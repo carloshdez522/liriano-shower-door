@@ -17,4 +17,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: lirianoshowerdoor.eliasworks.uy/
+          server-dir: ${{ secrets.FTP_TARGET_DIR }}
