@@ -55,7 +55,7 @@
         el.textContent = '0' + suffix;
         targets.push({ el: el, target: num, suffix: suffix, current: 0 });
       });
-      var duration = 3000;
+      var duration = 1000;
       var startTime = null;
       function step(timestamp) {
         if (!startTime) startTime = timestamp;
@@ -143,7 +143,7 @@
       gallery17: 'Professional Installation',
       gallery18: 'Custom Design',
       whatsapp_tooltip: 'Chat for a Free Estimate!',
-      gallery_social: 'Want to see more of our work? Follow us on:',
+      gallery_social: 'See more of our work at:',
       service1_title: 'Shower Doors',
       service1_desc: 'Custom shower doors, framed or frameless. Premium hardware, watertight seal, and contemporary style for a classy bathroom.',
       service2_title: 'Custom Cabinets',
@@ -227,7 +227,7 @@
       gallery17: 'Instalaci\u00f3n Profesional',
       gallery18: 'Dise\u00f1o Personalizado',
       whatsapp_tooltip: '\u00a1Chatea por tu Estimado Gratis!',
-      gallery_social: 'Si quieres ver m\u00e1s de nuestros trabajos s\u00edguenos en:',
+      gallery_social: 'Vea m\u00e1s de nuestros trabajos en:',
       service1_title: 'Puertas de Ducha',
       service1_desc: 'Puertas de ducha a medida, con o sin marco. Herrajes de calidad, cierre herm\u00e9tico y estilo contempor\u00e1neo para un ba\u00f1o con clase.',
       service2_title: 'Gabinetes Personalizados',

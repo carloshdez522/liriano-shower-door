@@ -1094,6 +1094,14 @@ section {
 }
 
 @media (max-width: 768px) {
+  .nav .container {
+    padding-left: 6px;
+  }
+
+  .nav-logo {
+    gap: 6px;
+  }
+
   .nav-links {
     display: none;
     position: absolute;
@@ -1139,6 +1147,17 @@ section {
 
   .gallery-grid {
     column-count: 2;
+    column-gap: 6px;
+    padding: 0 10px;
+  }
+
+  .gallery-item {
+    margin-bottom: 6px;
+    border-radius: 4px;
+  }
+
+  .gallery-item img {
+    border-radius: 4px;
   }
 
   .contact-panel {
