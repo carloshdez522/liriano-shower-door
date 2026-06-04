@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Liriano & Son Shower Doors Corp | Premium Glass & Shower Door Installation</title>
+  <title>Liriano &amp; Son Shower Doors Corp</title>
+  <link rel="icon" type="image/webp" href="images/logo.webp">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HPM354EK47"></script>
   <script>
@@ -20,994 +21,31 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous">
-  <style>
-    :root {
-      --deep-teal: #0B2B3B;
-      --medium-teal: #0F4A4A;
-      --card-surface: #154F4F;
-      --aquamarine: #66E0C0;
-      --aqua-light: #A8F0E0;
-      --aqua-pale: #D8F8F0;
-      --bg-light: #F0FAF8;
-      --white: #FFFFFF;
-      --text-dark: #0D1F1F;
-      --text-muted: #5A7A7A;
-      --font-heading: 'Playfair Display', serif;
-      --font-body: 'Inter', sans-serif;
-      --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      --shadow-sm: 0 2px 20px rgba(102, 224, 192, 0.15);
-      --shadow-lg: 0 8px 60px rgba(11, 43, 59, 0.3);
-    }
-
-    *,
-    *::before,
-    *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      font-size: 16px;
-    }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg-light);
-      color: var(--text-dark);
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    a {
-      color: var(--aquamarine);
-      text-decoration: none;
-      transition: color var(--transition);
-    }
-
-    a:hover {
-      color: var(--aqua-light);
-    }
-
-    ul {
-      list-style: none;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* ----- Navigation ----- */
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      padding: 20px 0;
-      transition: all var(--transition);
-    }
-
-    .nav.scrolled {
-      background: rgba(11, 43, 59, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 12px 0;
-      box-shadow: 0 2px 30px rgba(11, 43, 59, 0.4);
-    }
-
-    .nav .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .nav-logo {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--white);
-      letter-spacing: 1px;
-    }
-
-    .nav-logo span {
-      color: var(--aquamarine);
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-    }
-
-    .nav-links a {
-      color: rgba(255, 255, 255, 0.85);
-      font-size: 0.875rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      position: relative;
-      padding-bottom: 4px;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--aquamarine);
-      transition: width var(--transition);
-    }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-
-    .nav-links a:hover {
-      color: var(--aquamarine);
-    }
-
-    .nav-lang {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: 8px;
-    }
-
-    .lang-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font-body);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: rgba(255, 255, 255, 0.5);
-      transition: color var(--transition);
-      padding: 2px 4px;
-    }
-
-    .lang-btn.active {
-      color: var(--aquamarine);
-    }
-
-    .lang-btn:hover {
-      color: var(--aquamarine);
-    }
-
-    .lang-sep {
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 0.7rem;
-    }
-
-    .nav-toggle {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 4px;
-    }
-
-    .nav-toggle span {
-      display: block;
-      width: 28px;
-      height: 2px;
-      background: var(--white);
-      transition: all var(--transition);
-    }
-
-    .nav-toggle.active span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    .nav-toggle.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .nav-toggle.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(5px, -5px);
-    }
-
-    /* ----- Hero ----- */
-    .hero {
-      position: relative;
-      height: 100vh;
-      min-height: 600px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background: url('images/hero-bg.png') center/cover no-repeat;
-      transform: scale(1.1);
-      will-change: transform;
-    }
-
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(11, 43, 59, 0.92) 0%, rgba(15, 74, 74, 0.6) 50%, rgba(11, 43, 59, 0.85) 100%);
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      max-width: 800px;
-      padding: 0 24px;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      border: 1px solid var(--aquamarine);
-      color: var(--aquamarine);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      padding: 8px 20px;
-      margin-bottom: 24px;
-      font-weight: 500;
-    }
-
-    .hero h1 {
-      font-family: var(--font-heading);
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 700;
-      line-height: 1.1;
-      margin-bottom: 20px;
-      color: var(--white);
-    }
-
-    .hero h1 span {
-      color: var(--aquamarine);
-    }
-
-    .hero p {
-      font-size: clamp(1rem, 2vw, 1.2rem);
-      color: rgba(255, 255, 255, 0.6);
-      max-width: 600px;
-      margin: 0 auto 36px;
-      font-weight: 300;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 16px 40px;
-      font-family: var(--font-body);
-      font-size: 0.875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      border: none;
-      cursor: pointer;
-      transition: all var(--transition);
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: var(--aquamarine);
-      color: var(--deep-teal);
-    }
-
-    .btn-primary:hover {
-      background: var(--aqua-light);
-      color: var(--deep-teal);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(102, 224, 192, 0.35);
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--aquamarine);
-      border: 1px solid var(--aquamarine);
-    }
-
-    .btn-outline:hover {
-      background: var(--aquamarine);
-      color: var(--deep-teal);
-    }
-
-    .scroll-indicator {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      animation: floatDown 2s ease-in-out infinite;
-    }
-
-    .scroll-indicator .line {
-      width: 1px;
-      height: 40px;
-      background: linear-gradient(to bottom, var(--aquamarine), transparent);
-    }
-
-    @keyframes floatDown {
-
-      0%,
-      100% {
-        transform: translateX(-50%) translateY(0);
-      }
-
-      50% {
-        transform: translateX(-50%) translateY(8px);
-      }
-    }
-
-    /* ----- Section Shared ----- */
-    section {
-      padding: 70px 0;
-    }
-
-    .section-label {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: var(--aquamarine);
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-family: var(--font-heading);
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 700;
-      margin-bottom: 16px;
-      line-height: 1.2;
-      color: var(--deep-teal);
-    }
-
-    .section-subtitle {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 600px;
-      font-weight: 300;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    .mx-auto {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .mb-16 {
-      margin-bottom: 16px;
-    }
-
-    .mb-60 {
-      margin-bottom: 60px;
-    }
-
-    /* ----- About ----- */
-    .about {
-      background: var(--white);
-    }
-
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-
-    .about-grid > .about-image {
-      order: -1;
-    }
-
-    .about-image {
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .about-image img {
-      width: 100%;
-      height: 500px;
-      object-fit: cover;
-    }
-
-    .about-image::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border: 1px solid rgba(102, 224, 192, 0.3);
-      border-radius: 8px;
-      pointer-events: none;
-    }
-
-    .about-text h2 {
-      margin-bottom: 24px;
-      color: var(--deep-teal);
-    }
-
-    .about-text p {
-      text-align: justify;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      font-size: 1rem;
-    }
-
-    .about-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-top: 40px;
-      padding-top: 40px;
-      border-top: 1px solid rgba(102, 224, 192, 0.2);
-    }
-
-    .stat-number {
-      font-family: var(--font-heading);
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #0D6B5E;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* ----- Services / Carousel ----- */
-    .services {
-      background: var(--bg-light);
-      padding-top: 40px;
-      overflow: hidden;
-    }
-    .services .container.text-center {
-      padding-bottom: 32px;
-    }
-
-    .carousel-wrap { position: relative; overflow: hidden; width: 100vw; margin-left: calc(-50vw + 50%); }
-    .carousel-track { display: flex; gap: 24px; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; padding-left: 24px; }
-    .carousel-track.dragging { transition: none; cursor: grabbing; }
-
-    .carousel-card {
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
-      min-width: 340px;
-      max-width: 340px;
-      min-height: 320px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 28px 24px;
-      background-size: cover;
-      background-position: center;
-      border: 1px solid rgba(102,224,192,0.15);
-      transition: transform 0.4s ease;
-      user-select: none;
-    }
-    .carousel-card:hover { transform: translateY(-6px); }
-    .carousel-card .overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,43,59,0.05) 0%, rgba(11,43,59,0.88) 65%, rgba(11,43,59,0.95) 100%); }
-    .carousel-card .content { position: relative; z-index: 2; }
-        .carousel-card h3 { font-family: var(--font-heading); font-size: 1.2rem; color: #fff; margin-bottom: 8px; }
-    .carousel-card p { color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.6; }
-
-    .carousel-dots { display: flex; justify-content: center; gap: 10px; padding: 20px 24px 0; }
-    .carousel-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(102,224,192,0.25); border: none; cursor: pointer; transition: all 0.3s; padding: 0; }
-    .carousel-dots .dot.active { background: var(--aquamarine); transform: scale(1.3); }
-
-    .carousel-arrow {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(11,43,59,0.85); color: #fff; border: none;
-      cursor: pointer; font-size: 1rem; z-index: 5;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s; backdrop-filter: blur(4px);
-    }
-    .carousel-arrow:hover { background: var(--deep-teal); transform: translateY(-50%) scale(1.1); }
-    .carousel-arrow.prev { left: 8px; }
-    .carousel-arrow.next { right: 8px; }
-    .carousel-arrow.hidden { opacity: 0; pointer-events: none; }
-
-    /* ----- Gallery ----- */
-    .gallery {
-      background: var(--deep-teal);
-    }
-
-    .gallery .section-title {
-      color: var(--white);
-    }
-
-    .gallery .section-subtitle {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-      cursor: pointer;
-      aspect-ratio: 4/3;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s ease;
-    }
-
-    .gallery-item:hover img {
-      transform: scale(1.08);
-    }
-
-    .gallery-item:nth-child(1) {
-      grid-column: span 2;
-    }
-
-    .gallery-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(11, 43, 59, 0.85), transparent);
-      opacity: 0;
-      transition: opacity var(--transition);
-      display: flex;
-      align-items: flex-end;
-      padding: 24px;
-    }
-
-    .gallery-item:hover .gallery-overlay {
-      opacity: 1;
-    }
-
-    .gallery-overlay span {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--aquamarine);
-    }
-
-    /* ----- Contact ----- */
-    .contact {
-      background: var(--bg-light);
-    }
-
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-    }
-
-    .contact-info h3 {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      margin-bottom: 24px;
-      color: var(--deep-teal);
-    }
-
-    .contact-info p {
-      color: var(--text-muted);
-      margin-bottom: 32px;
-      font-size: 0.95rem;
-    }
-
-    .contact-detail {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 20px;
-      align-items: flex-start;
-    }
-
-    .contact-detail-icon {
-      width: 20px;
-      height: 20px;
-      color: var(--aquamarine);
-      flex-shrink: 0;
-      margin-top: 4px;
-    }
-
-    .contact-detail-icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .contact-detail h4 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--aquamarine);
-      margin-bottom: 4px;
-    }
-
-    .contact-detail p {
-      color: var(--text-dark);
-      font-size: 0.95rem;
-      margin-bottom: 0;
-    }
-
-    .contact-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      background: var(--white);
-      border: 1px solid rgba(102, 224, 192, 0.2);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      color: var(--text-dark);
-      transition: border-color var(--transition);
-      outline: none;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      border-color: var(--aquamarine);
-      box-shadow: 0 0 0 3px rgba(102, 224, 192, 0.1);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-
-    /* ----- Footer ----- */
-    .footer {
-      background: var(--deep-teal);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .footer__gradient {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--aquamarine), var(--aqua-light), var(--aquamarine), transparent);
-      opacity: 0.6;
-    }
-
-    .footer__inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 40px;
-      padding: 48px 24px 32px;
-    }
-
-    .footer__brand {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .footer__right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 16px;
-      flex-shrink: 0;
-    }
-
-    .footer__brand i {
-      font-size: 1.6rem;
-      color: var(--aquamarine);
-    }
-
-    .footer__logo {
-      font-family: var(--font-heading);
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--white);
-      letter-spacing: 1px;
-    }
-
-    .footer__logo span {
-      color: var(--aquamarine);
-    }
-
-    .footer__brand p {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.85rem;
-      max-width: 360px;
-    }
-
-    .footer__social {
-      display: flex;
-      gap: 12px;
-    }
-
-    .footer__social a {
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(102, 224, 192, 0.25);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--aquamarine);
-      font-size: 1rem;
-      transition: all var(--transition);
-    }
-
-    .footer__social a:hover {
-      background: var(--aquamarine);
-      color: var(--deep-teal);
-      border-color: var(--aquamarine);
-      transform: translateY(-2px);
-    }
-
-    .footer__info {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px 24px;
-      font-size: 0.85rem;
-    }
-
-    .footer__info a,
-    .footer__info span {
-      color: rgba(255, 255, 255, 0.55);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: color var(--transition);
-    }
-
-    .footer__info a:hover {
-      color: var(--aquamarine);
-    }
-
-    .footer__info i {
-      font-size: 0.75rem;
-    }
-
-    .footer__copy {
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 0.75rem;
-      letter-spacing: 0.5px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(102, 224, 192, 0.08);
-      width: 100%;
-      text-align: right;
-    }
-
-    /* ----- WhatsApp Float ----- */
-    .whatsapp-float {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 999;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #25D366;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-      transition: all var(--transition);
-      text-decoration: none;
-    }
-
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(37, 211, 102, 0.55);
-      color: #fff;
-    }
-
-    .whatsapp-float .whatsapp-tooltip {
-      position: absolute;
-      right: 70px;
-      background: var(--deep-teal);
-      color: var(--white);
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--transition);
-    }
-
-    .whatsapp-float:hover .whatsapp-tooltip {
-      opacity: 1;
-    }
-
-    /* ----- Scroll Animation ----- */
-    [data-animate] {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-
-    [data-animate].visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ----- Responsive ----- */
-    @media (max-width: 1024px) {
-      .about-grid {
-        gap: 48px;
-      }
-
-    }
-
-      @media (max-width: 768px) {
-        .about-grid > .about-image {
-          order: 0;
-        }
-
-        .nav-links {
-          position: fixed;
-          top: 0;
-          right: -100%;
-          width: 280px;
-          height: 100vh;
-          background: rgba(11, 43, 59, 0.98);
-        backdrop-filter: blur(12px);
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 24px;
-        transition: right 0.4s ease;
-        box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
-      }
-
-      .nav-links.open {
-        right: 0;
-      }
-
-      .nav-toggle {
-        display: flex;
-      }
-
-      .nav-lang {
-        margin-left: 0;
-      }
-
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .about-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      .about-image img {
-        height: 300px;
-      }
-
-      .about-stats {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-      }
-
-      .gallery-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .gallery-item:nth-child(1) {
-        grid-column: span 1;
-      }
-
-      .contact-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      section {
-        padding: 72px 0;
-      }
-      .carousel-card { min-width: 280px; max-width: 280px; min-height: 280px; }
-      .carousel-arrow { width: 36px; height: 36px; font-size: 0.85rem; }
-    }
-
-    @media (max-width: 480px) {
-      .about-stats {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .gallery-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .footer__info {
-        justify-content: flex-start;
-      }
-
-      .footer__right {
-        align-items: flex-start;
-        width: 100%;
-      }
-
-      .footer__inner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 24px;
-      }
-
-      .footer__brand {
-        width: 100%;
-      }
-
-      .footer__copy {
-        text-align: left;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
   <nav class="nav" id="navbar">
     <div class="container">
-      <a href="#hero" class="nav-logo">Liriano<span> &</span> Son</a>
+      <a href="#hero" class="nav-logo">
+        <img src="images/logo.webp" alt="Liriano &amp; Son" class="nav-logo-img">
+        <span class="nav-logo-text">
+          <span class="nav-logo-top">Liriano <span>&amp;</span> Son</span>
+          <span class="nav-logo-sub">Shower Doors Corp</span>
+        </span>
+      </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#about" data-i18n="nav_about">About</a></li>
-        <li><a href="#services" data-i18n="nav_services">Services</a></li>
-        <li class="nav-lang">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <span class="lang-sep">|</span>
-          <button class="lang-btn" data-lang="es">ES</button>
-        </li>
+        <li><a href="#about" data-i18n="nav_about">Nosotros</a></li>
+        <li><a href="#services" data-i18n="nav_services">Servicios</a></li>
+        <li><a href="#gallery" data-i18n="nav_gallery">Galer\u00eda</a></li>
+        <li><a href="#contact" data-i18n="nav_contact">Contacto</a></li>
       </ul>
+      <div class="nav-lang" id="navLang">
+        <button class="lang-btn" data-lang="en">EN</button>
+        <span class="lang-sep">|</span>
+        <button class="lang-btn active" data-lang="es">ES</button>
+      </div>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
@@ -1018,13 +56,13 @@
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <div class="hero-badge" data-i18n="hero_badge">Premium Craftsmanship · Free Estimate</div>
-      <h1 data-i18n="hero_title">Glass Solutions &<br><span>Glasswork</span></h1>
-      <p data-i18n="hero_p">Transform your home into a sanctuary of elegance. Custom glass installations for discerning homeowners across Florida. Ask about our free estimate!</p>
-      <a href="#contact" class="btn btn-primary" data-i18n="hero_btn">Request a Free Estimate</a>
+      <div class="hero-badge" data-i18n="hero_badge">Artesan\u00eda Premium \u00b7 Estimado Gratis</div>
+      <h1 data-i18n="hero_title">Soluciones en Vidrio<br><span>&amp; Cristaler\u00eda</span></h1>
+      <p data-i18n="hero_p">Transforma tu hogar en un santuario de elegancia. Instalaci\u00f3n de cristaler\u00eda personalizada para propietarios exigentes en todo Miami.</p>
+      <a href="#contact-form" class="btn btn-primary" data-i18n="hero_btn">Solicita tu Estimado Gratis</a>
     </div>
     <div class="scroll-indicator">
-      <span data-i18n="scroll">Scroll</span>
+      <span data-i18n="scroll">Desplazar</span>
       <div class="line"></div>
     </div>
   </section>
@@ -1032,29 +70,31 @@
   <section class="about" id="about">
     <div class="container">
       <div class="about-grid">
-        <div class="about-text" data-animate>
-          <span class="section-label" data-i18n="about_label">About Us</span>
-          <h2 class="section-title" data-i18n="about_title">Crafting Elegance<br>Since 2019</h2>
-          <p data-i18n="about_p1">Liriano & Son Shower Doors Corp is a family-owned business dedicated to transforming homes into works of art. For over 7 years, we have delivered unparalleled quality in custom glass design, fabrication, and installation across Florida. We offer free estimates on every project!</p>
-          <p data-i18n="about_p2">Every project reflects our commitment to precision, premium materials, and white-glove service — from the first consultation to the final reveal. We don't just install; we create experiences. <strong>Request your free estimate with no obligation.</strong></p>
+        <div class="about-heading" data-animate>
+          <span class="section-label" data-i18n="about_label">Nosotros</span>
+          <h2 class="section-title" data-i18n="about_title">Creando Elegancia<br>Desde 2019</h2>
+        </div>
+        <div class="about-image" data-animate>
+          <img src="images/about-us.webp"
+            alt="Luxury shower door installation">
+        </div>
+        <div class="about-body" data-animate>
+          <p data-i18n="about_p1">Liriano &amp; Son Shower Doors Corp es un negocio familiar con sede en Miami dedicado a transformar hogares en obras de arte. Cada proyecto comienza con una promesa: dar lo mejor de nosotros. Nos especializamos en puertas de ba\u00f1o, pero hacemos mucho m\u00e1s: balaustradas, pasamanos, balcones interiores, ventanales de piso a techo, expositores, vidrieras, closets, espejos\u2026 Todo lo que se pueda hacer con vidrio, lo hacemos y lo hacemos bien.</p>
+          <p data-i18n="about_p2">&iquest;Por qu&eacute; confiar en nosotros? Porque cada instalaci&oacute;n la tratamos como si fuera en nuestra propia casa. Usamos materiales premium, cuidamos cada detalle y no damos un trabajo por terminado hasta que usted est&eacute; 100% satisfecho. Desde 2019, hemos completado m&aacute;s de 1200 proyectos en todo Miami. Y seguimos con la misma ilusi&oacute;n del primer d&iacute;a. <strong>Solicite su estimado gratis, no se arrepentir&aacute;.</strong></p>
           <div class="about-stats">
             <div>
               <div class="stat-number" data-target="7+">7+</div>
-              <div class="stat-label" data-i18n="stat1">Years Experience</div>
+              <div class="stat-label" data-i18n="stat1">A\u00f1os de Experiencia</div>
             </div>
             <div>
-              <div class="stat-number" data-target="500+">500+</div>
-              <div class="stat-label" data-i18n="stat2">Projects Completed</div>
+              <div class="stat-number" data-target="1200+">1200+</div>
+              <div class="stat-label" data-i18n="stat2">Proyectos Completados</div>
             </div>
             <div>
               <div class="stat-number" data-target="100%">100%</div>
-              <div class="stat-label" data-i18n="stat3">Client Satisfaction</div>
+              <div class="stat-label" data-i18n="stat3">Satisfacci\u00f3n del Cliente</div>
             </div>
           </div>
-        </div>
-        <div class="about-image" data-animate>
-          <img src="images/about-us.png"
-            alt="Luxury shower door installation">
         </div>
       </div>
     </div>
@@ -1062,10 +102,9 @@
 
   <section class="services" id="services">
     <div class="container text-center">
-      <span class="section-label" data-i18n="services_label">Our Services</span>
-      <h2 class="section-title" data-i18n="services_title">Premium Glass Solutions</h2>
-      <p class="section-subtitle mx-auto" data-i18n="services_p">From custom frameless enclosures to commercial glass
-        partitions — we bring precision and beauty to every installation across Florida. Free estimate for your project!</p>
+        <span class="section-label" data-i18n="services_label">Servicios</span>
+        <h2 class="section-title" data-i18n="services_title">Soluciones en Vidrio</h2>
+        <p class="section-subtitle mx-auto" data-i18n="services_p">Desde elegantes puertas de ba\u00f1o hasta imponentes ventanales y barandas de cristal, brindamos precisi\u00f3n y belleza en cada instalaci\u00f3n en todo Miami. \u00a1Estimado gratis para tu proyecto!</p>
     </div>
     <div class="carousel-wrap" id="carouselWrap">
       <button class="carousel-arrow prev" id="prevBtn" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
@@ -1075,19 +114,134 @@
     </div>
   </section>
 
+  <section class="gallery" id="gallery">
+    <div class="container">
+      <div class="text-center mb-60" data-animate>
+        <span class="section-label" data-i18n="gallery_label">Portafolio</span>
+        <h2 class="section-title" style="color: var(--white);" data-i18n="gallery_title">Nuestro Trabajo</h2>
+        <p class="section-subtitle mx-auto" style="color: rgba(255,255,255,0.5);" data-i18n="gallery_p">Cada proyecto es un testimonio de nuestra artesan\u00eda. Explore una selecci\u00f3n de nuestras instalaciones recientes.</p>
+      </div>
+    </div>
+    <div class="gallery-grid">
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-1.webp" alt="Instalaci\u00f3n de ducha" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-2.webp" alt="Ba\u00f1o moderno" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-3.webp" alt="Puerta de vidrio" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-4.webp" alt="Dise\u00f1o de lujo" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-5.webp" alt="Cristaler\u00eda residencial" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-6.webp" alt="Acabado premium" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-7.webp" alt="Proyecto comercial" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-8.webp" alt="Transformaci\u00f3n total" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-9.webp" alt="Ducha de lujo" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-10.webp" alt="Cristaler\u00eda moderna" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-11.webp" alt="Acabados de vidrio" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-12.webp" alt="Proyecto residencial" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-13.webp" alt="Dise\u00f1o contempor\u00e1neo" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-14.webp" alt="Puerta corrediza" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-15.webp" alt="Cristaler\u00eda comercial" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-16.webp" alt="Remodelaci\u00f3n de ba\u00f1o" loading="lazy">
+        </div>
+        <div class="gallery-item" data-animate>
+          <img src="images/gallery-17.webp" alt="Instalaci\u00f3n profesional" loading="lazy">
+        </div>
+      </div>
+      <div class="gallery-social">
+        <p data-i18n="gallery_social">Si quieres ver m&aacute;s de nuestros trabajos s&iacute;guenos en:</p>
+        <div class="gallery-social-links">
+          <a href="https://www.instagram.com/liriano_and_son_showers_doors/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i> Instagram</a>
+          <a href="https://www.facebook.com/misael.liriano.79" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i> Facebook</a>
+        </div>
+      </div>
+  </section>
 
+  <section class="contact" id="contact">
+    <div class="contact-bg" style="background-image:url('images/hero-bg.webp');"></div>
+    <div class="contact-overlay"></div>
+    <div class="contact-panel">
+      <div class="contact-panel-info" data-animate>
+        <h3 data-i18n="contact_h3">Cont\u00e1ctanos</h3>
+        <p data-i18n="contact_desc">Estamos listos para ayudarte con tu pr\u00f3ximo proyecto de vidrio. Respuesta en menos de 24 horas.</p>
+        <div class="contact-panel-detail">
+          <div class="contact-panel-icon"><i class="fas fa-phone"></i></div>
+          <div>
+            <h4 data-i18n="contact_phone">Tel\u00e9fono</h4>
+            <p>+1 (786) 222-4264</p>
+          </div>
+        </div>
+        <div class="contact-panel-detail">
+          <div class="contact-panel-icon"><i class="fas fa-envelope"></i></div>
+          <div>
+            <h4 data-i18n="contact_email">Email</h4>
+            <p>misaelliriano75@gmail.com</p>
+          </div>
+        </div>
+      </div>
+      <form class="contact-panel-form" id="contact-form" data-animate>
+        <input type="text" id="name" name="name" required data-i18n-placeholder="form_name" placeholder="Nombre completo">
+        <input type="email" id="email" name="email" required data-i18n-placeholder="form_email_ph" placeholder="correo@ejemplo.com">
+        <input type="tel" id="phone" name="phone" data-i18n-placeholder="form_phone_ph" placeholder="+1 (786) 222-4264">
+        <select id="service" name="service">
+          <option value="" data-i18n="form_select">Selecciona un servicio</option>
+          <option value="Shower Doors" data-i18n="opt_shower">Puertas de Ducha</option>
+          <option value="Custom Glass Cabinets" data-i18n="opt_cabinets">Gabinetes de Vidrio</option>
+          <option value="Glass Partitions & Railings" data-i18n="opt_partitions">Particiones y Barandales</option>
+          <option value="Glass Repair & Replacement" data-i18n="opt_repair">Reparaci\u00f3n de Vidrio</option>
+          <option value="Custom Mirrors & Glass" data-i18n="opt_mirrors">Espejos y Vidrios</option>
+          <option value="Other" data-i18n="form_other">Otro</option>
+        </select>
+        <textarea id="message" name="message" required data-i18n-placeholder="form_msg_ph" placeholder="Cu\u00e9ntanos sobre tu proyecto..."></textarea>
+        <button type="submit" style="align-self: flex-end;" data-i18n="form_btn">Enviar Mensaje</button>
+      </form>
+    </div>
+  </section>
 
   <a class="whatsapp-float" href="https://wa.me/17862224264" target="_blank" rel="noopener" aria-label="WhatsApp">
     <i class="fab fa-whatsapp"></i>
-    <span class="whatsapp-tooltip" data-i18n="whatsapp_tooltip">Chat for a Free Estimate!</span>
+    <span class="whatsapp-tooltip" data-i18n="whatsapp_tooltip">\u00a1Chatea por tu Estimado Gratis!</span>
   </a>
 
   <footer class="footer">
     <div class="footer__gradient"></div>
     <div class="container footer__inner">
       <div class="footer__brand">
-        <span class="footer__logo">Liriano <span>&amp; Son</span></span>
-        <p data-i18n="footer_p">Excellence in glass since 2019. Free estimates for all of Florida!</p>
+        <div class="nav-logo">
+          <img src="images/logo.webp" alt="Liriano &amp; Son" class="nav-logo-img">
+          <span class="nav-logo-text">
+            <span class="nav-logo-top">Liriano <span>&amp;</span> Son</span>
+            <span class="nav-logo-sub">Shower Doors Corp</span>
+          </span>
+        </div>
+        <p data-i18n="footer_p">Excelencia en vidrio desde 2019. ¡Estimado gratis para todo Miami!</p>
       </div>
       <div class="footer__right">
         <div class="footer__social">
@@ -1105,311 +259,12 @@
     </div>
   </footer>
 
-  <script>
-    (function () {
-      'use strict';
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <img class="lightbox-img" alt="">
+  </div>
 
-      /* ----- Mobile Menu ----- */
-      var navToggle = document.getElementById('navToggle');
-      var navLinks = document.getElementById('navLinks');
-      navToggle.addEventListener('click', function () {
-        navToggle.classList.toggle('active');
-        navLinks.classList.toggle('open');
-      });
-      navLinks.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-          navToggle.classList.remove('active');
-          navLinks.classList.remove('open');
-        });
-      });
-
-      /* ----- Navbar Scroll ----- */
-      var navbar = document.getElementById('navbar');
-      var heroBg = document.getElementById('heroBg');
-      window.addEventListener('scroll', function () {
-        var scrollY = window.scrollY;
-        if (scrollY > 60) { navbar.classList.add('scrolled'); }
-        else { navbar.classList.remove('scrolled'); }
-        if (heroBg) { heroBg.style.transform = 'scale(1.1) translateY(' + (scrollY * 0.15) + 'px)'; }
-      });
-
-      /* ----- Scroll Animations (Intersection Observer) ----- */
-      var animateEls = document.querySelectorAll('[data-animate]');
-      if ('IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        animateEls.forEach(function (el) { observer.observe(el); });
-      } else {
-        animateEls.forEach(function (el) { el.classList.add('visible'); });
-      }
-
-      /* ----- Stats Counter Animation ----- */
-      function animateStats(entries, observer) {
-        entries.forEach(function(entry) {
-          if (!entry.isIntersecting) return;
-          observer.unobserve(entry.target);
-          var stats = entry.target.querySelectorAll('.stat-number');
-          var targets = [];
-          stats.forEach(function(el) {
-            var text = el.getAttribute('data-target');
-            var suffix = text.replace(/[\d,]+/g, '');
-            var num = parseInt(text.replace(/[,+%]/g, ''), 10);
-            el.textContent = '0' + suffix;
-            targets.push({ el: el, target: num, suffix: suffix, current: 0 });
-          });
-          var duration = 3000;
-          var startTime = null;
-          function step(timestamp) {
-            if (!startTime) startTime = timestamp;
-            var progress = Math.min((timestamp - startTime) / duration, 1);
-            targets.forEach(function(t) {
-              t.current = Math.floor(progress * t.target);
-              t.el.textContent = t.current + t.suffix;
-            });
-            if (progress < 1) requestAnimationFrame(step);
-            else targets.forEach(function(t) { t.el.textContent = t.target + t.suffix; });
-          }
-          requestAnimationFrame(step);
-        });
-      }
-      var statsObserver = new IntersectionObserver(animateStats, { threshold: 0.3 });
-      var aboutStats = document.querySelector('.about-stats');
-      if (aboutStats) statsObserver.observe(aboutStats);
-
-      /* ----- Language Switcher ----- */
-      var translations = {
-        en: {
-          nav_about: 'About',
-          nav_services: 'Services',
-    
-      hero_badge: 'Premium Craftsmanship \u00b7 Free Estimate',
-      hero_title: 'Glass Solutions &<br><span>Glasswork</span>',
-      hero_p: 'Transform your home into a sanctuary of elegance. Custom glass installations for discerning homeowners across Florida. Ask about our free estimate!',
-      hero_btn: 'Request a Free Estimate',
-          scroll: 'Scroll',
-          about_label: 'About Us',
-          about_title: 'Crafting Elegance<br>Since 2019',
-      about_p1: 'Liriano & Son Shower Doors Corp is a family-owned business dedicated to transforming homes into works of art. For over 7 years, we have delivered unparalleled quality in custom glass design, fabrication, and installation across Florida. We offer free estimates on every project!',
-      about_p2: 'Every project reflects our commitment to precision, premium materials, and white-glove service — from the first consultation to the final reveal. We don\'t just install; we create experiences. <strong>Request your free estimate with no obligation.</strong>',
-          stat1: 'Years Experience',
-          stat2: 'Projects Completed',
-          stat3: 'Client Satisfaction',
-          services_label: 'Our Services',
-          services_title: 'Premium Glass Solutions',
-          services_p: 'From custom frameless enclosures to commercial glass partitions — we bring precision and beauty to every installation across Florida. Free estimate for your project!',
-              whatsapp_tooltip: 'Chat for a Free Estimate!',
-          service1_title: 'Frameless Shower Doors',
-          service1_desc: 'Seamless, minimalist frameless enclosures with premium hinges and sleek handles that elevate any bathroom design.',
-          service2_title: 'Custom Glass Enclosures',
-          service2_desc: 'Tailored walk-in showers, steam enclosures, and neo-angle designs crafted to your exact specifications and space.',
-          service3_title: 'Glass Partitions & Railings',
-          service3_desc: 'Elegant commercial glass partitions, balustrades, and pool fencing that merge safety with architectural sophistication.',
-          service4_title: 'Glass Repair & Replacement',
-          service4_desc: 'Prompt, professional repair and replacement services for cracked, chipped, or outdated glass shower doors.',
-          service5_title: 'Custom Mirrors & Glass',
-          service5_desc: 'Bespoke mirrors, etched glass designs, and custom-cut glass solutions for residential and commercial spaces.',
-          service6_title: 'Hardware & Accessories',
-          service6_desc: 'Premium handles, towel bars, shelves, and accessories in brushed brass, matte black, and chrome finishes.',
-
-          footer_p: 'Excellence in glass since 2019. Free estimates for all of Florida!',
-          footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp'
-        },
-        es: {
-          nav_about: 'Nosotros',
-          nav_services: 'Servicios',
-    
-      hero_badge: 'Artesan\u00eda Premium \u00b7 Estimado Gratis',
-      hero_title: 'Soluciones en Vidrio<br><span>&amp; Cristaler\u00eda</span>',
-      hero_p: 'Transforma tu hogar en un santuario de elegancia. Instalaci\u00f3n de cristaler\u00eda personalizada para propietarios exigentes en toda la Florida. \u00a1Pregunta por nuestro estimado gratis!',
-      hero_btn: 'Solicita tu Estimado Gratis',
-          scroll: 'Desplazar',
-          about_label: 'Nosotros',
-          about_title: 'Creando Elegancia<br>Desde 2019',
-      about_p1: 'Liriano & Son Shower Doors Corp es un negocio familiar dedicado a transformar hogares en obras de arte. Por m\u00e1s de 7 a\u00f1os, hemos brindado calidad inigualable en dise\u00f1o, fabricaci\u00f3n e instalaci\u00f3n de cristaler\u00eda personalizada en toda la Florida. \u00a1Ofrecemos estimado gratis en cada proyecto!',
-      about_p2: 'Cada proyecto refleja nuestro compromiso con la precisi\u00f3n, los materiales premium y el servicio de primera clase, desde la primera consulta hasta el resultado final. No solo instalamos; creamos experiencias. <strong>Solicita tu estimado gratis sin compromiso.</strong>',
-          stat1: 'A\u00f1os de Experiencia',
-          stat2: 'Proyectos Completados',
-          stat3: 'Satisfacci\u00f3n del Cliente',
-          services_label: 'Servicios',
-          services_title: 'Soluciones Premium en Vidrio',
-          services_p: 'Desde gabinetes sin marco hasta particiones comerciales de vidrio, brindamos precisi\u00f3n y belleza en cada instalaci\u00f3n en toda la Florida. \u00a1Estimado gratis para tu proyecto!',
-
-          whatsapp_tooltip: '\u00a1Chatea por tu Estimado Gratis!',
-          service1_title: 'Puertas de Ducha Sin Marco',
-          service1_desc: 'Gabinetes sin marco, minimalistas y elegantes con bisagras premium y manijas modernas que elevan cualquier dise\u00f1o de ba\u00f1o.',
-          service2_title: 'Gabinetes de Vidrio Personalizados',
-          service2_desc: 'Duchas walk-in a medida, gabinetes de vapor y dise\u00f1os neo-angle elaborados seg\u00fan sus especificaciones y espacio exactos.',
-          service3_title: 'Particiones y Barandales de Vidrio',
-          service3_desc: 'Elegantes particiones comerciales de vidrio, balaustradas y cercas de piscina que combinan seguridad con sofisticaci\u00f3n arquitect\u00f3nica.',
-          service4_title: 'Reparaci\u00f3n y Reemplazo de Vidrio',
-          service4_desc: 'Servicios r\u00e1pidos y profesionales de reparaci\u00f3n y reemplazo para puertas de ducha de vidrio agrietadas, astilladas o desactualizadas.',
-          service5_title: 'Espejos y Vidrios Personalizados',
-          service5_desc: 'Espejos a medida, dise\u00f1os de vidrio grabado y soluciones de vidrio cortado a la medida para espacios residenciales y comerciales.',
-          service6_title: 'Herrajes y Accesorios',
-          service6_desc: 'Manijas premium, barras de toallas, estantes y accesorios en lat\u00f3n cepillado, negro mate y acabados cromados.',
-
-          footer_p: 'Excelencia en vidrio desde 2019. \u00a1Estimado gratis para toda la Florida!',
-          footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp'
-        }
-      };
-
-      function applyLang(lang) {
-        var t = translations[lang];
-        document.querySelectorAll('[data-i18n]').forEach(function (el) {
-          var key = el.getAttribute('data-i18n');
-          if (t[key]) el.innerHTML = t[key];
-        });
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-          var key = el.getAttribute('data-i18n-placeholder');
-          if (t[key]) el.placeholder = t[key];
-        });
-        document.querySelectorAll('.lang-btn').forEach(function (btn) {
-          btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-        });
-        if (window.rebuildCarousel) window.rebuildCarousel();
-      }
-
-      document.querySelectorAll('.lang-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          applyLang(this.getAttribute('data-lang'));
-        });
-      });
-
-      applyLang('en');
-
-      /* ----- Services Carousel ----- */
-      var carouselData = [
-        { key: 'service1', icon: 'fa-shower', img: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=400&auto=format&fit=crop' },
-        { key: 'service2', icon: 'fa-cube', img: 'https://images.unsplash.com/photo-1600566753086-00f18f6b0056?q=80&w=400&auto=format&fit=crop' },
-        { key: 'service3', icon: 'fa-building', img: 'https://images.unsplash.com/photo-1600489001362-e7086a1a8a15?q=80&w=400&auto=format&fit=crop' },
-        { key: 'service4', icon: 'fa-wrench', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=400&auto=format&fit=crop' },
-        { key: 'service5', icon: 'fa-image', img: 'https://images.unsplash.com/photo-1584622650111-994a4f9f1952?q=80&w=400&auto=format&fit=crop' },
-        { key: 'service6', icon: 'fa-tools', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=400&auto=format&fit=crop' }
-      ];
-
-      var track = document.getElementById('carouselTrack');
-      var dotsContainer = document.getElementById('carouselDots');
-      var carouselWrap = document.getElementById('carouselWrap');
-      var prevBtn = document.getElementById('prevBtn');
-      var nextBtn = document.getElementById('nextBtn');
-      if (!track) { return; }
-
-      function getStep() { var c = track.querySelector('.carousel-card'); return c ? c.offsetWidth + 24 : 364; }
-      var totalReal = carouselData.length;
-      var current = 0;
-      var isAnimating = false;
-      var autoTimer = null;
-      var isPaused = false;
-
-      function buildCarousel() {
-        var lang = document.querySelector('.lang-btn.active').getAttribute('data-lang');
-        var t = translations[lang];
-        var allData = carouselData.concat(carouselData);
-        track.innerHTML = '';
-        allData.forEach(function(item, i) {
-          var div = document.createElement('div');
-          div.className = 'carousel-card';
-          div.style.backgroundImage = 'url(' + item.img + ')';
-          var title = t[item.key + '_title'];
-          var desc = t[item.key + '_desc'];
-          div.innerHTML = '<div class="overlay"></div><div class="content"><h3>' + title + '</h3><p>' + desc + '</p></div>';
-          track.appendChild(div);
-        });
-      }
-
-      function buildDots() {
-        dotsContainer.innerHTML = '';
-        for (var i = 0; i < totalReal; i++) {
-          var dot = document.createElement('button');
-          dot.className = 'dot' + (i === 0 ? ' active' : '');
-          dot.setAttribute('data-index', i);
-          dot.addEventListener('click', function() { goTo(parseInt(this.getAttribute('data-index'))); });
-          dotsContainer.appendChild(dot);
-        }
-      }
-
-      function goTo(index, instant) {
-        if (isAnimating) return;
-        isAnimating = true;
-        current = index;
-        var s = getStep();
-        track.style.transition = instant ? 'none' : 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        track.style.transform = 'translateX(' + (-current * s) + 'px)';
-        var idx = current % totalReal;
-        dotsContainer.querySelectorAll('.dot').forEach(function(d, i) { d.classList.toggle('active', i === idx); });
-        if (current >= totalReal) {
-          setTimeout(function() {
-            current = current - totalReal;
-            track.style.transition = 'none';
-            track.style.transform = 'translateX(' + (-current * s) + 'px)';
-            isAnimating = false;
-          }, 620);
-        } else if (current < 0) {
-          setTimeout(function() {
-            current = totalReal - 1;
-            track.style.transition = 'none';
-            track.style.transform = 'translateX(' + (-current * s) + 'px)';
-            isAnimating = false;
-          }, 620);
-        } else {
-          setTimeout(function() { isAnimating = false; }, 620);
-        }
-      }
-
-      function next() { goTo(current + 1); }
-      function prev() { goTo(current - 1); }
-      function startAuto() { stopAuto(); autoTimer = setInterval(function() { if (!isPaused) next(); }, 3500); }
-      function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
-
-      carouselWrap.addEventListener('mouseenter', function() { isPaused = true; });
-      carouselWrap.addEventListener('mouseleave', function() { isPaused = false; });
-      nextBtn.addEventListener('click', next);
-      prevBtn.addEventListener('click', prev);
-
-      /* Drag / Swipe */
-      var dragStartX = 0, isDragging = false, dragOffsetX = 0;
-      function onDragStart(cx) { isDragging = true; dragStartX = cx; track.classList.add('dragging'); var s = window.getComputedStyle(track).transform; if (s !== 'none') { var v = s.match(/-?\d+\.?\d*/g); if (v) dragOffsetX = parseFloat(v[4]); } }
-      function onDragMove(cx) { if (!isDragging) return; track.style.transform = 'translateX(' + (dragOffsetX + cx - dragStartX) + 'px)'; }
-      function onDragEnd() { if (!isDragging) return; isDragging = false; track.classList.remove('dragging'); var s = window.getComputedStyle(track).transform; var fx = 0; if (s !== 'none') { var v = s.match(/-?\d+\.?\d*/g); if (v) fx = parseFloat(v[4]); } var st = getStep(); var diff = fx - (-current * st); track.style.transition = 'transform 0.4s ease'; if (diff < -60) { next(); } else if (diff > 60) { prev(); } else { track.style.transform = 'translateX(' + (-current * st) + 'px)'; } setTimeout(function() { isAnimating = false; }, 450); }
-
-      track.addEventListener('mousedown', function(e) { onDragStart(e.clientX); });
-      window.addEventListener('mousemove', function(e) { onDragMove(e.clientX); });
-      window.addEventListener('mouseup', function() { onDragEnd(); });
-      track.addEventListener('touchstart', function(e) { onDragStart(e.touches[0].clientX); }, { passive: true });
-      track.addEventListener('touchmove', function(e) { onDragMove(e.touches[0].clientX); }, { passive: true });
-      track.addEventListener('touchend', function() { onDragEnd(); });
-
-      buildCarousel();
-      buildDots();
-      current = 0;
-      track.style.transition = 'none';
-      track.style.transform = 'translateX(0)';
-      startAuto();
-
-      /* Rebuild carousel on language change */
-      window.rebuildCarousel = function() {
-        stopAuto();
-        current = 0;
-        buildCarousel();
-        buildDots();
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(0)';
-        startAuto();
-      };
-
-      /* Reposition on resize */
-      window.addEventListener('resize', function() {
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(' + (-current * getStep()) + 'px)';
-      });
-    })();
-  </script>
+  <script src="scripts.js"></script>
 </body>
 
 </html>
