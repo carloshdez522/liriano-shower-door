@@ -511,7 +511,7 @@ section {
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
   padding: 10px 0 10px 24px;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 .carousel-track.dragging {
@@ -1128,7 +1128,11 @@ section {
 
   .nav-lang {
     margin-left: auto;
-    margin-right: 16px;
+    margin-right: 4px;
+  }
+
+  .nav-toggle {
+    margin-right: 4px;
   }
 
   .about-grid {
@@ -1141,8 +1145,12 @@ section {
   }
 
   .about-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .about-stats > div:nth-child(3) {
+    grid-column: 1 / -1;
   }
 
   .gallery-grid {
@@ -1211,10 +1219,14 @@ section {
     padding: 30px 0;
   }
 
+  .carousel-track {
+    gap: 12px;
+  }
+
   .carousel-card {
-    min-width: 280px;
-    max-width: 280px;
-    min-height: 280px;
+    min-width: 240px;
+    max-width: 240px;
+    min-height: 240px;
   }
 
   .carousel-arrow {
@@ -1223,14 +1235,4 @@ section {
     font-size: 0.85rem;
   }
 }
-
-@media (max-width: 480px) {
-  .about-stats {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .gallery-grid {
-    column-count: 1;
-  }
 }
