@@ -83,20 +83,20 @@
       nav_contact: 'Contact',
 
       hero_badge: 'Premium Craftsmanship',
-      hero_title: 'Glass Solutions &<br><span>Glasswork</span>',
-      hero_p: 'Transform your home into a sanctuary of elegance. Custom glass installations for discerning homeowners across Miami.',
+      hero_title: 'Glass Solutions',
+      hero_p: 'Transform your home into a sanctuary of elegance. Custom glass installations for discerning homeowners across Miami, Miami-Dade and Broward.',
       hero_btn: 'Request a Free Estimate',
       scroll: 'Scroll',
       about_label: 'About Us',
       about_title: 'Crafting Elegance<br>Since 2019',
-      about_p1: 'Liriano &amp; Son Shower Doors Corp is a family-owned business based in Miami dedicated to transforming homes into works of art. Every project starts with a promise: to give our very best. We specialize in shower doors, but we do much more: balustrades, handrails, interior balconies, floor-to-ceiling windows, display cases, storefronts, closets, mirrors\u2026 Anything that can be done with glass, we do it and we do it right.',
-      about_p2: 'Why trust us? Because we treat every installation as if it were in our own home. We use premium materials, care for every detail, and don\u2019t consider a job finished until you are 100% satisfied. Since 2019, we have completed over 1,200 projects across Miami. And we still have the same passion as day one. <strong>Request your free estimate \u2014 you won\u2019t regret it.</strong>',
+      about_p1: '<strong>Liriano &amp; Son Shower Doors Corp</strong> is a family-owned business based in Miami dedicated to transforming homes into works of art. Every project starts with a promise: to give our very best. We specialize in shower doors, but we do much more: balustrades, handrails, interior balconies, office partitions, storefronts, mirrors\u2026 <strong>Anything that can be done with glass, we do it and we do it right.</strong>',
+      about_p2: '<strong>Why trust us?</strong><br>Because we treat every installation as if it were in our own home. We use premium materials, care for every detail, and don\u2019t consider a job finished until you are 100% satisfied. Since 2019, we have completed <strong>over 1,200 projects</strong> across Miami, Miami-Dade and Broward. And we still have the same passion as day one.<br><strong style="font-size:1.15em">Request your free estimate \u2014 you won\u2019t regret it.</strong>',
       stat1: 'Years Experience',
       stat2: 'Projects Completed',
       stat3: 'Client Satisfaction',
       services_label: 'Our Services',
       services_title: 'Glass Solutions',
-      services_p: 'From elegant shower doors to stunning floor-to-ceiling windows and glass railings \u2014 we bring precision and beauty to every installation across Miami. Free estimate for your project!',
+      services_p: 'From elegant shower doors to stunning office partitions and glass railings \u2014 we bring precision and beauty to every installation across Miami, Miami-Dade and Broward. Free estimate for your project!',
       gallery_label: 'Portfolio',
       gallery_title: 'Our Work',
       gallery_p: 'Every project is a testament to our craft. Browse a selection of our recent installations.',
@@ -113,9 +113,9 @@
       form_service: 'Service Interest',
       form_select: 'Select a service',
       opt_shower: 'Shower Doors',
-      opt_cabinets: 'Custom Glass Cabinets',
-      opt_partitions: 'Glass Partitions & Railings',
-      opt_repair: 'Glass Repair & Replacement',
+      opt_cabinets: 'Custom Cabinets',
+      opt_partitions: 'Partitions & Railings',
+      opt_repair: 'Repair & Replacement',
       opt_mirrors: 'Custom Mirrors & Glass',
       form_message: 'Message',
       form_btn: 'Send Message',
@@ -145,9 +145,9 @@
       whatsapp_tooltip: 'Chat for a Free Estimate!',
       gallery_social: 'See more of our work at:',
       service1_title: 'Shower Doors',
-      service1_desc: 'Custom shower doors, framed or frameless. Premium hardware, watertight seal, and contemporary style for a classy bathroom.',
+      service1_desc: 'Custom shower doors, framed or frameless. Premium hardware, watertight seal, and contemporary and modern style for a classy bathroom.',
       service2_title: 'Custom Cabinets',
-      service2_desc: 'Custom glass cabinets for closets, display cases, or storefronts. Sliding or hinged doors, clear or frosted glass.',
+      service2_desc: 'Custom glass cabinets for display cases or storefronts. Sliding or hinged doors, clear or frosted glass.',
       service3_title: 'Partitions & Railings',
       service3_desc: 'Railings, balustrades, and glass partitions for indoors and outdoors.',
       service4_title: 'Repair & Replacement',
@@ -157,8 +157,9 @@
       service6_title: 'Hardware & Accessories',
       service6_desc: 'Premium handles, towel bars, shelves, and accessories in brushed brass, matte black, and chrome finishes.',
 
-      footer_p: 'Excellence in glass since 2019. Free estimates for all of Miami!',
-      footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp'
+      footer_p: 'Excellence in glass since 2019. Free estimates for all of Miami, Miami-Dade and Broward!',
+      footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp',
+      wa_msg: 'Hello! I would like to request a free estimate for my project.'
     },
     es: {
       nav_about: 'Nosotros',
@@ -167,20 +168,20 @@
       nav_contact: 'Contacto',
 
       hero_badge: 'Artesan\u00eda Premium',
-      hero_title: 'Soluciones en Vidrio<br><span>&amp; Cristaler\u00eda</span>',
-      hero_p: 'Transforma tu hogar en un santuario de elegancia. Instalaci\u00f3n de cristaler\u00eda personalizada para propietarios exigentes en todo Miami.',
+      hero_title: 'Soluciones en Vidrio',
+      hero_p: 'Transforma tu hogar en un santuario de elegancia. Instalaci\u00f3n de cristaler\u00eda personalizada para propietarios exigentes en Miami, Miami-Dade y Broward.',
       hero_btn: 'Solicita tu Estimado Gratis',
       scroll: 'Desplazar',
       about_label: 'Nosotros',
       about_title: 'Creando Elegancia<br>Desde 2019',
-      about_p1: 'Liriano &amp; Son Shower Doors Corp es un negocio familiar con sede en Miami dedicado a transformar hogares en obras de arte. Cada proyecto comienza con una promesa: dar lo mejor de nosotros. Nos especializamos en puertas de ba\u00f1o, pero hacemos mucho m\u00e1s: balaustradas, pasamanos, balcones interiores, ventanales de piso a techo, expositores, vidrieras, closets, espejos\u2026 Todo lo que se pueda hacer con vidrio, lo hacemos y lo hacemos bien.',
-      about_p2: '\u00bfPor qu\u00e9 confiar en nosotros? Porque cada instalaci\u00f3n la tratamos como si fuera en nuestra propia casa. Usamos materiales premium, cuidamos cada detalle y no damos un trabajo por terminado hasta que usted est\u00e9 100% satisfecho. Desde 2019, hemos completado m\u00e1s de 1200 proyectos en todo Miami. Y seguimos con la misma ilusi\u00f3n del primer d\u00eda. <strong>Solicite su estimado gratis, no se arrepentir\u00e1.</strong>',
+      about_p1: '<strong>Liriano &amp; Son Shower Doors Corp</strong> es un negocio familiar con sede en Miami dedicado a transformar hogares en obras de arte. Cada proyecto comienza con una promesa: dar lo mejor de nosotros. Nos especializamos en puertas de ba\u00f1o, pero hacemos mucho m\u00e1s: balaustradas, pasamanos, balcones interiores, divisiones de oficinas, expositores, vidrieras, espejos\u2026 <strong>Todo lo que se pueda hacer con vidrio, lo hacemos y lo hacemos bien.</strong>',
+      about_p2: '<strong>\u00bfPor qu\u00e9 confiar en nosotros?</strong><br>Porque cada instalaci\u00f3n la tratamos como si fuera en nuestra propia casa. Usamos materiales premium, cuidamos cada detalle y no damos un trabajo por terminado hasta que usted est\u00e9 100% satisfecho. Desde 2019, hemos completado <strong>m\u00e1s de 1200 proyectos</strong> en Miami, Miami-Dade y Broward. Y seguimos con la misma ilusi\u00f3n del primer d\u00eda.<br><strong style="font-size:1.15em">Solicite su estimado gratis, no se arrepentir\u00e1.</strong>',
       stat1: 'A\u00f1os de Experiencia',
       stat2: 'Proyectos Completados',
       stat3: 'Satisfacci\u00f3n del Cliente',
       services_label: 'Servicios',
       services_title: 'Soluciones en Vidrio',
-      services_p: 'Desde elegantes puertas de ba\u00f1o hasta imponentes ventanales y barandas de cristal, brindamos precisi\u00f3n y belleza en cada instalaci\u00f3n en todo Miami. \u00a1Estimado gratis para tu proyecto!',
+      services_p: 'Desde elegantes puertas de ba\u00f1o hasta divisiones de oficinas y barandas de cristal, brindamos precisi\u00f3n y belleza en cada instalaci\u00f3n en Miami, Miami-Dade y Broward. \u00a1Estimado gratis para tu proyecto!',
       gallery_label: 'Portafolio',
       gallery_title: 'Nuestro Trabajo',
       gallery_p: 'Cada proyecto es un testimonio de nuestra artesan\u00eda. Explore una selecci\u00f3n de nuestras instalaciones recientes.',
@@ -197,9 +198,9 @@
       form_service: 'Servicio de Inter\u00e9s',
       form_select: 'Seleccione un servicio',
       opt_shower: 'Puertas de Ducha',
-      opt_cabinets: 'Gabinetes de Vidrio Personalizados',
-      opt_partitions: 'Particiones y Barandales de Vidrio',
-      opt_repair: 'Reparaci\u00f3n y Reemplazo de Vidrio',
+      opt_cabinets: 'Gabinetes Personalizados',
+      opt_partitions: 'Particiones y Barandales',
+      opt_repair: 'Reparaci\u00f3n y Reemplazo',
       opt_mirrors: 'Espejos y Vidrios Personalizados',
       form_message: 'Mensaje',
       form_btn: 'Enviar Mensaje',
@@ -229,9 +230,9 @@
       whatsapp_tooltip: '\u00a1Chatea por tu Estimado Gratis!',
       gallery_social: 'Vea m\u00e1s de nuestros trabajos en:',
       service1_title: 'Puertas de Ducha',
-      service1_desc: 'Puertas de ducha a medida, con o sin marco. Herrajes de calidad, cierre herm\u00e9tico y estilo contempor\u00e1neo para un ba\u00f1o con clase.',
+      service1_desc: 'Puertas de ducha a medida, con o sin marco. Herrajes de calidad, cierre herm\u00e9tico y estilo contempor\u00e1neo y moderno para un ba\u00f1o con clase.',
       service2_title: 'Gabinetes Personalizados',
-      service2_desc: 'Gabinetes de vidrio a medida para closets, vitrinas o expositores. Puertas corredizas o abatibles, vidrios claros, esmerilados o con dise\u00f1o.',
+      service2_desc: 'Gabinetes de vidrio a medida para vitrinas o expositores. Puertas corredizas o abatibles, vidrios claros, esmerilados o con dise\u00f1o.',
       service3_title: 'Particiones y Barandales',
       service3_desc: 'Barandales, balaustradas y particiones de vidrio para interiores y exteriores.',
       service4_title: 'Reparaci\u00f3n y Reemplazo',
@@ -241,8 +242,9 @@
       service6_title: 'Herrajes y Accesorios',
       service6_desc: 'Manijas premium, barras de toallas, estantes y accesorios en lat\u00f3n cepillado, negro mate y acabados cromados.',
 
-      footer_p: 'Excelencia en vidrio desde 2019. \u00a1Estimado gratis para todo Miami!',
-      footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp'
+      footer_p: 'Excelencia en vidrio desde 2019. \u00a1Estimado gratis en Miami, Miami-Dade y Broward!',
+      footer_copy: '\u00a9 2026 Liriano and Son Shower Doors Corp',
+      wa_msg: '\u00a1Hola! Me gustar\u00eda solicitar un estimado gratis para mi proyecto.'
     }
   };
 
@@ -260,6 +262,9 @@
       btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
     });
     if (window.rebuildCarousel) window.rebuildCarousel();
+    document.querySelectorAll('[data-wa]').forEach(function (el) {
+      el.href = 'https://wa.me/17862224264?text=' + encodeURIComponent(t.wa_msg);
+    });
   }
 
   document.querySelectorAll('.lang-btn').forEach(function (btn) {
@@ -268,7 +273,7 @@
     });
   });
 
-  applyLang('es');
+  applyLang('en');
 
   /* ----- Contact Form ----- */
   var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQuFR98i66yFSana-ArihnwAAdv4odjeMEJjLEqxpjAQj3rfSXNLv9zXXlqmbrjTfNKw/exec';
@@ -277,6 +282,8 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var btn = form.querySelector('button[type="submit"]');
+    if (btn.disabled) return;
+    btn.disabled = true;
     var currentLang = document.querySelector('.lang-btn.active').getAttribute('data-lang');
 
     var data = {
@@ -299,6 +306,7 @@
       setTimeout(function () {
         btn.textContent = translations[currentLang].form_btn;
         btn.style.background = '';
+        btn.disabled = false;
         form.reset();
       }, 3000);
     })
@@ -308,6 +316,7 @@
       setTimeout(function () {
         btn.textContent = translations[currentLang].form_btn;
         btn.style.background = '';
+        btn.disabled = false;
         form.reset();
       }, 3000);
     });

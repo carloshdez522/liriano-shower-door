@@ -26,6 +26,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 60px;
   font-size: 16px;
 }
 
@@ -637,7 +638,7 @@ section {
 }
 
 .gallery .section-label {
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .gallery .section-subtitle {
@@ -1149,8 +1150,9 @@ section {
     gap: 12px;
   }
 
-  .about-stats > div:nth-child(3) {
+  .about-stats>div:nth-child(3) {
     grid-column: 1 / -1;
+    text-align: center;
   }
 
   .gallery-grid {
