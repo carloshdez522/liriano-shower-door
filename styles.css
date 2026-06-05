@@ -1095,6 +1095,10 @@ section {
 }
 
 @media (max-width: 768px) {
+  html {
+    scroll-padding-top: 60px;
+  }
+
   .nav .container {
     padding-left: 6px;
   }
