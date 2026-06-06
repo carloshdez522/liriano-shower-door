@@ -1154,9 +1154,12 @@ section {
     gap: 12px;
   }
 
-  .about-stats>div:nth-child(3) {
-    grid-column: 1 / -1;
+  .about-stats > div {
     text-align: center;
+  }
+
+  .about-stats > div:nth-child(3) {
+    grid-column: 1 / -1;
   }
 
   .gallery-grid {
@@ -1228,12 +1231,11 @@ section {
   .carousel-track {
     gap: 12px;
     padding: 10px 0;
-    justify-content: center;
   }
 
   .carousel-card {
-    min-width: 260px;
-    max-width: 260px;
+    min-width: 280px;
+    max-width: 280px;
     min-height: 240px;
   }
 

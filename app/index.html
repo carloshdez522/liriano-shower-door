@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Liriano & Son">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/webp" href="../images/logo.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <title>Liriano & Son — App</title>
+</head>
+<body class="login-page">
+  <div class="login-bg"></div>
+
+  <div class="login-card" id="loginCard">
+    <div class="login-logo">
+      <img src="../images/logo.webp" alt="Liriano & Son">
+    </div>
+    <h1 class="login-title">Liriano <span>&amp;</span> Son</h1>
+    <p class="login-subtitle">Shower Doors Corp</p>
+    <form id="loginForm" class="login-form">
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="username" data-i18n-placeholder="login_user_ph" placeholder="Username" autocomplete="username" required>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" data-i18n-placeholder="login_pass_ph" placeholder="Password" autocomplete="current-password" required>
+        <button type="button" class="toggle-pass" id="togglePass" tabindex="-1">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+      <p class="login-error" id="loginError"></p>
+      <button type="submit" class="login-btn" id="loginBtn">
+        <span data-i18n="login_btn">Log In</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </form>
+    <div class="login-lang">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" data-lang="es">ES</button>
+    </div>
+  </div>
+
+  <div class="app-container" id="appContainer" style="display:none">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <img src="../images/logo.webp" alt="" class="app-header-logo">
+        <span class="app-header-title">Liriano <span>&amp;</span> Son</span>
+        <div class="app-header-lang">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <span class="lang-sep">|</span>
+          <button class="lang-btn" data-lang="es">ES</button>
+        </div>
+        <button class="app-logout" id="logoutBtn" title="Log out">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <!-- ===== DASHBOARD ===== -->
+      <div id="dashboardView">
+        <div class="dash-header">
+          <div class="dash-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" data-i18n-placeholder="search_ph" placeholder="Search by name, job, phone...">
+          </div>
+          <div class="dash-filters" id="filterBar">
+            <button class="filter-btn active" data-filter="all"><span data-i18n="all">All</span> <span class="filter-count" id="countAll">0</span></button>
+            <button class="filter-btn" data-filter="estimado"><span data-i18n="estimados">Estimates</span> <span class="filter-count" id="countEstimado">0</span></button>
+            <button class="filter-btn" data-filter="invoice"><span data-i18n="facturas">Invoices</span> <span class="filter-count" id="countInvoice">0</span></button>
+          </div>
+        </div>
+        <div class="job-list" id="jobList">
+          <div class="empty-state" id="emptyState">
+            <i class="fas fa-clipboard-list"></i>
+            <p data-i18n="empty">No jobs yet. Tap + to create one.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== FORM VIEW ===== -->
+      <div id="formView" style="display:none">
+        <div class="form-top">
+          <button class="form-back" id="formBack"><i class="fas fa-arrow-left"></i></button>
+          <h2 class="form-view-title" id="formViewTitle" data-i18n="new_job">New Job</h2>
+        </div>
+        <form id="valeForm" class="vale-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="valeJob" data-i18n="job">Job</label>
+              <input type="text" id="valeJob" data-i18n-placeholder="job_ph" placeholder="e.g. Window Installation" required>
+            </div>
+            <div class="form-group">
+              <label for="valeDate" data-i18n="date">Date</label>
+              <input type="date" id="valeDate" required>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span data-i18n="invoice_to">Invoice To</span>
+          </div>
+
+          <div class="form-group">
+            <label for="valeName" data-i18n="name">Name</label>
+            <input type="text" id="valeName" data-i18n-placeholder="name_ph" placeholder="Client name" required>
+          </div>
+          <div class="form-group">
+            <label for="valeAddress" data-i18n="address">Address</label>
+            <input type="text" id="valeAddress" data-i18n-placeholder="address_ph" placeholder="Street, city, zip">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="valePhone" data-i18n="phone">Phone</label>
+              <input type="tel" id="valePhone" data-i18n-placeholder="phone_ph" placeholder="+1 (786) 222-4264">
+            </div>
+            <div class="form-group">
+              <label data-i18n="temper">Temper</label>
+              <div class="toggle-wrap">
+                <label class="toggle-label">
+                  <input type="checkbox" id="valeTemper">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-text" id="temperText" data-i18n="no">No</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span data-i18n="items">Items</span>
+          </div>
+
+          <div class="form-group">
+            <label for="valeItem" data-i18n="item">Item</label>
+            <input type="text" id="valeItem" data-i18n-placeholder="item_ph" placeholder="e.g. Frameless shower door" required>
+          </div>
+          <div class="form-group">
+            <label for="valeDescription" data-i18n="description">Description</label>
+            <textarea id="valeDescription" data-i18n-placeholder="desc_ph" placeholder="Details, measurements, notes..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="valeAmount" data-i18n="amount">Amount ($)</label>
+            <input type="number" id="valeAmount" placeholder="0.00" step="0.01" min="0" required>
+          </div>
+          <button type="submit" class="generate-btn" id="saveBtn">
+            <i class="fas fa-save"></i>
+            <span data-i18n="save">Save</span>
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <button class="fab" id="fabBtn"><i class="fas fa-plus"></i></button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/app/sw.js');
+    }
+  </script>
+</body>
+</html>
