@@ -62,6 +62,9 @@
       deleted: 'Deleted',
       approved: 'Converted to invoice',
       error_api: 'Server error',
+      pdf_close: 'Close',
+      pdf_share_msg: 'Hi! Here is your {job} - Total: ${amount}',
+      pdf_email_body: 'Dear {name},\n\nPlease find attached the {job} document.\n\nTotal: ${amount}\n\nThank you,\nLiriano & Son Shower Doors Corp',
     },
     es: {
       login_user_ph: 'Usuario',
@@ -119,6 +122,9 @@
       deleted: 'Eliminado',
       approved: 'Convertido a factura',
       error_api: 'Error del servidor',
+      pdf_close: 'Cerrar',
+      pdf_share_msg: '¡Hola! Aquí está su {job} - Total: ${amount}',
+      pdf_email_body: 'Estimado {name},\n\nAdjunto encontrará el documento de {job}.\n\nTotal: ${amount}\n\nGracias,\nLiriano & Son Shower Doors Corp',
     },
   };
 
@@ -412,7 +418,7 @@
       });
     });
     jobList.querySelectorAll('.view-pdf').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); getJobById(+btn.dataset.id).then(j => generatePDF(j)); });
+      btn.addEventListener('click', e => { e.stopPropagation(); getJobById(+btn.dataset.id).then(j => showPDFPreview(j)); });
     });
     jobList.querySelectorAll('.approve').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); showApproveModal(+btn.dataset.id); });
@@ -535,7 +541,7 @@
           <button class="detail-btn delete-btn" id="dtlDelete"><i class="fas fa-trash"></i> ${t('del')}</button>
         </div>`;
 
-      $('dtlPdf').addEventListener('click', () => generatePDF(j));
+      $('dtlPdf').addEventListener('click', () => showPDFPreview(j));
       if (j.status === 'estimado') {
         $('dtlApprove').addEventListener('click', () => showApproveModal(j.id));
       }
@@ -625,7 +631,7 @@
         else await showDashboard();
       } else {
         const job = await createJob(data);
-        generatePDF(job);
+        showPDFPreview(job);
         editingJobId = null;
         await showDashboard();
       }
@@ -644,8 +650,8 @@
   });
 
   /* ===== PDF GENERATION ===== */
-  function generatePDF(job) {
-    if (!job) return;
+  function buildPDFDoc(job) {
+    if (!job) return null;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const pageW = 210, pageH = 297, margin = 18, topBarH = 46;
@@ -764,7 +770,68 @@
       doc.text('This is an estimate — not a final invoice.', pageW / 2, pageH - 18, { align: 'center' });
     }
 
-    doc.save(`${job.job || job.name || 'document'}_${job.status}.pdf`);
+    return doc;
+  }
+
+  function showPDFPreview(job) {
+    if (!job) return;
+    const doc = buildPDFDoc(job);
+    if (!doc) return;
+    const blob = doc.output('blob');
+    const blobUrl = URL.createObjectURL(blob);
+    const filename = `${job.job || job.name || 'document'}_${job.status}.pdf`;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'pdf-overlay';
+    overlay.innerHTML = `
+      <div class="pdf-overlay-container">
+        <div class="pdf-toolbar">
+          <span class="pdf-toolbar-title">${esc(filename)}</span>
+          <button class="pdf-toolbar-close" id="pdfClose">&times;</button>
+        </div>
+        <iframe class="pdf-frame" src="${blobUrl}"></iframe>
+        <div class="pdf-actions">
+          <button class="pdf-btn download" id="pdfDl"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
+          <button class="pdf-btn whatsapp" id="pdfWa"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button class="pdf-btn email" id="pdfMail"><i class="fas fa-envelope"></i> Email</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    function closePreview() {
+      URL.revokeObjectURL(blobUrl);
+      overlay.remove();
+    }
+
+    $('pdfClose').addEventListener('click', closePreview);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closePreview(); });
+
+    $('pdfDl').addEventListener('click', () => { doc.save(filename); });
+
+    $('pdfWa').addEventListener('click', () => {
+      const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
+      if (phone) {
+        const msg = encodeURIComponent(
+          t('pdf_share_msg')
+            .replace('{job}', job.job || job.name || '')
+            .replace('{amount}', parseFloat(job.amount || 0).toFixed(2))
+        );
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+      } else {
+        showToast('No phone number', 'error');
+      }
+    });
+
+    $('pdfMail').addEventListener('click', () => {
+      const subject = encodeURIComponent(`${job.status === 'estimado' ? 'Estimate' : 'Invoice'} - ${job.job || job.name}`);
+      const body = encodeURIComponent(
+        t('pdf_email_body')
+          .replace('{name}', job.name || '')
+          .replace('{job}', job.job || '')
+          .replace('{amount}', parseFloat(job.amount || 0).toFixed(2))
+      );
+      window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    });
   }
 
   /* ===== SEARCH ===== */
