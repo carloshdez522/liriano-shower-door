@@ -638,22 +638,58 @@
   /* ===== INSTALL BUTTON ===== */
   let installPrompt = null;
   const installBtn = $('installBtn');
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    installPrompt = e;
-    installBtn.style.display = 'flex';
-  });
-  installBtn.addEventListener('click', async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const result = await installPrompt.userChoice;
-    installPrompt = null;
-    installBtn.style.display = 'none';
-  });
-  window.addEventListener('appinstalled', () => {
-    installPrompt = null;
-    installBtn.style.display = 'none';
-  });
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  function showInstallModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.innerHTML = `
+      <div class="modal-box" style="text-align:left">
+        <h3 style="text-align:center;margin-bottom:12px">${isIOS ? '📱 Install on iPhone' : '📲 Install App'}</h3>
+        ${isIOS ? `
+          <p style="margin-bottom:8px;line-height:1.6">1. Tap <b>Share</b> <span style="font-size:1.2rem">⬆</span></p>
+          <p style="margin-bottom:8px;line-height:1.6">2. Scroll down & tap <b>"Add to Home Screen"</b> <span style="font-size:1.2rem">➕</span></p>
+          <p style="margin-bottom:16px;line-height:1.6">3. Tap <b>"Add"</b> in the top right</p>
+        ` : `
+          <p style="margin-bottom:16px;line-height:1.6">Open Chrome menu (⋮) → <b>"Add to Home Screen"</b></p>
+        `}
+        <div class="modal-actions">
+          <button class="modal-btn confirm" id="installModalOk">OK</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#installModalOk').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  if (!isStandalone) {
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      installPrompt = e;
+      installBtn.style.display = 'flex';
+    });
+    installBtn.addEventListener('click', async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        const result = await installPrompt.userChoice;
+        installPrompt = null;
+        if (result.outcome === 'accepted') { installBtn.style.display = 'none'; }
+      } else {
+        showInstallModal();
+      }
+    });
+    window.addEventListener('appinstalled', () => {
+      installPrompt = null;
+      installBtn.style.display = 'none';
+    });
+    if (!isIOS && !('beforeinstallprompt' in window)) {
+      installBtn.style.display = 'flex';
+    }
+    if (isIOS) {
+      installBtn.style.display = 'flex';
+    }
+  }
 
   /* ===== LOGIN ===== */
   togglePass.addEventListener('click', () => {
