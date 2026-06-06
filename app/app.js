@@ -639,6 +639,7 @@
   let installPrompt = null;
   const installBtn = $('installBtn');
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const wasInstalled = localStorage.getItem('liriano_installed') === 'true';
 
   function showInstallModal() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -663,7 +664,7 @@
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
-  if (!isStandalone) {
+  if (!isStandalone && !wasInstalled) {
     installBtn.style.display = 'flex';
 
     window.addEventListener('beforeinstallprompt', e => {
@@ -676,7 +677,7 @@
         installPrompt.prompt();
         const result = await installPrompt.userChoice;
         installPrompt = null;
-        if (result.outcome === 'accepted') { installBtn.style.display = 'none'; }
+        if (result.outcome === 'accepted') { installBtn.style.display = 'none'; localStorage.setItem('liriano_installed', 'true'); }
       } else {
         showInstallModal();
       }
@@ -685,6 +686,7 @@
     window.addEventListener('appinstalled', () => {
       installPrompt = null;
       installBtn.style.display = 'none';
+      localStorage.setItem('liriano_installed', 'true');
     });
   }
 
@@ -736,6 +738,7 @@
   showDashboard();
 
   /* ===== INIT ===== */
+  if (isStandalone) localStorage.setItem('liriano_installed', 'true');
   applyTranslations();
   setLanguage(lang);
   f.date.value = new Date().toISOString().split('T')[0];
