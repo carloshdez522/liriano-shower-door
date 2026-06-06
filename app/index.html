@@ -94,10 +94,13 @@
       <div id="formView" style="display:none">
         <div class="form-top">
           <button class="form-back" id="formBack"><i class="fas fa-arrow-left"></i></button>
-          <h2 class="form-view-title" id="formViewTitle" data-i18n="new_job">New Job</h2>
+          <h2 class="form-view-title" id="formViewTitle">New Job</h2>
         </div>
         <form id="valeForm" class="vale-form">
-          <div class="form-row">
+          <div class="section-divider">
+            <span data-i18n="client">Client</span>
+          </div>
+          <div class="form-row job-date-row">
             <div class="form-group">
               <label for="valeJob" data-i18n="job">Job</label>
               <input type="text" id="valeJob" data-i18n-placeholder="job_ph" placeholder="e.g. Window Installation" required>
@@ -108,13 +111,10 @@
             </div>
           </div>
 
-          <div class="section-divider">
-            <span data-i18n="invoice_to">Invoice To</span>
-          </div>
-
-          <div class="form-group">
+          <div class="form-group" style="position:relative">
             <label for="valeName" data-i18n="name">Name</label>
-            <input type="text" id="valeName" data-i18n-placeholder="name_ph" placeholder="Client name" required>
+            <input type="text" id="valeName" data-i18n-placeholder="name_ph" placeholder="Client name" required autocomplete="off">
+            <div class="autocomplete-list" id="autocompleteList"></div>
           </div>
           <div class="form-group">
             <label for="valeAddress" data-i18n="address">Address</label>
@@ -126,14 +126,8 @@
               <input type="tel" id="valePhone" data-i18n-placeholder="phone_ph" placeholder="+1 (786) 222-4264">
             </div>
             <div class="form-group">
-              <label data-i18n="temper">Temper</label>
-              <div class="toggle-wrap">
-                <label class="toggle-label">
-                  <input type="checkbox" id="valeTemper">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-text" id="temperText" data-i18n="no">No</span>
-              </div>
+              <label for="valeEmail" data-i18n="email">Email</label>
+              <input type="email" id="valeEmail" data-i18n-placeholder="email_ph" placeholder="client@email.com">
             </div>
           </div>
 
@@ -141,23 +135,98 @@
             <span data-i18n="items">Items</span>
           </div>
 
-          <div class="form-group">
-            <label for="valeItem" data-i18n="item">Item</label>
-            <input type="text" id="valeItem" data-i18n-placeholder="item_ph" placeholder="e.g. Frameless shower door" required>
-          </div>
-          <div class="form-group">
-            <label for="valeDescription" data-i18n="description">Description</label>
-            <textarea id="valeDescription" data-i18n-placeholder="desc_ph" placeholder="Details, measurements, notes..." rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="valeAmount" data-i18n="amount">Amount ($)</label>
-            <input type="number" id="valeAmount" placeholder="0.00" step="0.01" min="0" required>
-          </div>
+          <div id="itemsCompactList" class="items-compact-list"></div>
+
+          <button type="button" class="add-item-btn" id="addItemBtn">
+            <i class="fas fa-plus"></i> <span data-i18n="add_item">Add Item</span>
+          </button>
+
           <button type="submit" class="generate-btn" id="saveBtn">
             <i class="fas fa-save"></i>
             <span data-i18n="save">Save</span>
           </button>
         </form>
+      </div>
+
+      <!-- ===== ITEM FORM VIEW ===== -->
+      <div id="itemFormView" style="display:none">
+        <div class="form-top">
+          <button class="form-back" id="itemFormBack"><i class="fas fa-arrow-left"></i></button>
+          <h2 class="form-view-title" id="itemFormTitle">New Item</h2>
+        </div>
+        <div class="vale-form" id="itemFormBody">
+          <div class="form-row item-temper-row">
+            <div class="form-group">
+              <label for="itemFormName" data-i18n="item">Item</label>
+              <input type="text" id="itemFormName" data-i18n-placeholder="item_ph" placeholder="e.g. Frameless shower door" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="temper">Temper</label>
+              <div class="toggle-wrap" style="justify-content:flex-start">
+                <label class="toggle-label">
+                  <input type="checkbox" id="itemFormTemper">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-text" id="itemFormTemperText" data-i18n="no">No</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="itemFormDesc" data-i18n="description">Description</label>
+            <textarea id="itemFormDesc" data-i18n-placeholder="desc_ph" placeholder="Details, hardware color, finish..." rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="itemFormGlass" data-i18n="glass_thickness">Hardware Color Glass Thickness</label>
+            <input type="text" id="itemFormGlass" placeholder="e.g. Brushed nickel, 3/8 tempered">
+          </div>
+          <div class="form-row row-dimensions">
+            <div class="form-group">
+              <label data-i18n="dimensions">Dimensions</label>
+              <div class="dimensions-row">
+                <input type="number" id="itemFormDimW" placeholder="64" step="0.1" min="0">
+                <span class="dim-x">x</span>
+                <input type="number" id="itemFormDimH" placeholder="70" step="0.1" min="0">
+                <select id="itemFormDimUnit">
+                  <option value="in">in</option>
+                  <option value="ft">ft</option>
+                  <option value="mm">mm</option>
+                  <option value="cm">cm</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group price-wrap">
+              <label for="itemFormUnitPrice" data-i18n="unit_price">Unit Price</label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="number" id="itemFormUnitPrice" placeholder="0.00" step="0.01" min="0">
+              </div>
+            </div>
+          </div>
+          <div class="form-row row-installation">
+            <div class="form-group">
+              <label for="itemFormInstall" data-i18n="installation">Installation</label>
+              <div class="install-row">
+                <input type="number" id="itemFormInstall" placeholder="50" step="1" min="0">
+                <select id="itemFormInstallUnit">
+                  <option value="ft">ft</option>
+                  <option value="in">in</option>
+                  <option value="sqft">sq ft</option>
+                  <option value="unit">unit</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group price-wrap">
+              <label for="itemFormPrice" data-i18n="price">Price</label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="number" id="itemFormPrice" placeholder="0.00" step="0.01" min="0" required>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="generate-btn" id="itemFormSaveBtn">
+            <i class="fas fa-check"></i> <span data-i18n="save">Save</span>
+          </button>
+        </div>
       </div>
 
       <!-- ===== DETAIL VIEW ===== -->
@@ -169,9 +238,9 @@
         <div class="detail-card" id="detailContent"></div>
       </div>
     </main>
-
-    <button class="fab" id="fabBtn"><i class="fas fa-plus"></i></button>
   </div>
+
+  <button class="fab" id="fabBtn"><i class="fas fa-plus"></i></button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="app.js"></script>

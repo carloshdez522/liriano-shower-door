@@ -22,6 +22,8 @@
       address_ph: 'Street, city, zip',
       phone: 'Phone',
       phone_ph: '+1 (786) 222-4264',
+      email: 'Email',
+      email_ph: 'client@email.com',
       temper: 'Temper',
       yes: 'Yes',
       no: 'No',
@@ -63,8 +65,21 @@
       approved: 'Converted to invoice',
       error_api: 'Server error',
       pdf_close: 'Close',
+      pdf_share: 'Share',
       pdf_share_msg: 'Hi! Here is your {job} - Total: ${amount}',
       pdf_email_body: 'Dear {name},\n\nPlease find attached the {job} document.\n\nTotal: ${amount}\n\nThank you,\nLiriano & Son Shower Doors Corp',
+      client: 'Client',
+      item_required: 'Item name is required',
+      price_required: 'Price is required',
+      add_item: 'Add Item',
+      edit_item: 'Edit Item',
+      remove: 'Remove',
+      dimensions: 'Dimensions',
+      unit: 'Unit',
+      glass_thickness: 'Hardware Color Glass Thickness',
+      unit_price: 'Unit Price',
+      installation: 'Installation',
+      price: 'Price',
     },
     es: {
       login_user_ph: 'Usuario',
@@ -82,6 +97,8 @@
       address_ph: 'Calle, ciudad, código postal',
       phone: 'Teléfono',
       phone_ph: '+1 (786) 222-4264',
+      email: 'Correo',
+      email_ph: 'cliente@email.com',
       temper: 'Temple',
       yes: 'Sí',
       no: 'No',
@@ -123,8 +140,21 @@
       approved: 'Convertido a factura',
       error_api: 'Error del servidor',
       pdf_close: 'Cerrar',
+      pdf_share: 'Compartir',
       pdf_share_msg: '¡Hola! Aquí está su {job} - Total: ${amount}',
       pdf_email_body: 'Estimado {name},\n\nAdjunto encontrará el documento de {job}.\n\nTotal: ${amount}\n\nGracias,\nLiriano & Son Shower Doors Corp',
+      client: 'Cliente',
+      item_required: 'El nombre del artículo es requerido',
+      price_required: 'El precio es requerido',
+      add_item: 'Agregar Artículo',
+      edit_item: 'Editar Artículo',
+      remove: 'Quitar',
+      dimensions: 'Dimensiones',
+      unit: 'Unidad',
+      glass_thickness: 'Grosor del Vidrio - Color Herraje',
+      unit_price: 'Precio Unitario',
+      installation: 'Instalación',
+      price: 'Precio',
     },
   };
 
@@ -162,7 +192,11 @@
       } else if (formView.style.display !== 'none') {
         formViewTitle.textContent = editingJobId ? t('edit_job') : t('new_job');
         saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
-        document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
+        renderCompactItems();
+      } else if (itemFormView.style.display !== 'none') {
+        itemFormTitle.textContent = editingItemId ? t('edit_job') : t('add_item');
+        itemFormSaveBtn.innerHTML = `<i class="fas fa-check"></i> ${t('save')}`;
+        ifTemperText.textContent = ifTemper.checked ? t('yes') : t('no');
       }
     }
   }
@@ -191,16 +225,36 @@
   const valeForm = $('valeForm');
   const saveBtn = $('saveBtn');
 
+  const itemsCompactList = $('itemsCompactList');
+  const addItemBtn = $('addItemBtn');
+  const itemFormView = $('itemFormView');
+  const itemFormBack = $('itemFormBack');
+  const itemFormTitle = $('itemFormTitle');
+  const itemFormBody = $('itemFormBody');
+  const itemFormSaveBtn = $('itemFormSaveBtn');
+  const ifTemper = $('itemFormTemper');
+  const ifTemperText = $('itemFormTemperText');
+  const ifName = $('itemFormName');
+  const ifDesc = $('itemFormDesc');
+  const ifDimW = $('itemFormDimW');
+  const ifDimH = $('itemFormDimH');
+  const ifDimUnit = $('itemFormDimUnit');
+  const ifGlass = $('itemFormGlass');
+  const ifInstall = $('itemFormInstall');
+  const ifInstallUnit = $('itemFormInstallUnit');
+  const ifUnitPrice = $('itemFormUnitPrice');
+  const ifPrice = $('itemFormPrice');
+  let itemsData = [];
+  let itemIdCounter = 0;
+  let editingItemId = null;
+
   const f = {
     job: $('valeJob'),
     date: $('valeDate'),
     name: $('valeName'),
     address: $('valeAddress'),
     phone: $('valePhone'),
-    temper: $('valeTemper'),
-    item: $('valeItem'),
-    description: $('valeDescription'),
-    amount: $('valeAmount'),
+    email: $('valeEmail'),
   };
 
   let editingJobId = null;
@@ -220,17 +274,18 @@
   function lsSeed() {
     const existing = lsRead();
     if (existing.length > 0) return;
+    const now = Date.now();
     const sample = [
-      { job: 'Shower Door Installation', date: '2026-05-20', name: 'John Smith', address: '123 Main St, Miami, FL', phone: '+1 (305) 555-0101', temper: true, item: 'Frameless 3/8" Glass Door', description: 'Measure 60"x72", clear glass, brushed nickel handle', amount: 1200, status: 'estimado', createdAt: Date.now() - 90000000 },
-      { job: 'Window Replacement', date: '2026-05-18', name: 'Maria Garcia', address: '456 Oak Ave, Coral Gables, FL', phone: '+1 (305) 555-0102', temper: true, item: 'Double Hung Window 36"x48"', description: 'Replace old single-pane with energy-efficient double-pane', amount: 850, status: 'invoice', createdAt: Date.now() - 80000000 },
-      { job: 'Storefront Glass', date: '2026-05-15', name: 'Carlos Ruiz', address: '789 Pine Rd, Hialeah, FL', phone: '+1 (305) 555-0103', temper: false, item: 'Tempered Storefront Glass 1/4"', description: 'Commercial storefront, 96"x84", include aluminum frame', amount: 3200, status: 'estimado', createdAt: Date.now() - 70000000 },
-      { job: 'Frameless Shower Enclosure', date: '2026-05-12', name: 'Ana Lopez', address: '321 Beach Blvd, Miami Beach, FL', phone: '+1 (305) 555-0104', temper: true, item: 'Custom Shower Enclosure', description: 'Neo-angle 48"x48", clear glass, chrome hinges', amount: 2100, status: 'invoice', createdAt: Date.now() - 60000000 },
-      { job: 'Glass Railing', date: '2026-05-10', name: 'Robert Johnson', address: '555 Sunset Dr, Key Biscayne, FL', phone: '+1 (305) 555-0105', temper: true, item: 'Glass Railing Panel', description: 'Staircase railing, 60"x42", laminated safety glass', amount: 1750, status: 'estimado', createdAt: Date.now() - 50000000 },
-      { job: 'Mirror Installation', date: '2026-05-08', name: 'Sofia Martinez', address: '777 Palm Way, Fort Lauderdale, FL', phone: '+1 (305) 555-0106', temper: false, item: 'Beveled Mirror 36"x48"', description: 'Bathroom wall mirror with beveled edges, silver frame', amount: 450, status: 'invoice', createdAt: Date.now() - 40000000 },
-      { job: 'Glass Table Top', date: '2026-05-05', name: 'David Chen', address: '999 Coral Way, Miami, FL', phone: '+1 (305) 555-0107', temper: true, item: 'Round Glass Table Top 48"', description: 'Tempered glass, 1/2" thick, polished edge', amount: 380, status: 'estimado', createdAt: Date.now() - 30000000 },
-      { job: 'Commercial Door Repair', date: '2026-05-03', name: 'Miami Office Suites', address: '1000 Brickell Ave, Miami, FL', phone: '+1 (305) 555-0108', temper: true, item: 'Commercial Glass Door', description: 'Replace damaged 1/4" tempered glass, new hinges and closer', amount: 950, status: 'invoice', createdAt: Date.now() - 20000000 },
-      { job: 'Custom Mirrored Wall', date: '2026-04-28', name: 'Fit Gym LLC', address: '2000 Flagler St, Miami, FL', phone: '+1 (305) 555-0109', temper: false, item: 'Full Wall Mirror 96"x72"', description: 'Gym wall mirrors, 3/8" thick, mitred edges', amount: 2800, status: 'estimado', createdAt: Date.now() - 10000000 },
-      { job: 'Patio Door Glass', date: '2026-04-25', name: 'Linda Torres', address: '1500 SW 8th St, Miami, FL', phone: '+1 (305) 555-0110', temper: true, item: 'Sliding Patio Door Glass 72"x80"', description: 'Replace cracked panel, tempered low-E glass', amount: 1100, status: 'invoice', createdAt: Date.now() },
+      { job: 'Shower Door Installation', date: '2026-05-20', name: 'John Smith', address: '123 Main St, Miami, FL', phone: '+1 (305) 555-0101', email: 'john@example.com', items: [{ id:1, temper:true, item:'Frameless 3/8" Glass Door', description:'Brushed nickel handle, clear glass', dimensionsW:60, dimensionsH:72, dimensionsUnit:'in', glassThickness:'Brushed nickel, 3/8 tempered', installation:50, installationUnit:'ft', unitPrice:400, price:1200 }], status: 'estimado', createdAt: now - 90000000 },
+      { job: 'Window Replacement', date: '2026-05-18', name: 'Maria Garcia', address: '456 Oak Ave, Coral Gables, FL', email: 'maria@example.com', items: [{ id:1, temper:true, item:'Double Hung Window 36"x48"', description:'White frame, low-E glass', dimensionsW:36, dimensionsH:48, dimensionsUnit:'in', glassThickness:'White frame, low-E', installation:2, installationUnit:'unit', unitPrice:425, price:850 }], status: 'invoice', createdAt: now - 80000000 },
+      { job: 'Storefront Glass', date: '2026-05-15', name: 'Carlos Ruiz', address: '789 Pine Rd, Hialeah, FL', phone: '+1 (305) 555-0103', email: 'carlos@example.com', items: [{ id:1, temper:false, item:'Tempered Storefront 1/4"', description:'Aluminum frame incl.', dimensionsW:96, dimensionsH:84, dimensionsUnit:'in', glassThickness:'Aluminum frame, 1/4 laminated', installation:1, installationUnit:'unit', unitPrice:600, price:1800 },{ id:2, temper:true, item:'Side Panel', description:'Clear tempered', dimensionsW:36, dimensionsH:84, dimensionsUnit:'in', glassThickness:'Clear tempered', installation:2, installationUnit:'sqft', unitPrice:700, price:1400 }], status: 'estimado', createdAt: now - 70000000 },
+      { job: 'Frameless Shower Enclosure', date: '2026-05-12', name: 'Ana Lopez', address: '321 Beach Blvd, Miami Beach, FL', phone: '+1 (305) 555-0104', email: 'ana@example.com', items: [{ id:1, temper:true, item:'Neo-angle enclosure 48"x48"', description:'Chrome hinges, clear glass', dimensionsW:48, dimensionsH:76, dimensionsUnit:'in', glassThickness:'Chrome hinges, 3/8 clear', installation:1, installationUnit:'unit', unitPrice:700, price:2100 }], status: 'invoice', createdAt: now - 60000000 },
+      { job: 'Glass Railing', date: '2026-05-10', name: 'Robert Johnson', address: '555 Sunset Dr, Key Biscayne, FL', phone: '+1 (305) 555-0105', temper: true, items: [{ id:1, temper:true, item:'Staircase Panel 60"x42"', description:'Laminated safety glass', dimensionsW:60, dimensionsH:42, dimensionsUnit:'in', glassThickness:'Laminated safety, stainless posts', installation:12, installationUnit:'ft', unitPrice:583.33, price:1750 }], status: 'estimado', createdAt: now - 50000000 },
+      { job: 'Mirror Installation', date: '2026-05-08', name: 'Sofia Martinez', address: '777 Palm Way, Fort Lauderdale, FL', email: 'sofia@example.com', items: [{ id:1, temper:false, item:'Beveled Mirror 36"x48"', description:'Silver frame, beveled edges', dimensionsW:36, dimensionsH:48, dimensionsUnit:'in', glassThickness:'Silver frame, 1/4 beveled', installation:1, installationUnit:'unit', unitPrice:450, price:450 }], status: 'invoice', createdAt: now - 40000000 },
+      { job: 'Glass Table Top', date: '2026-05-05', name: 'David Chen', address: '999 Coral Way, Miami, FL', phone: '+1 (305) 555-0107', items: [{ id:1, temper:true, item:'Round Table Top 48"', description:'Polished edge, 1/2" thick', dimensionsW:48, dimensionsH:48, dimensionsUnit:'in', glassThickness:'Polished edge, 1/2 thick', installation:1, installationUnit:'unit', unitPrice:380, price:380 }], status: 'estimado', createdAt: now - 30000000 },
+      { job: 'Commercial Door Repair', date: '2026-05-03', name: 'Miami Office Suites', address: '1000 Brickell Ave, Miami, FL', phone: '+1 (305) 555-0108', email: 'info@miamioffices.com', items: [{ id:1, temper:true, item:'Commercial Door 1/4"', description:'New hinges & closer', dimensionsW:36, dimensionsH:80, dimensionsUnit:'in', glassThickness:'New hinges & closer, 1/4 tempered', installation:1, installationUnit:'unit', unitPrice:950, price:950 }], status: 'invoice', createdAt: now - 20000000 },
+      { job: 'Custom Mirrored Wall', date: '2026-04-28', name: 'Fit Gym LLC', address: '2000 Flagler St, Miami, FL', phone: '+1 (305) 555-0109', items: [{ id:1, temper:false, item:'Full Wall Mirror 96"x72"', description:'3/8" thick, mitred edges', dimensionsW:96, dimensionsH:72, dimensionsUnit:'in', glassThickness:'3/8 thick, mitred edges', installation:48, installationUnit:'sqft', unitPrice:700, price:1400 },{ id:2, temper:false, item:'Side Mirror 48"x72"', description:'3/8" thick', dimensionsW:48, dimensionsH:72, dimensionsUnit:'in', glassThickness:'3/8 thick', installation:24, installationUnit:'sqft', unitPrice:1400, price:1400 }], status: 'estimado', createdAt: now - 10000000 },
+      { job: 'Patio Door Glass', date: '2026-04-25', name: 'Linda Torres', address: '1500 SW 8th St, Miami, FL', email: 'linda@example.com', items: [{ id:1, temper:true, item:'Sliding Door Panel 72"x80"', description:'Tempered low-E glass', dimensionsW:72, dimensionsH:80, dimensionsUnit:'in', glassThickness:'Tempered low-E, anodized frame', installation:1, installationUnit:'unit', unitPrice:1100, price:1100 }], status: 'invoice', createdAt: now },
     ];
     lsWrite(sample);
   }
@@ -338,6 +393,17 @@
     el._hide = setTimeout(() => el.classList.remove('show'), 2500);
   }
 
+  /* ===== HELPERS ===== */
+  function calcTotal(job) {
+    if (!job || !job.items || !job.items.length) return 0;
+    return job.items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
+  }
+
+  function calcItemsTotal(items) {
+    if (!items || !items.length) return 0;
+    return items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
+  }
+
   /* ===== DASHBOARD ===== */
   function getCurrentFilter() {
     const active = filterBar.querySelector('.filter-btn.active');
@@ -369,10 +435,12 @@
     if (query) {
       const words = query.split(/\s+/).filter(Boolean);
       jobs = jobs.filter(j => {
+        const itemText = (j.items || []).map(it => (it.item || '') + ' ' + (it.description || '')).join(' ');
+        const total = calcTotal(j);
         const haystack = (
           (j.name || '') + ' ' + (j.job || '') + ' ' + (j.phone || '') + ' ' +
-          (j.address || '') + ' ' + (j.item || '') + ' ' + (j.description || '') + ' ' +
-          (j.amount || '') + ' ' + (j.date || '')
+          (j.address || '') + ' ' + itemText + ' ' +
+          (total || '') + ' ' + (j.date || '')
         ).toLowerCase();
         return words.every(w => haystack.includes(w));
       });
@@ -388,7 +456,8 @@
     jobList.innerHTML = jobs.map(j => {
       const badgeClass = j.status === 'estimado' ? 'estimado' : 'invoice';
       const badgeLabel = j.status === 'estimado' ? t('estimados').slice(0, -1) : t('facturas').slice(0, -1);
-      const amount = parseFloat(j.amount) || 0;
+      const total = calcTotal(j);
+      const itemCount = (j.items || []).length;
       const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
       return `
         <div class="job-card" data-id="${j.id}">
@@ -401,7 +470,7 @@
             <span><i class="fas fa-calendar"></i>${esc(dateStr)}</span>
             ${j.address ? `<span><i class="fas fa-map-pin"></i>${esc(j.address)}</span>` : ''}
           </div>
-          <div class="job-card-amount">$${amount.toFixed(2)}</div>
+          <div class="job-card-amount">$${total.toFixed(2)}${itemCount > 0 ? ` <span class="job-card-count">(${itemCount} ${t('items')})</span>` : ''}</div>
           <div class="job-card-actions">
             <button class="job-action-btn view-pdf" data-id="${j.id}"><i class="fas fa-file-pdf"></i> ${t('view_pdf')}</button>
             ${j.status === 'estimado' ? `<button class="job-action-btn approve" data-id="${j.id}"><i class="fas fa-check-circle"></i> ${t('approve')}</button>` : ''}
@@ -442,6 +511,7 @@
     dashboardView.style.display = view === 'dashboard' ? 'block' : 'none';
     formView.style.display = view === 'form' ? 'block' : 'none';
     detailView.style.display = view === 'detail' ? 'block' : 'none';
+    itemFormView.style.display = 'none';
     fabBtn.classList.toggle('hidden', view !== 'dashboard');
   }
 
@@ -467,18 +537,19 @@
         f.name.value = j.name || '';
         f.address.value = j.address || '';
         f.phone.value = j.phone || '';
-        f.temper.checked = j.temper || false;
-        f.item.value = j.item || '';
-        f.description.value = j.description || '';
-        f.amount.value = j.amount || '';
-        document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
+        f.email.value = j.email || '';
+        itemsData = (j.items || []).map(it => ({ ...it }));
+        itemIdCounter = itemsData.reduce((max, it) => Math.max(max, it.id || 0), 0) + 1;
+        renderCompactItems();
       });
     } else {
       formViewTitle.textContent = t('new_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
       f.date.value = new Date().toISOString().split('T')[0];
+      itemsData = [];
+      itemIdCounter = 1;
+      renderCompactItems();
     }
-    document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
     applyTranslations(formView);
   }
 
@@ -494,15 +565,26 @@
 
       const badgeClass = j.status === 'estimado' ? 'estimado' : 'invoice';
       const badgeLabel = j.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice');
-      const amount = parseFloat(j.amount) || 0;
+      const total = calcTotal(j);
       const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+      const itemsHtml = (j.items || []).map(it => `
+        <div class="detail-item-row">
+          <div class="detail-item-info">
+            <strong>${esc(it.item || '—')}</strong>
+            ${(it.dimensionsW || it.dimensionsH) ? `<span class="detail-item-desc">${esc(it.dimensionsW || '?')} x ${esc(it.dimensionsH || '?')} ${esc(it.dimensionsUnit || 'in')}</span>` : ''}
+            ${it.description ? `<span class="detail-item-desc">${esc(it.description)}</span>` : ''}
+          </div>
+          <div class="detail-item-price">$${(parseFloat(it.price) || 0).toFixed(2)}</div>
+        </div>
+      `).join('');
 
       detailContent.innerHTML = `
         <div class="detail-header">
           <h3>${esc(j.job || '')}</h3>
           <span class="detail-badge ${badgeClass}">${badgeLabel}</span>
         </div>
-        <div class="detail-amount">$${amount.toFixed(2)}</div>
+        <div class="detail-amount">$${total.toFixed(2)}</div>
 
         <div class="detail-field">
           <span class="detail-field-label">${t('name')}</span>
@@ -516,23 +598,18 @@
           <span class="detail-field-label">${t('address')}</span>
           <span class="detail-field-value">${esc(j.address || '—')}</span>
         </div>
-        <div class="detail-field">
+        ${j.phone ? `<div class="detail-field">
           <span class="detail-field-label">${t('phone')}</span>
-          <span class="detail-field-value">${esc(j.phone || '—')}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">${t('temper')}</span>
-          <span class="detail-field-value">${j.temper ? t('yes') : t('no')}</span>
-        </div>
-        <div class="detail-field">
-          <span class="detail-field-label">${t('item')}</span>
-          <span class="detail-field-value">${esc(j.item || '—')}</span>
-        </div>
-        ${j.description ? `
-        <div class="detail-field">
-          <span class="detail-field-label">${t('description')}</span>
-          <span class="detail-field-value">${esc(j.description)}</span>
+          <span class="detail-field-value">${esc(j.phone)}</span>
         </div>` : ''}
+        ${j.email ? `<div class="detail-field">
+          <span class="detail-field-label">${t('email')}</span>
+          <span class="detail-field-value">${esc(j.email)}</span>
+        </div>` : ''}
+        ${(j.items || []).length > 0 ? `
+        <div class="detail-section-title" style="margin-top:16px">${t('items')}</div>
+        <div class="detail-items-list">${itemsHtml}</div>
+        ` : ''}
 
         <div class="detail-actions">
           <button class="detail-btn pdf" id="dtlPdf"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -606,19 +683,134 @@
     });
   }
 
+  /* ===== ITEMS (compact list + separate item form) ===== */
+  function renderCompactItems() {
+    itemsCompactList.innerHTML = itemsData.map((it, i) => `
+      <div class="item-compact-row" data-item-id="${it.id}">
+        <div class="item-compact-body" data-item-id="${it.id}">
+          <span class="item-compact-name">${esc(it.item || t('item') + ' ' + (i + 1))}</span>
+          <span class="item-compact-price">$${(parseFloat(it.price) || 0).toFixed(2)}</span>
+        </div>
+        <button type="button" class="item-compact-remove" data-item-id="${it.id}"><i class="fas fa-times"></i></button>
+      </div>
+    `).join('');
+
+    itemsCompactList.querySelectorAll('.item-compact-body').forEach(el => {
+      el.addEventListener('click', () => openItemForm(+el.dataset.itemId));
+    });
+
+    itemsCompactList.querySelectorAll('.item-compact-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        removeItem(+btn.dataset.itemId);
+      });
+    });
+  }
+
+  function removeItem(id) {
+    itemsData = itemsData.filter(it => it.id !== id);
+    renderCompactItems();
+  }
+
+  function openItemForm(itemId) {
+    editingItemId = itemId || null;
+    formView.style.display = 'none';
+    itemFormView.style.display = 'block';
+
+    if (editingItemId) {
+      const it = itemsData.find(x => x.id === editingItemId);
+      itemFormTitle.textContent = t('edit_item');
+      ifTemper.checked = it ? it.temper : false;
+      ifName.value = it ? (it.item || '') : '';
+      ifDesc.value = it ? (it.description || '') : '';
+      ifDimW.value = it ? (it.dimensionsW || '') : '';
+      ifDimH.value = it ? (it.dimensionsH || '') : '';
+      ifDimUnit.value = it ? (it.dimensionsUnit || 'in') : 'in';
+      ifGlass.value = it ? (it.glassThickness || '') : '';
+      ifInstall.value = it ? (it.installation || '') : '';
+      ifInstallUnit.value = it ? (it.installationUnit || 'ft') : 'ft';
+      ifUnitPrice.value = it ? (it.unitPrice || '') : '';
+      ifPrice.value = it ? (it.price || '') : '';
+    } else {
+      itemFormTitle.textContent = t('add_item');
+      ifTemper.checked = false;
+      ifName.value = '';
+      ifDesc.value = '';
+      ifDimW.value = '';
+      ifDimH.value = '';
+      ifDimUnit.value = 'in';
+      ifGlass.value = '';
+      ifInstall.value = '';
+      ifInstallUnit.value = 'ft';
+      ifUnitPrice.value = '';
+      ifPrice.value = '';
+    }
+    ifTemperText.textContent = ifTemper.checked ? t('yes') : t('no');
+    applyTranslations(itemFormBody);
+  }
+
+  function closeItemForm() {
+    itemFormView.style.display = 'none';
+    formView.style.display = 'block';
+    editingItemId = null;
+  }
+
+  function saveItemFromForm() {
+    if (!ifName.value.trim()) { showToast(t('item_required'), 'error'); ifName.focus(); return; }
+    if (!ifPrice.value.trim() || parseFloat(ifPrice.value) <= 0) { showToast(t('price_required'), 'error'); ifPrice.focus(); return; }
+    const item = {
+      id: editingItemId || itemIdCounter++,
+      temper: ifTemper.checked,
+      item: ifName.value.trim(),
+      description: ifDesc.value.trim(),
+      dimensionsW: parseFloat(ifDimW.value) || 0,
+      dimensionsH: parseFloat(ifDimH.value) || 0,
+      dimensionsUnit: ifDimUnit.value,
+      glassThickness: ifGlass.value.trim(),
+      installation: parseFloat(ifInstall.value) || 0,
+      installationUnit: ifInstallUnit.value,
+      unitPrice: parseFloat(ifUnitPrice.value) || 0,
+      price: parseFloat(ifPrice.value) || 0,
+    };
+
+    if (editingItemId) {
+      const idx = itemsData.findIndex(x => x.id === editingItemId);
+      if (idx >= 0) itemsData[idx] = item;
+    } else {
+      itemsData.push(item);
+    }
+
+    renderCompactItems();
+    closeItemForm();
+  }
+
+  function collectItems() {
+    return itemsData.map(it => ({ ...it }));
+  }
+
+  addItemBtn.addEventListener('click', () => openItemForm(null));
+  itemFormBack.addEventListener('click', closeItemForm);
+  itemFormSaveBtn.addEventListener('click', saveItemFromForm);
+  ifTemper.addEventListener('change', () => { ifTemperText.textContent = ifTemper.checked ? t('yes') : t('no'); });
+
+  /* ===== FORM SUBMIT ===== */
+
   /* ===== FORM SUBMIT ===== */
   valeForm.addEventListener('submit', async e => {
     e.preventDefault();
+    const phone = f.phone.value.trim();
+    const email = f.email.value.trim();
+    if (!phone && !email) return;
+    const finalItems = collectItems();
+    if (finalItems.length === 0) return;
     const data = {
       job: f.job.value.trim(),
       date: f.date.value,
       name: f.name.value.trim(),
       address: f.address.value.trim(),
-      phone: f.phone.value.trim(),
-      temper: f.temper.checked,
-      item: f.item.value.trim(),
-      description: f.description.value.trim(),
-      amount: parseFloat(f.amount.value) || 0,
+      phone: phone,
+      email: email,
+      items: finalItems,
     };
 
     try {
@@ -657,6 +849,8 @@
     const pageW = 210, pageH = 297, margin = 18, topBarH = 46;
     const aqua = [102, 224, 192], teal = [11, 43, 59];
     const isEstimado = job.status === 'estimado';
+    const items = job.items || [];
+    const total = calcTotal(job);
 
     doc.setFillColor(...teal);
     doc.rect(0, 0, pageW, topBarH, 'F');
@@ -701,38 +895,77 @@
     doc.setTextColor(100, 100, 100);
     if (job.address) { doc.text(job.address, margin, y); y += 4; }
     if (job.phone) { doc.text(job.phone, margin, y); y += 4; }
-    if (job.temper) { doc.text('Temper: ' + (job.temper ? t('yes') : t('no')), margin, y); y += 4; }
+    if (job.email) { doc.text(job.email, margin, y); y += 4; }
 
+    // Table header
     y += 4;
     doc.setFillColor(...teal);
     doc.rect(margin, y, pageW - 2 * margin, 7, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setTextColor(255, 255, 255);
-    doc.text(t('item').toUpperCase(), margin + 3, y + 5);
-    doc.text(t('description').toUpperCase(), margin + 60, y + 5);
-    doc.text(t('amount').toUpperCase(), pageW - margin - 3, y + 5, { align: 'right' });
+
+    if (isEstimado) {
+      const colW = [40, 50, 35, 28, 30];
+      let cx = margin + 3;
+      doc.text(t('item').toUpperCase(), cx, y + 5); cx += colW[0];
+      doc.text(t('hardware_color').toUpperCase(), cx, y + 5); cx += colW[1];
+      doc.text(lang === 'es' ? 'VIDRIO' : 'GLASS', cx, y + 5); cx += colW[2];
+      doc.text(t('unit_price').toUpperCase(), cx, y + 5); cx += colW[3];
+      doc.text(t('pdf_total').toUpperCase(), cx, y + 5);
+    } else {
+      const colW = [40, 50, 35, 28, 30];
+      let cx = margin + 3;
+      doc.text(t('item').toUpperCase(), cx, y + 5); cx += colW[0];
+      doc.text(t('description').toUpperCase(), cx, y + 5); cx += colW[1];
+      doc.text(lang === 'es' ? 'GROSOR VIDRIO' : 'GLASS THICKNESS', cx, y + 5); cx += colW[2];
+      doc.text(t('unit_price').toUpperCase(), cx, y + 5); cx += colW[3];
+      doc.text(t('pdf_total').toUpperCase(), cx, y + 5);
+    }
     y += 7;
 
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.2);
     doc.line(margin, y, pageW - margin, y);
     y += 2;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(50, 50, 50);
-    const itemLines = doc.splitTextToSize(job.item || '', 55);
-    itemLines.forEach(line => { doc.text(line, margin + 3, y + 3); y += 4; });
-    const descLines = doc.splitTextToSize(job.description || '', 70);
-    const descStartY = y - itemLines.length * 4 - 2;
-    descLines.forEach((line, i) => { doc.text(line, margin + 60, descStartY + i * 4); });
-    const descEndY = descStartY + descLines.length * 4;
-    y = Math.max(y, descEndY);
-    const amountVal = parseFloat(job.amount) || 0;
-    doc.setFont('helvetica', 'bold');
-    doc.text('$' + amountVal.toFixed(2), pageW - margin - 3, y - descLines.length * 4 + 3, { align: 'right' });
 
-    y += 6;
+    // Item rows
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(50, 50, 50);
+
+    items.forEach(it => {
+      const itemName = it.item || '';
+      const desc = it.description || '';
+      const glassLabel = isEstimado
+        ? ((it.dimensionsW || it.dimensionsH) ? (it.dimensionsW || '?') + ' x ' + (it.dimensionsH || '?') + ' ' + (it.dimensionsUnit || 'in') : '')
+        : (it.glassThickness || '');
+      const unitPrice = parseFloat(it.unitPrice) || 0;
+      const totalPrice = parseFloat(it.price) || 0;
+
+      const nameLines = doc.splitTextToSize(itemName, 38);
+      const descLines = doc.splitTextToSize(desc, 48);
+      const glassLines = doc.splitTextToSize(glassLabel, 33);
+
+      const rowH = Math.max(
+        nameLines.length * 4,
+        descLines.length * 4,
+        glassLines.length * 4,
+        5
+      );
+
+      nameLines.forEach((line, i) => { doc.text(line, margin + 3, y + (i * 4)); });
+      descLines.forEach((line, i) => { doc.text(line, margin + 44, y + (i * 4)); });
+      glassLines.forEach((line, i) => { doc.text(line, margin + 95, y + (i * 4)); });
+      doc.text('$' + unitPrice.toFixed(2), margin + 130, y + 3, { align: 'right' });
+      doc.setFont('helvetica', 'bold');
+      doc.text('$' + totalPrice.toFixed(2), margin + 160, y + 3, { align: 'right' });
+      doc.setFont('helvetica', 'normal');
+
+      y += rowH + 3;
+    });
+
+    // Total line
     doc.setDrawColor(...aqua);
     doc.setLineWidth(0.5);
     doc.line(margin, y, pageW - margin, y);
@@ -741,8 +974,9 @@
     doc.setFontSize(11);
     doc.setTextColor(...teal);
     doc.text(t('pdf_total') + ':', pageW - margin - 45, y);
-    doc.text('$' + amountVal.toFixed(2), pageW - margin, y, { align: 'right' });
+    doc.text('$' + total.toFixed(2), pageW - margin, y, { align: 'right' });
 
+    // Signature
     const sigY = pageH - 50;
     doc.setDrawColor(150, 150, 150);
     doc.setLineWidth(0.3);
@@ -781,6 +1015,8 @@
     const blobUrl = URL.createObjectURL(blob);
     const filename = `${job.job || job.name || 'document'}_${job.status}.pdf`;
 
+    const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+
     const overlay = document.createElement('div');
     overlay.className = 'pdf-overlay';
     overlay.innerHTML = `
@@ -792,8 +1028,12 @@
         <iframe class="pdf-frame" src="${blobUrl}"></iframe>
         <div class="pdf-actions">
           <button class="pdf-btn download" id="pdfDl"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
-          <button class="pdf-btn whatsapp" id="pdfWa"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-          <button class="pdf-btn email" id="pdfMail"><i class="fas fa-envelope"></i> Email</button>
+          ${canShare ? `
+          <button class="pdf-btn share" id="pdfShare"><i class="fas fa-share-alt"></i> ${t('pdf_share')}</button>
+          ` : `
+          ${job.phone ? `<button class="pdf-btn whatsapp" id="pdfWa"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
+          ${job.email ? `<button class="pdf-btn email" id="pdfMail"><i class="fas fa-envelope"></i> Email</button>` : ''}
+          `}
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -808,30 +1048,50 @@
 
     $('pdfDl').addEventListener('click', () => { doc.save(filename); });
 
-    $('pdfWa').addEventListener('click', () => {
-      const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
-      if (phone) {
-        const msg = encodeURIComponent(
-          t('pdf_share_msg')
+    if (canShare) {
+      $('pdfShare').addEventListener('click', async () => {
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        const shareData = {
+          files: [file],
+          title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`,
+          text: t('pdf_share_msg')
             .replace('{job}', job.job || job.name || '')
-            .replace('{amount}', parseFloat(job.amount || 0).toFixed(2))
-        );
-        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-      } else {
-        showToast('No phone number', 'error');
+            .replace('{amount}', calcTotal(job).toFixed(2))
+        };
+        try {
+          await navigator.share(shareData);
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            showToast(t('error_api'), 'error');
+          }
+        }
+      });
+    } else {
+      if (job.phone) {
+        $('pdfWa').addEventListener('click', () => {
+          const phone = job.phone.replace(/[^0-9]/g, '');
+          const msg = encodeURIComponent(
+            t('pdf_share_msg')
+              .replace('{job}', job.job || job.name || '')
+              .replace('{amount}', calcTotal(job).toFixed(2))
+          );
+          window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        });
       }
-    });
 
-    $('pdfMail').addEventListener('click', () => {
-      const subject = encodeURIComponent(`${job.status === 'estimado' ? 'Estimate' : 'Invoice'} - ${job.job || job.name}`);
-      const body = encodeURIComponent(
-        t('pdf_email_body')
-          .replace('{name}', job.name || '')
-          .replace('{job}', job.job || '')
-          .replace('{amount}', parseFloat(job.amount || 0).toFixed(2))
-      );
-      window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
-    });
+      if (job.email) {
+        $('pdfMail').addEventListener('click', () => {
+          const subject = encodeURIComponent(`${job.status === 'estimado' ? 'Estimate' : 'Invoice'} - ${job.job || job.name}`);
+          const body = encodeURIComponent(
+            t('pdf_email_body')
+              .replace('{name}', job.name || '')
+              .replace('{job}', job.job || '')
+              .replace('{amount}', calcTotal(job).toFixed(2))
+          );
+          window.open(`mailto:${job.email}?subject=${subject}&body=${body}`, '_blank');
+        });
+      }
+    }
   }
 
   /* ===== SEARCH ===== */
@@ -848,9 +1108,85 @@
     renderDashboard(btn.dataset.filter);
   });
 
-  /* ===== TEMPER TOGGLE ===== */
-  f.temper.addEventListener('change', () => {
-    document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
+  /* ===== CLIENT AUTOCOMPLETE ===== */
+  let clientsCache = [];
+
+  async function loadClientsCache() {
+    try {
+      const jobs = await getJobs();
+      clientsCache = extractClients(jobs);
+    } catch {
+      clientsCache = extractClients(lsRead());
+    }
+  }
+
+  function extractClients(jobs) {
+    const seen = {};
+    return jobs.filter(j => {
+      if (!j.name || seen[j.name]) return false;
+      seen[j.name] = true;
+      return true;
+    }).map(j => ({ name: j.name, phone: j.phone || '', email: j.email || '', address: j.address || '' }));
+  }
+
+  let acIndex = -1;
+
+  function showAutocomplete(query) {
+    const list = $('autocompleteList');
+    if (!query || query.length < 1) { list.classList.remove('show'); return; }
+    const q = query.toLowerCase();
+    const matches = clientsCache.filter(c => c.name.toLowerCase().includes(q));
+    if (matches.length === 0) { list.classList.remove('show'); return; }
+    acIndex = -1;
+    list.innerHTML = matches.map((c, i) =>
+      `<div class="autocomplete-item" data-index="${i}">${esc(c.name)}<span class="ac-phone">${esc(c.phone || c.email || '')}</span></div>`
+    ).join('');
+    list.classList.add('show');
+
+    list.querySelectorAll('.autocomplete-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = +el.dataset.index;
+        selectClient(matches[idx]);
+      });
+    });
+  }
+
+  function selectClient(client) {
+    f.name.value = client.name;
+    f.phone.value = client.phone;
+    f.email.value = client.email;
+    f.address.value = client.address;
+    $('autocompleteList').classList.remove('show');
+  }
+
+  f.name.addEventListener('input', () => {
+    showAutocomplete(f.name.value);
+  });
+
+  f.name.addEventListener('keydown', e => {
+    const list = $('autocompleteList');
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!list.classList.contains('show') || items.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items.forEach(el => el.classList.remove('highlight'));
+      acIndex = Math.min(acIndex + 1, items.length - 1);
+      items[acIndex].classList.add('highlight');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items.forEach(el => el.classList.remove('highlight'));
+      acIndex = Math.max(acIndex - 1, 0);
+      items[acIndex].classList.add('highlight');
+    } else if (e.key === 'Enter' && acIndex >= 0) {
+      e.preventDefault();
+      const match = clientsCache.filter(c => c.name.toLowerCase().includes(f.name.value.toLowerCase()))[acIndex];
+      if (match) selectClient(match);
+    }
+  });
+
+  f.name.addEventListener('focus', () => { loadClientsCache(); showAutocomplete(f.name.value); });
+  f.name.addEventListener('blur', () => {
+    setTimeout(() => $('autocompleteList').classList.remove('show'), 200);
   });
 
   /* ===== FAB ===== */
@@ -899,6 +1235,19 @@
     window.addEventListener('appinstalled', () => { installPrompt = null; installBtn.style.display = 'none'; localStorage.setItem('liriano_installed', 'true'); });
   }
 
+  /* ===== DATE PICKER: click anywhere opens calendar ===== */
+  document.querySelectorAll('.form-group input[type="date"]').forEach(inp => {
+    const btn = document.createElement('div');
+    btn.style.cssText = 'position:absolute;inset:0;cursor:pointer;z-index:1';
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      inp.focus();
+      try { inp.showPicker(); } catch (_) { inp.click(); }
+    });
+    inp.parentElement.style.position = 'relative';
+    inp.parentElement.appendChild(btn);
+  });
+
   /* ===== LOGIN ===== */
   togglePass.addEventListener('click', () => {
     if (password.type === 'password') { password.type = 'text'; togglePass.querySelector('i').className = 'fas fa-eye-slash'; }
@@ -943,6 +1292,5 @@
   applyTranslations();
   setLanguage(lang);
   f.date.value = new Date().toISOString().split('T')[0];
-  document.getElementById('temperText').textContent = t('no');
 
 })();

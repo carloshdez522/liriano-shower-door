@@ -23,15 +23,16 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
 body {
   height: 100%;
   font-family: var(--font-body);
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
-}
-
-body {
   background: var(--deep-teal);
 }
 
@@ -589,6 +590,12 @@ button {
   opacity: 0.6;
 }
 
+.job-card-count {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .job-card-amount {
   font-size: 1.05rem;
   font-weight: 700;
@@ -742,6 +749,58 @@ button {
   line-height: 1.4;
 }
 
+.detail-section-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--aquamarine);
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.detail-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-item-info strong {
+  font-size: 0.85rem;
+  color: var(--white);
+}
+
+.detail-item-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.detail-item-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--aqua-light);
+  white-space: nowrap;
+}
+
 .detail-actions {
   display: flex;
   gap: 8px;
@@ -827,7 +886,9 @@ button {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== TOAST ===== */
@@ -863,10 +924,12 @@ button {
 /* ===== FLOATING ACTION BUTTON ===== */
 .fab {
   position: fixed;
-  bottom: 5%;
-  right: 24px;
+  top: 87.5%;
+  left: 90%;
   width: 56px;
   height: 56px;
+  margin-left: -28px;
+  margin-top: -28px;
   border-radius: 50%;
   background: var(--aquamarine);
   color: var(--deep-teal);
@@ -899,13 +962,24 @@ button {
 
 /* ===== FORM VIEW ===== */
 .form-top {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   margin-bottom: 20px;
+  min-height: 36px;
+}
+
+.form-view-title {
+  text-align: center;
+  font-size: 1.1rem;
 }
 
 .form-back {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--white);
@@ -918,6 +992,7 @@ button {
   justify-content: center;
   transition: all var(--transition);
   font-size: 0.9rem;
+  z-index: 1;
 }
 
 .form-back:hover {
@@ -977,6 +1052,12 @@ button {
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
+.form-row.row-dimensions {
+  grid-template-columns: 7fr 3fr;
+}
+.form-row.row-installation {
+  grid-template-columns: 7fr 3fr;
+}
 
 .form-group {
   display: flex;
@@ -1009,6 +1090,49 @@ button {
   color: rgba(255, 255, 255, 0.25);
 }
 
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--medium-teal);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+.autocomplete-list.show {
+  display: block;
+}
+
+.autocomplete-item {
+  padding: 10px 13px;
+  cursor: pointer;
+  color: var(--white);
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background var(--transition);
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlight {
+  background: rgba(102, 224, 192, 0.15);
+}
+
+.autocomplete-item .ac-phone {
+  font-size: 0.75rem;
+  color: var(--aqua-light);
+  margin-left: 8px;
+}
+
 .form-group select option {
   color: var(--text-dark);
   background: var(--bg-light);
@@ -1024,6 +1148,170 @@ button {
 .form-group textarea {
   resize: vertical;
   min-height: 70px;
+}
+
+/* ===== ITEMS COMPACT LIST ===== */
+.items-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-compact-body {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.item-compact-body:hover {
+  border-color: rgba(102, 224, 192, 0.25);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.item-compact-name {
+  font-size: 0.8rem;
+  color: var(--white);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-compact-price {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--aqua-light);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.item-compact-remove {
+  background: none;
+  border: 1px solid rgba(224, 96, 96, 0.2);
+  color: var(--error);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.item-compact-remove:hover {
+  background: rgba(224, 96, 96, 0.15);
+  border-color: var(--error);
+}
+
+.add-item-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed rgba(102, 224, 192, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--aquamarine);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.add-item-btn:hover {
+  background: rgba(102, 224, 192, 0.08);
+  border-color: var(--aquamarine);
+}
+
+/* ===== DIMENSIONS W x H + UNIT ===== */
+.dimensions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dimensions-row input {
+  width: 60px;
+  flex: none;
+}
+.dim-x {
+  color: var(--aqua-light);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.dimensions-row select {
+  width: auto;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+/* ===== INSTALLATION + UNIT ===== */
+.install-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.install-row input {
+  width: 70px;
+  flex: none;
+}
+.install-row select {
+  width: auto;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+/* ===== NO SPINNERS on number inputs ===== */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* ===== $ PRICE PREFIX ===== */
+.price-wrap {
+  position: relative;
+}
+.price-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.price-prefix {
+  position: absolute;
+  left: 12px;
+  font-size: 0.85rem;
+  color: var(--aqua-light);
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 1;
+}
+.price-input input {
+  padding-left: 28px;
+  width: 100%;
+  max-width: 120px;
 }
 
 /* ===== TOGGLE SWITCH ===== */
@@ -1270,6 +1558,33 @@ button {
     grid-template-columns: 1fr;
     gap: 18px;
   }
+  .form-row.job-date-row {
+    grid-template-columns: 7fr 3fr;
+  }
+  .form-row.item-temper-row {
+    grid-template-columns: 4fr 1fr;
+    gap: 10px;
+  }
+  .form-row.row-dimensions {
+    grid-template-columns: 7fr 3fr;
+  }
+  .form-row.row-installation {
+    grid-template-columns: 7fr 3fr;
+  }
+
+/* ===== JOB + DATE ROW ===== */
+.form-row.job-date-row {
+  grid-template-columns: 7fr 3fr;
+}
+
+/* ===== DATE INPUT - click anywhere opens calendar ===== */
+input[type="date"] {
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
 
   .vale-form {
     padding: 20px 14px;
@@ -1297,7 +1612,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.2s ease;
@@ -1386,14 +1701,24 @@ button {
   border-color: var(--medium-teal);
 }
 
+.pdf-btn.share {
+  background: #5988E0;
+  border-color: #5988E0;
+}
+
 .pdf-btn:hover {
   opacity: 0.85;
   transform: translateY(-1px);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1401,6 +1726,7 @@ button {
     gap: 6px;
     padding: 10px 12px;
   }
+
   .pdf-btn {
     padding: 8px 14px;
     font-size: 12px;
