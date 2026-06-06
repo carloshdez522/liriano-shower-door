@@ -148,8 +148,16 @@
     });
     applyTranslations();
     if (document.getElementById('appContainer').style.display !== 'none') {
-      renderDashboard(getCurrentFilter());
-      updateCounts();
+      if (dashboardView.style.display !== 'none') {
+        renderDashboard(getCurrentFilter());
+        updateCounts();
+      } else if (detailView.style.display !== 'none' && currentDetailId) {
+        showDetail(currentDetailId);
+      } else if (formView.style.display !== 'none') {
+        formViewTitle.textContent = editingJobId ? t('edit_job') : t('new_job');
+        saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
+        document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
+      }
     }
   }
 
@@ -190,6 +198,7 @@
   };
 
   let editingJobId = null;
+  let currentDetailId = null;
   let lastView = 'dashboard';
 
   let useRemote = true;
@@ -468,6 +477,7 @@
   }
 
   async function showDetail(jobId) {
+    currentDetailId = jobId;
     lastView = 'detail';
     showView('detail');
     detailContent.innerHTML = `<div class="detail-loading"><i class="fas fa-spinner"></i></div>`;
