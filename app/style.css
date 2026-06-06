@@ -386,6 +386,27 @@ button {
   color: var(--aquamarine);
 }
 
+.app-install {
+  background: none;
+  border: 1px solid var(--aquamarine);
+  color: var(--aquamarine);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-size: 0.85rem;
+  margin-right: 4px;
+}
+
+.app-install:hover {
+  background: var(--aquamarine);
+  color: var(--deep-teal);
+}
+
 /* ===== APP MAIN ===== */
 .app-main {
   flex: 1;

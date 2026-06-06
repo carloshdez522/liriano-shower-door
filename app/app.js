@@ -635,6 +635,26 @@
   /* ===== FAB ===== */
   fabBtn.addEventListener('click', () => openForm(null));
 
+  /* ===== INSTALL BUTTON ===== */
+  let installPrompt = null;
+  const installBtn = $('installBtn');
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installPrompt = e;
+    installBtn.style.display = 'flex';
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    installPrompt = null;
+    installBtn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => {
+    installPrompt = null;
+    installBtn.style.display = 'none';
+  });
+
   /* ===== LOGIN ===== */
   togglePass.addEventListener('click', () => {
     const input = password;
