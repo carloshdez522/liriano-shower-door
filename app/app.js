@@ -2,6 +2,7 @@
   'use strict';
 
   const API = '/app/api/';
+  const LS_KEY = 'liriano_jobs';
 
   /* ===== I18N ===== */
   const i18n = {
@@ -191,7 +192,34 @@
   let editingJobId = null;
   let lastView = 'dashboard';
 
-  /* ===== API CRUD ===== */
+  let useRemote = true;
+
+  function lsRead() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; }
+  }
+
+  function lsWrite(jobs) {
+    localStorage.setItem(LS_KEY, JSON.stringify(jobs));
+  }
+
+  function lsSeed() {
+    const existing = lsRead();
+    if (existing.length > 0) return;
+    const sample = [
+      { job: 'Shower Door Installation', date: '2026-05-20', name: 'John Smith', address: '123 Main St, Miami, FL', phone: '+1 (305) 555-0101', temper: true, item: 'Frameless 3/8" Glass Door', description: 'Measure 60"x72", clear glass, brushed nickel handle', amount: 1200, status: 'estimado', createdAt: Date.now() - 90000000 },
+      { job: 'Window Replacement', date: '2026-05-18', name: 'Maria Garcia', address: '456 Oak Ave, Coral Gables, FL', phone: '+1 (305) 555-0102', temper: true, item: 'Double Hung Window 36"x48"', description: 'Replace old single-pane with energy-efficient double-pane', amount: 850, status: 'invoice', createdAt: Date.now() - 80000000 },
+      { job: 'Storefront Glass', date: '2026-05-15', name: 'Carlos Ruiz', address: '789 Pine Rd, Hialeah, FL', phone: '+1 (305) 555-0103', temper: false, item: 'Tempered Storefront Glass 1/4"', description: 'Commercial storefront, 96"x84", include aluminum frame', amount: 3200, status: 'estimado', createdAt: Date.now() - 70000000 },
+      { job: 'Frameless Shower Enclosure', date: '2026-05-12', name: 'Ana Lopez', address: '321 Beach Blvd, Miami Beach, FL', phone: '+1 (305) 555-0104', temper: true, item: 'Custom Shower Enclosure', description: 'Neo-angle 48"x48", clear glass, chrome hinges', amount: 2100, status: 'invoice', createdAt: Date.now() - 60000000 },
+      { job: 'Glass Railing', date: '2026-05-10', name: 'Robert Johnson', address: '555 Sunset Dr, Key Biscayne, FL', phone: '+1 (305) 555-0105', temper: true, item: 'Glass Railing Panel', description: 'Staircase railing, 60"x42", laminated safety glass', amount: 1750, status: 'estimado', createdAt: Date.now() - 50000000 },
+      { job: 'Mirror Installation', date: '2026-05-08', name: 'Sofia Martinez', address: '777 Palm Way, Fort Lauderdale, FL', phone: '+1 (305) 555-0106', temper: false, item: 'Beveled Mirror 36"x48"', description: 'Bathroom wall mirror with beveled edges, silver frame', amount: 450, status: 'invoice', createdAt: Date.now() - 40000000 },
+      { job: 'Glass Table Top', date: '2026-05-05', name: 'David Chen', address: '999 Coral Way, Miami, FL', phone: '+1 (305) 555-0107', temper: true, item: 'Round Glass Table Top 48"', description: 'Tempered glass, 1/2" thick, polished edge', amount: 380, status: 'estimado', createdAt: Date.now() - 30000000 },
+      { job: 'Commercial Door Repair', date: '2026-05-03', name: 'Miami Office Suites', address: '1000 Brickell Ave, Miami, FL', phone: '+1 (305) 555-0108', temper: true, item: 'Commercial Glass Door', description: 'Replace damaged 1/4" tempered glass, new hinges and closer', amount: 950, status: 'invoice', createdAt: Date.now() - 20000000 },
+      { job: 'Custom Mirrored Wall', date: '2026-04-28', name: 'Fit Gym LLC', address: '2000 Flagler St, Miami, FL', phone: '+1 (305) 555-0109', temper: false, item: 'Full Wall Mirror 96"x72"', description: 'Gym wall mirrors, 3/8" thick, mitred edges', amount: 2800, status: 'estimado', createdAt: Date.now() - 10000000 },
+      { job: 'Patio Door Glass', date: '2026-04-25', name: 'Linda Torres', address: '1500 SW 8th St, Miami, FL', phone: '+1 (305) 555-0110', temper: true, item: 'Sliding Patio Door Glass 72"x80"', description: 'Replace cracked panel, tempered low-E glass', amount: 1100, status: 'invoice', createdAt: Date.now() },
+    ];
+    lsWrite(sample);
+  }
+
   async function apiFetch(method, body) {
     const opts = { method, headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
@@ -201,33 +229,77 @@
     return data;
   }
 
+  async function tryAPI(method, body) {
+    if (!useRemote) throw new Error('local');
+    try {
+      return await apiFetch(method, body);
+    } catch {
+      useRemote = false;
+      lsSeed();
+      throw new Error('local');
+    }
+  }
+
   async function getJobs() {
-    return await apiFetch('GET');
+    try {
+      const jobs = await tryAPI('GET');
+      return jobs;
+    } catch {
+      return lsRead();
+    }
   }
 
   async function getJobById(id) {
-    const res = await fetch(API + '?id=' + id);
-    const data = await res.json();
-    if (!res.ok) return null;
-    return data;
+    try {
+      const res = await fetch(API + '?id=' + id);
+      const data = await res.json();
+      if (!res.ok) return null;
+      return data;
+    } catch {
+      const jobs = lsRead();
+      return jobs.find(j => j.id === id) || null;
+    }
   }
 
   async function createJob(data) {
     data.status = 'estimado';
     data.createdAt = Date.now();
-    return await apiFetch('POST', data);
+    try {
+      return await tryAPI('POST', data);
+    } catch {
+      const jobs = lsRead();
+      data.id = Date.now();
+      jobs.push(data);
+      lsWrite(jobs);
+      return data;
+    }
   }
 
   async function updateJob(id, data) {
     data.id = id;
-    return await apiFetch('PUT', data);
+    try {
+      return await tryAPI('PUT', data);
+    } catch {
+      const jobs = lsRead();
+      const idx = jobs.findIndex(j => j.id === id);
+      if (idx === -1) throw new Error(t('error_api'));
+      Object.assign(jobs[idx], data);
+      lsWrite(jobs);
+      return jobs[idx];
+    }
   }
 
   async function deleteJob(id) {
-    const res = await fetch(API + '?id=' + id, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || t('error_api'));
-    return data;
+    try {
+      const res = await fetch(API + '?id=' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t('error_api'));
+      return data;
+    } catch {
+      const jobs = lsRead();
+      lsWrite(jobs.filter(j => j.id !== id));
+      return { success: true };
+    }
   }
 
   async function toggleJobStatus(id) {
