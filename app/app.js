@@ -639,9 +639,9 @@
   let installPrompt = null;
   const installBtn = $('installBtn');
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   function showInstallModal() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay active';
     overlay.innerHTML = `
@@ -649,10 +649,10 @@
         <h3 style="text-align:center;margin-bottom:12px">${isIOS ? '📱 Install on iPhone' : '📲 Install App'}</h3>
         ${isIOS ? `
           <p style="margin-bottom:8px;line-height:1.6">1. Tap <b>Share</b> <span style="font-size:1.2rem">⬆</span></p>
-          <p style="margin-bottom:8px;line-height:1.6">2. Scroll down & tap <b>"Add to Home Screen"</b> <span style="font-size:1.2rem">➕</span></p>
-          <p style="margin-bottom:16px;line-height:1.6">3. Tap <b>"Add"</b> in the top right</p>
+          <p style="margin-bottom:8px;line-height:1.6">2. Scroll & tap <b>"Add to Home Screen"</b> <span style="font-size:1.2rem">➕</span></p>
+          <p style="margin-bottom:16px;line-height:1.6">3. Tap <b>"Add"</b> top right</p>
         ` : `
-          <p style="margin-bottom:16px;line-height:1.6">Open Chrome menu (⋮) → <b>"Add to Home Screen"</b></p>
+          <p style="margin-bottom:16px;line-height:1.6">Open browser menu (⋮) → <b>"Add to Home Screen"</b></p>
         `}
         <div class="modal-actions">
           <button class="modal-btn confirm" id="installModalOk">OK</button>
@@ -664,11 +664,13 @@
   }
 
   if (!isStandalone) {
+    installBtn.style.display = 'flex';
+
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       installPrompt = e;
-      installBtn.style.display = 'flex';
     });
+
     installBtn.addEventListener('click', async () => {
       if (installPrompt) {
         installPrompt.prompt();
@@ -679,16 +681,11 @@
         showInstallModal();
       }
     });
+
     window.addEventListener('appinstalled', () => {
       installPrompt = null;
       installBtn.style.display = 'none';
     });
-    if (!isIOS && !('beforeinstallprompt' in window)) {
-      installBtn.style.display = 'flex';
-    }
-    if (isIOS) {
-      installBtn.style.display = 'flex';
-    }
   }
 
   /* ===== LOGIN ===== */
