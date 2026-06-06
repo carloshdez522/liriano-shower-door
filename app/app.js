@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'liriano_jobs';
+  const API = '/app/api/';
 
   /* ===== I18N ===== */
   const i18n = {
@@ -56,6 +56,11 @@
       confirm_approve_msg: 'This will change the status from estimate to invoice.',
       confirm_cancel: 'Cancel',
       confirm_yes: 'Yes',
+      detail_title: 'Details',
+      saved: 'Saved',
+      deleted: 'Deleted',
+      approved: 'Converted to invoice',
+      error_api: 'Server error',
     },
     es: {
       login_user_ph: 'Usuario',
@@ -108,6 +113,11 @@
       confirm_approve_msg: 'Esto cambiará el estado de estimado a factura.',
       confirm_cancel: 'Cancelar',
       confirm_yes: 'Sí',
+      detail_title: 'Detalles',
+      saved: 'Guardado',
+      deleted: 'Eliminado',
+      approved: 'Convertido a factura',
+      error_api: 'Error del servidor',
     },
   };
 
@@ -154,12 +164,14 @@
   const logoutBtn = $('logoutBtn');
   const dashboardView = $('dashboardView');
   const formView = $('formView');
+  const detailView = $('detailView');
+  const detailContent = $('detailContent');
   const jobList = $('jobList');
-  const emptyState = $('emptyState');
   const searchInput = $('searchInput');
   const filterBar = $('filterBar');
   const fabBtn = $('fabBtn');
   const formBack = $('formBack');
+  const detailBack = $('detailBack');
   const formViewTitle = $('formViewTitle');
   const valeForm = $('valeForm');
   const saveBtn = $('saveBtn');
@@ -177,83 +189,66 @@
   };
 
   let editingJobId = null;
+  let lastView = 'dashboard';
 
-  /* ===== LOCAL STORAGE CRUD ===== */
-  function getJobs() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch {
-      return [];
+  /* ===== API CRUD ===== */
+  async function apiFetch(method, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || t('error_api'));
+    return data;
+  }
+
+  async function getJobs() {
+    return await apiFetch('GET');
+  }
+
+  async function getJobById(id) {
+    const res = await fetch(API + '?id=' + id);
+    const data = await res.json();
+    if (!res.ok) return null;
+    return data;
+  }
+
+  async function createJob(data) {
+    data.status = 'estimado';
+    data.createdAt = Date.now();
+    return await apiFetch('POST', data);
+  }
+
+  async function updateJob(id, data) {
+    data.id = id;
+    return await apiFetch('PUT', data);
+  }
+
+  async function deleteJob(id) {
+    const res = await fetch(API + '?id=' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || t('error_api'));
+    return data;
+  }
+
+  async function toggleJobStatus(id) {
+    const job = await getJobById(id);
+    if (!job) return null;
+    job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
+    return await updateJob(id, { status: job.status });
+  }
+
+  /* ===== TOAST ===== */
+  function showToast(msg, type) {
+    let el = document.querySelector('.toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'toast';
+      document.body.appendChild(el);
     }
-  }
-
-  function saveJobs(jobs) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  }
-
-  function createJob(data) {
-    const jobs = getJobs();
-    const job = {
-      id: Date.now(),
-      ...data,
-      status: 'estimado',
-      createdAt: Date.now(),
-    };
-    jobs.unshift(job);
-    saveJobs(jobs);
-    return job;
-  }
-
-  function updateJob(id, data) {
-    const jobs = getJobs();
-    const idx = jobs.findIndex(j => j.id === id);
-    if (idx === -1) return null;
-    jobs[idx] = { ...jobs[idx], ...data };
-    saveJobs(jobs);
-    return jobs[idx];
-  }
-
-  function deleteJob(id) {
-    let jobs = getJobs();
-    jobs = jobs.filter(j => j.id !== id);
-    saveJobs(jobs);
-  }
-
-  function toggleJobStatus(id) {
-    const jobs = getJobs();
-    const j = jobs.find(j => j.id === id);
-    if (!j) return null;
-    j.status = j.status === 'estimado' ? 'invoice' : 'estimado';
-    saveJobs(jobs);
-    return j;
-  }
-
-  function getJobById(id) {
-    return getJobs().find(j => j.id === id) || null;
-  }
-
-  /* ===== SEED TEST DATA ===== */
-  function seedTestData() {
-    if (getJobs().length > 0) return;
-    const samples = [
-      { job: 'Shower Door Install', date: '2026-06-05', name: 'Maria Rodriguez', address: '1234 SW 8th St, Miami', phone: '+1 (305) 555-0101', temper: true, item: 'Frameless sliding door 60"x72"', description: 'Clear tempered glass, brushed nickel handle', amount: 1850 },
-      { job: 'Window Replacement', date: '2026-06-03', name: 'Carlos Mendez', address: '5678 Coral Way, Coral Gables', phone: '+1 (305) 555-0102', temper: false, item: 'Double hung window 36"x48"', description: 'White frame, low-E glass, screens included', amount: 1200 },
-      { job: 'Storefront Glass', date: '2026-05-28', name: 'La Tienda Bakery', address: '8901 W Flagler St, Miami', phone: '+1 (786) 555-0103', temper: true, item: 'Commercial storefront 96"x84"', description: 'Tempered laminated glass, aluminum frame, with logo etching', amount: 4200 },
-      { job: 'Shower Enclosure', date: '2026-05-20', name: 'Ana Perez', address: '4321 Collins Ave, Miami Beach', phone: '+1 (305) 555-0104', temper: true, item: 'Offset shower door 48"x76"', description: 'Clear glass, chrome hinges and handle, rain guard', amount: 2100 },
-      { job: 'Mirror Installation', date: '2026-05-15', name: 'Jose Garcia', address: '7777 Bird Rd, Miami', phone: '+1 (305) 555-0105', temper: false, item: 'Bathroom mirror 36"x48"', description: 'Beveled edges, silver frame, mounting hardware included', amount: 450 },
-      { job: 'Glass Railing', date: '2026-05-10', name: 'Ocean View Condo', address: '1500 Ocean Dr, Miami Beach', phone: '+1 (305) 555-0106', temper: true, item: 'Staircase railing 12 linear ft', description: '3/8" tempered glass, stainless steel posts and handrail', amount: 3800 },
-      { job: 'Shower Door Repair', date: '2026-05-05', name: 'Luis Fernandez', address: '2500 SW 27th Ave, Miami', phone: '+1 (305) 555-0107', temper: true, item: 'Replacement roller set', description: 'Replaced bottom rollers on sliding door, adjusted track', amount: 250 },
-      { job: 'Custom Glass Shelf', date: '2026-04-28', name: 'Patricia Lopez', address: '8900 Kendall Dr, Kendall', phone: '+1 (305) 555-0108', temper: true, item: 'Tempered shelf 12"x48"', description: 'Polished edges, clear glass, with floating shelf brackets', amount: 320 },
-      { job: 'Commercial Window', date: '2026-04-20', name: 'Miami Dental Clinic', address: '5500 Biscayne Blvd, Miami', phone: '+1 (305) 555-0109', temper: true, item: 'Fixed window 72"x60"', description: 'Tempered insulated glass unit, aluminum frame, frosted film', amount: 2800 },
-      { job: 'Shower Door & Screen', date: '2026-04-15', name: 'Roberto & Sonia Diaz', address: '1200 SW 40th St, Miami', phone: '+1 (305) 555-0110', temper: true, item: 'Pivot shower door 36"x72" + side panel', description: '3/8" tempered glass, oil-rubbed bronze finish, towel bar', amount: 3200 },
-    ];
-    const now = Date.now();
-    samples.forEach((s, i) => {
-      const job = { ...s, id: now - i * 100000, status: i < 5 ? 'estimado' : 'invoice', createdAt: now - i * 86400000 };
-      const jobs = getJobs();
-      jobs.push(job);
-      saveJobs(jobs);
-    });
+    el.textContent = msg;
+    el.className = 'toast ' + (type || 'success') + ' show';
+    clearTimeout(el._hide);
+    el._hide = setTimeout(() => el.classList.remove('show'), 2500);
   }
 
   /* ===== DASHBOARD ===== */
@@ -262,20 +257,25 @@
     return active ? active.dataset.filter : 'all';
   }
 
-  function updateCounts() {
-    const jobs = getJobs();
-    const total = jobs.length;
-    const estimados = jobs.filter(j => j.status === 'estimado').length;
-    const invoices = jobs.filter(j => j.status === 'invoice').length;
-    $('countAll').textContent = total;
-    $('countEstimado').textContent = estimados;
-    $('countInvoice').textContent = invoices;
+  async function updateCounts() {
+    try {
+      const jobs = await getJobs();
+      $('countAll').textContent = jobs.length;
+      $('countEstimado').textContent = jobs.filter(j => j.status === 'estimado').length;
+      $('countInvoice').textContent = jobs.filter(j => j.status === 'invoice').length;
+    } catch {}
   }
 
-  function renderDashboard(filter) {
+  async function renderDashboard(filter) {
     filter = filter || 'all';
     const query = (searchInput.value || '').toLowerCase().trim();
-    let jobs = getJobs();
+    let jobs;
+    try {
+      jobs = await getJobs();
+    } catch {
+      jobList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${t('error_api')}</p></div>`;
+      return;
+    }
     jobs.sort((a, b) => b.createdAt - a.createdAt);
     if (filter === 'estimado') jobs = jobs.filter(j => j.status === 'estimado');
     else if (filter === 'invoice') jobs = jobs.filter(j => j.status === 'invoice');
@@ -283,14 +283,9 @@
       const words = query.split(/\s+/).filter(Boolean);
       jobs = jobs.filter(j => {
         const haystack = (
-          (j.name || '') + ' ' +
-          (j.job || '') + ' ' +
-          (j.phone || '') + ' ' +
-          (j.address || '') + ' ' +
-          (j.item || '') + ' ' +
-          (j.description || '') + ' ' +
-          (j.amount || '') + ' ' +
-          (j.date || '')
+          (j.name || '') + ' ' + (j.job || '') + ' ' + (j.phone || '') + ' ' +
+          (j.address || '') + ' ' + (j.item || '') + ' ' + (j.description || '') + ' ' +
+          (j.amount || '') + ' ' + (j.date || '')
         ).toLowerCase();
         return words.every(w => haystack.includes(w));
       });
@@ -299,11 +294,7 @@
     updateCounts();
 
     if (jobs.length === 0) {
-      jobList.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-clipboard-list"></i>
-          <p>${t('empty')}</p>
-        </div>`;
+      jobList.innerHTML = `<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>${t('empty')}</p></div>`;
       return;
     }
 
@@ -333,8 +324,14 @@
         </div>`;
     }).join('');
 
+    jobList.querySelectorAll('.job-card').forEach(card => {
+      card.addEventListener('click', e => {
+        if (e.target.closest('.job-action-btn')) return;
+        showDetail(+card.dataset.id);
+      });
+    });
     jobList.querySelectorAll('.view-pdf').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); generatePDF(getJobById(+btn.dataset.id)); });
+      btn.addEventListener('click', e => { e.stopPropagation(); getJobById(+btn.dataset.id).then(j => generatePDF(j)); });
     });
     jobList.querySelectorAll('.approve').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); showApproveModal(+btn.dataset.id); });
@@ -354,25 +351,30 @@
   }
 
   /* ===== NAVIGATION ===== */
-  function showDashboard() {
-    dashboardView.style.display = 'block';
-    formView.style.display = 'none';
-    fabBtn.classList.remove('hidden');
-    renderDashboard(getCurrentFilter());
+  function showView(view) {
+    dashboardView.style.display = view === 'dashboard' ? 'block' : 'none';
+    formView.style.display = view === 'form' ? 'block' : 'none';
+    detailView.style.display = view === 'detail' ? 'block' : 'none';
+    fabBtn.classList.toggle('hidden', view !== 'dashboard');
+  }
+
+  async function showDashboard() {
+    lastView = 'dashboard';
+    showView('dashboard');
+    await renderDashboard(getCurrentFilter());
   }
 
   function openForm(jobId) {
     editingJobId = jobId || null;
-    dashboardView.style.display = 'none';
-    formView.style.display = 'block';
-    fabBtn.classList.add('hidden');
+    lastView = jobId ? 'detail' : 'dashboard';
+    showView('form');
     valeForm.reset();
 
     if (editingJobId) {
       formViewTitle.textContent = t('edit_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
-      const j = getJobById(editingJobId);
-      if (j) {
+      getJobById(editingJobId).then(j => {
+        if (!j) return;
         f.job.value = j.job || '';
         f.date.value = j.date || '';
         f.name.value = j.name || '';
@@ -382,7 +384,8 @@
         f.item.value = j.item || '';
         f.description.value = j.description || '';
         f.amount.value = j.amount || '';
-      }
+        document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
+      });
     } else {
       formViewTitle.textContent = t('new_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
@@ -390,6 +393,75 @@
     }
     document.getElementById('temperText').textContent = f.temper.checked ? t('yes') : t('no');
     applyTranslations(formView);
+  }
+
+  async function showDetail(jobId) {
+    lastView = 'detail';
+    showView('detail');
+    detailContent.innerHTML = `<div class="detail-loading"><i class="fas fa-spinner"></i></div>`;
+
+    try {
+      const j = await getJobById(jobId);
+      if (!j) { detailContent.innerHTML = `<p>${t('error_api')}</p>`; return; }
+
+      const badgeClass = j.status === 'estimado' ? 'estimado' : 'invoice';
+      const badgeLabel = j.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice');
+      const amount = parseFloat(j.amount) || 0;
+      const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+      detailContent.innerHTML = `
+        <div class="detail-header">
+          <h3>${esc(j.job || '')}</h3>
+          <span class="detail-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div class="detail-amount">$${amount.toFixed(2)}</div>
+
+        <div class="detail-field">
+          <span class="detail-field-label">${t('name')}</span>
+          <span class="detail-field-value">${esc(j.name || '—')}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">${t('date')}</span>
+          <span class="detail-field-value">${esc(dateStr)}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">${t('address')}</span>
+          <span class="detail-field-value">${esc(j.address || '—')}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">${t('phone')}</span>
+          <span class="detail-field-value">${esc(j.phone || '—')}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">${t('temper')}</span>
+          <span class="detail-field-value">${j.temper ? t('yes') : t('no')}</span>
+        </div>
+        <div class="detail-field">
+          <span class="detail-field-label">${t('item')}</span>
+          <span class="detail-field-value">${esc(j.item || '—')}</span>
+        </div>
+        ${j.description ? `
+        <div class="detail-field">
+          <span class="detail-field-label">${t('description')}</span>
+          <span class="detail-field-value">${esc(j.description)}</span>
+        </div>` : ''}
+
+        <div class="detail-actions">
+          <button class="detail-btn pdf" id="dtlPdf"><i class="fas fa-file-pdf"></i> PDF</button>
+          ${j.status === 'estimado' ? `<button class="detail-btn approve" id="dtlApprove"><i class="fas fa-check-circle"></i> ${t('approve')}</button>` : ''}
+          <button class="detail-btn edit-btn" id="dtlEdit"><i class="fas fa-pen"></i> ${t('edit')}</button>
+          <button class="detail-btn delete-btn" id="dtlDelete"><i class="fas fa-trash"></i> ${t('del')}</button>
+        </div>`;
+
+      $('dtlPdf').addEventListener('click', () => generatePDF(j));
+      if (j.status === 'estimado') {
+        $('dtlApprove').addEventListener('click', () => showApproveModal(j.id));
+      }
+      $('dtlEdit').addEventListener('click', () => openForm(j.id));
+      $('dtlDelete').addEventListener('click', () => showDeleteModal(j.id));
+    } catch {
+      detailContent.innerHTML = `<div class="empty-state"><p>${t('error_api')}</p></div>`;
+    }
   }
 
   /* ===== MODALS ===== */
@@ -420,31 +492,34 @@
       modalCallback = null;
     });
     overlay.addEventListener('click', e => {
-      if (e.target === overlay) {
-        overlay.remove();
-        modalCallback = null;
-      }
+      if (e.target === overlay) { overlay.remove(); modalCallback = null; }
     });
   }
 
   function showDeleteModal(id) {
-    showModal(t('confirm_delete_title'), t('confirm_delete_msg'), t('confirm_yes'), true, () => {
-      deleteJob(id);
-      renderDashboard(getCurrentFilter());
-      updateCounts();
+    showModal(t('confirm_delete_title'), t('confirm_delete_msg'), t('confirm_yes'), true, async () => {
+      try {
+        await deleteJob(id);
+        showToast(t('deleted'));
+        if (lastView === 'detail') await showDashboard();
+        else { await renderDashboard(getCurrentFilter()); await updateCounts(); }
+      } catch { showToast(t('error_api'), 'error'); }
     });
   }
 
   function showApproveModal(id) {
-    showModal(t('confirm_approve_title'), t('confirm_approve_msg'), t('confirm_yes'), false, () => {
-      toggleJobStatus(id);
-      renderDashboard(getCurrentFilter());
-      updateCounts();
+    showModal(t('confirm_approve_title'), t('confirm_approve_msg'), t('confirm_yes'), false, async () => {
+      try {
+        await toggleJobStatus(id);
+        showToast(t('approved'));
+        if (lastView === 'detail') await showDetail(id);
+        else { await renderDashboard(getCurrentFilter()); await updateCounts(); }
+      } catch { showToast(t('error_api'), 'error'); }
     });
   }
 
   /* ===== FORM SUBMIT ===== */
-  valeForm.addEventListener('submit', e => {
+  valeForm.addEventListener('submit', async e => {
     e.preventDefault();
     const data = {
       job: f.job.value.trim(),
@@ -458,19 +533,31 @@
       amount: parseFloat(f.amount.value) || 0,
     };
 
-    if (editingJobId) {
-      updateJob(editingJobId, data);
-    } else {
-      const job = createJob(data);
-      generatePDF(job);
+    try {
+      if (editingJobId) {
+        await updateJob(editingJobId, data);
+        showToast(t('saved'));
+        const id = editingJobId;
+        editingJobId = null;
+        if (lastView === 'detail') await showDetail(id);
+        else await showDashboard();
+      } else {
+        const job = await createJob(data);
+        generatePDF(job);
+        editingJobId = null;
+        await showDashboard();
+      }
+    } catch {
+      showToast(t('error_api'), 'error');
     }
-
-    editingJobId = null;
-    showDashboard();
   });
 
   formBack.addEventListener('click', () => {
     editingJobId = null;
+    showDashboard();
+  });
+
+  detailBack.addEventListener('click', () => {
     showDashboard();
   });
 
@@ -479,14 +566,10 @@
     if (!job) return;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const pageW = 210;
-    const pageH = 297;
-    const margin = 18;
-    const topBarH = 46;
-    const aqua = [102, 224, 192];
-    const teal = [11, 43, 59];
+    const pageW = 210, pageH = 297, margin = 18, topBarH = 46;
+    const aqua = [102, 224, 192], teal = [11, 43, 59];
+    const isEstimado = job.status === 'estimado';
 
-    // top bar
     doc.setFillColor(...teal);
     doc.rect(0, 0, pageW, topBarH, 'F');
     doc.setFillColor(...aqua);
@@ -502,8 +585,6 @@
     doc.setFontSize(7);
     doc.text('Miami, FL', pageW - margin, topBarH - 6, { align: 'right' });
 
-    // status badge
-    const isEstimado = job.status === 'estimado';
     const badgeY = topBarH + 10;
     doc.setFillColor(...(isEstimado ? [224, 160, 48] : [64, 192, 128]));
     doc.roundedRect(margin, badgeY, 40, 7, 1, 1, 'F');
@@ -512,17 +593,15 @@
     doc.setTextColor(255, 255, 255);
     doc.text(isEstimado ? t('pdf_estimate') : t('pdf_invoice'), margin + 20, badgeY + 5, { align: 'center' });
 
-    // separator
     const sepY = badgeY + 16;
     doc.setDrawColor(...aqua);
     doc.setLineWidth(0.3);
     doc.line(margin, sepY, pageW - margin, sepY);
 
-    // client info
     let y = sepY + 10;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
-    doc.setTextColor(102, 224, 192);
+    doc.setTextColor(...aqua);
     doc.text(t('invoice_to').toUpperCase(), margin, y);
     y += 6;
     doc.setFont('helvetica', 'normal');
@@ -536,7 +615,6 @@
     if (job.phone) { doc.text(job.phone, margin, y); y += 4; }
     if (job.temper) { doc.text('Temper: ' + (job.temper ? t('yes') : t('no')), margin, y); y += 4; }
 
-    // items heading
     y += 4;
     doc.setFillColor(...teal);
     doc.rect(margin, y, pageW - 2 * margin, 7, 'F');
@@ -548,7 +626,6 @@
     doc.text(t('amount').toUpperCase(), pageW - margin - 3, y + 5, { align: 'right' });
     y += 7;
 
-    // item row
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.2);
     doc.line(margin, y, pageW - margin, y);
@@ -560,16 +637,13 @@
     itemLines.forEach(line => { doc.text(line, margin + 3, y + 3); y += 4; });
     const descLines = doc.splitTextToSize(job.description || '', 70);
     const descStartY = y - itemLines.length * 4 - 2;
-    descLines.forEach((line, i) => {
-      doc.text(line, margin + 60, descStartY + i * 4);
-    });
+    descLines.forEach((line, i) => { doc.text(line, margin + 60, descStartY + i * 4); });
     const descEndY = descStartY + descLines.length * 4;
     y = Math.max(y, descEndY);
     const amountVal = parseFloat(job.amount) || 0;
     doc.setFont('helvetica', 'bold');
     doc.text('$' + amountVal.toFixed(2), pageW - margin - 3, y - descLines.length * 4 + 3, { align: 'right' });
 
-    // total line
     y += 6;
     doc.setDrawColor(...aqua);
     doc.setLineWidth(0.5);
@@ -577,11 +651,10 @@
     y += 3;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.setTextColor(11, 43, 59);
+    doc.setTextColor(...teal);
     doc.text(t('pdf_total') + ':', pageW - margin - 45, y);
     doc.text('$' + amountVal.toFixed(2), pageW - margin, y, { align: 'right' });
 
-    // signature
     const sigY = pageH - 50;
     doc.setDrawColor(150, 150, 150);
     doc.setLineWidth(0.3);
@@ -591,12 +664,11 @@
     doc.setTextColor(120, 120, 120);
     doc.text(t('pdf_sig'), margin, sigY + 4);
 
-    // footer
     doc.setFillColor(...teal);
     doc.rect(0, pageH - 14, pageW, 14, 'F');
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(8);
-    doc.setTextColor(102, 224, 192);
+    doc.setTextColor(...aqua);
     doc.text(t('pdf_footer'), pageW / 2, pageH - 5, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6);
@@ -666,44 +738,25 @@
 
   if (!isStandalone && !wasInstalled) {
     installBtn.style.display = 'flex';
-
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      installPrompt = e;
-    });
-
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; });
     installBtn.addEventListener('click', async () => {
       if (installPrompt) {
         installPrompt.prompt();
         const result = await installPrompt.userChoice;
         installPrompt = null;
         if (result.outcome === 'accepted') { installBtn.style.display = 'none'; localStorage.setItem('liriano_installed', 'true'); }
-      } else {
-        showInstallModal();
-      }
+      } else { showInstallModal(); }
     });
-
-    window.addEventListener('appinstalled', () => {
-      installPrompt = null;
-      installBtn.style.display = 'none';
-      localStorage.setItem('liriano_installed', 'true');
-    });
+    window.addEventListener('appinstalled', () => { installPrompt = null; installBtn.style.display = 'none'; localStorage.setItem('liriano_installed', 'true'); });
   }
 
   /* ===== LOGIN ===== */
   togglePass.addEventListener('click', () => {
-    const input = password;
-    const icon = togglePass.querySelector('i');
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.className = 'fas fa-eye-slash';
-    } else {
-      input.type = 'password';
-      icon.className = 'fas fa-eye';
-    }
+    if (password.type === 'password') { password.type = 'text'; togglePass.querySelector('i').className = 'fas fa-eye-slash'; }
+    else { password.type = 'password'; togglePass.querySelector('i').className = 'fas fa-eye'; }
   });
 
-  loginForm.addEventListener('submit', e => {
+  loginForm.addEventListener('submit', async e => {
     e.preventDefault();
     loginError.textContent = '';
     if (username.value === 'admin' && password.value === 'liriano2024') {
@@ -711,7 +764,7 @@
       document.querySelector('.login-bg').style.display = 'none';
       document.body.classList.remove('login-page');
       appContainer.style.display = 'flex';
-      showDashboard();
+      await showDashboard();
     } else {
       loginError.textContent = t('login_error');
     }
@@ -730,7 +783,6 @@
   });
 
   /* ===== AUTO-LOGIN (testing) ===== */
-  seedTestData();
   loginCard.style.display = 'none';
   document.querySelector('.login-bg').style.display = 'none';
   document.body.classList.remove('login-page');
