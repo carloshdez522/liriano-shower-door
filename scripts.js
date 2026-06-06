@@ -77,7 +77,7 @@
   /* ----- Language Switcher ----- */
   var translations = {
     en: {
-      nav_about: 'About',
+      nav_about: 'About Us',
       nav_services: 'Services',
       nav_gallery: 'Gallery',
       nav_contact: 'Contact',
@@ -276,7 +276,7 @@
   applyLang('en');
 
   /* ----- Contact Form ----- */
-  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPm2L0cV0TOfUvDmO0nXVGw-myLOHq7SDt0OgsOQrI9dDq25q4x0uC4Ejpi45jkWLATw/exec';
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaUdIFhLTwnGrknREgw9jALboZnrAIyam18MlxydgacNl4Tc9R5dgApydbLi-ekM12qg/exec';
 
   var form = document.getElementById('contact-form');
   form.addEventListener('submit', function (e) {

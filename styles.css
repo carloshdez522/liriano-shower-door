@@ -1227,11 +1227,13 @@ section {
 
   .carousel-track {
     gap: 12px;
+    padding: 10px 0;
+    justify-content: center;
   }
 
   .carousel-card {
-    min-width: 240px;
-    max-width: 240px;
+    min-width: 260px;
+    max-width: 260px;
     min-height: 240px;
   }
 
