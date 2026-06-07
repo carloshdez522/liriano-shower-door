@@ -1104,6 +1104,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .form-group label {
@@ -1124,6 +1125,9 @@ button {
   color: var(--white);
   background: rgba(255, 255, 255, 0.04);
   transition: border-color var(--transition);
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .form-group input::placeholder,
@@ -1276,6 +1280,7 @@ button {
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
+  box-sizing: border-box;
 }
 
 .add-item-btn:hover {
@@ -1439,6 +1444,8 @@ input[type=number] {
   color: var(--deep-teal);
   transition: all var(--transition);
   margin-top: 4px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .generate-btn:hover {
@@ -1635,6 +1642,8 @@ input[type=number] {
   /* ===== DATE INPUT - click anywhere opens calendar ===== */
   input[type="date"] {
     cursor: pointer;
+    width: 100%;
+    min-width: 0;
   }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
