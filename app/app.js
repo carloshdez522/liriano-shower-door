@@ -85,7 +85,7 @@
       confirm_done_msg: 'This job will be moved to completed.',
       completed: 'Completed',
       manage_jobs: 'Manage Jobs',
-      manage_jobs_desc: 'Estimates, invoices &amp; completed',
+      records: 'Records',
     },
     es: {
       login_user_ph: 'Usuario',
@@ -167,7 +167,7 @@
       confirm_done_msg: 'Este trabajo se moverá a completados.',
       completed: 'Completado',
       manage_jobs: 'Gestionar Trabajos',
-      manage_jobs_desc: 'Estimados, facturas &amp; completados',
+      records: 'Registros',
     },
   };
 
@@ -561,6 +561,11 @@
     applyTranslations(dashboardView);
   }
 
+  function showRecords() {
+    lastView = 'records';
+    showView('records');
+  }
+
   function openForm(jobId) {
     editingJobId = jobId || null;
     lastView = jobId ? 'detail' : 'jobs';
@@ -912,6 +917,7 @@
     if (lastView !== 'dashboard') showDashboard();
   });
   $('dashboardJobs').addEventListener('click', () => showJobs());
+  $('dashboardRecords').addEventListener('click', () => showRecords());
   formBack.addEventListener('click', () => {
     editingJobId = null;
     showJobs();
