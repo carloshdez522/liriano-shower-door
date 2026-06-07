@@ -276,7 +276,7 @@
   applyLang('en');
 
   /* ----- Contact Form ----- */
-  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzv0P26alq6dwT3dWIpfQYnH8ndWJOGCNw5fVXLjA9HEva4YWXye4Mlqs03-pN8Mfec/exec';
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_lxCsmIr43HnxtwWXTAwF8hksE00vCR9r91qtkvSucIATqiW9PHgs2jhSwLQebceZLg/exec';
 
   var form = document.getElementById('contact-form');
   form.addEventListener('submit', function (e) {

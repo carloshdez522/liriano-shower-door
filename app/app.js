@@ -80,6 +80,12 @@
       unit_price: 'Unit Price',
       installation: 'Installation',
       price: 'Price',
+      done: 'Done',
+      confirm_done_title: 'Mark as Done?',
+      confirm_done_msg: 'This job will be moved to completed.',
+      completed: 'Completed',
+      manage_jobs: 'Manage Jobs',
+      manage_jobs_desc: 'Estimates, invoices &amp; completed',
     },
     es: {
       login_user_ph: 'Usuario',
@@ -155,6 +161,13 @@
       unit_price: 'Precio Unitario',
       installation: 'Instalación',
       price: 'Precio',
+      done: 'Completado',
+      dones: 'Completados',
+      confirm_done_title: '¿Marcar como Completado?',
+      confirm_done_msg: 'Este trabajo se moverá a completados.',
+      completed: 'Completado',
+      manage_jobs: 'Gestionar Trabajos',
+      manage_jobs_desc: 'Estimados, facturas &amp; completados',
     },
   };
 
@@ -184,7 +197,7 @@
     });
     applyTranslations();
     if (document.getElementById('appContainer').style.display !== 'none') {
-      if (dashboardView.style.display !== 'none') {
+      if (jobsView.style.display !== 'none') {
         renderDashboard(getCurrentFilter());
         updateCounts();
       } else if (detailView.style.display !== 'none' && currentDetailId) {
@@ -211,6 +224,7 @@
   const togglePass = $('togglePass');
   const appContainer = $('appContainer');
   const logoutBtn = $('logoutBtn');
+  const jobsView = $('jobsView');
   const dashboardView = $('dashboardView');
   const formView = $('formView');
   const detailView = $('detailView');
@@ -259,7 +273,16 @@
 
   let editingJobId = null;
   let currentDetailId = null;
+  let itemFormStatus = 'estimado';
   let lastView = 'dashboard';
+
+  let idCounter = parseInt(localStorage.getItem('liriano_id_counter') || '3970', 10);
+
+  function nextId() {
+    const id = idCounter++;
+    localStorage.setItem('liriano_id_counter', String(idCounter));
+    return '000000-' + String(id).padStart(5, '0');
+  }
 
   let useRemote = true;
 
@@ -274,19 +297,18 @@
   function lsSeed() {
     const existing = lsRead();
     if (existing.length > 0) return;
-    const now = Date.now();
+    const base = Date.now();
     const sample = [
-      { job: 'Shower Door Installation', date: '2026-05-20', name: 'John Smith', address: '123 Main St, Miami, FL', phone: '+1 (305) 555-0101', email: 'john@example.com', items: [{ id:1, temper:true, item:'Frameless 3/8" Glass Door', description:'Brushed nickel handle, clear glass', dimensionsW:60, dimensionsH:72, dimensionsUnit:'in', glassThickness:'Brushed nickel, 3/8 tempered', installation:50, installationUnit:'ft', unitPrice:400, price:1200 }], status: 'estimado', createdAt: now - 90000000 },
-      { job: 'Window Replacement', date: '2026-05-18', name: 'Maria Garcia', address: '456 Oak Ave, Coral Gables, FL', email: 'maria@example.com', items: [{ id:1, temper:true, item:'Double Hung Window 36"x48"', description:'White frame, low-E glass', dimensionsW:36, dimensionsH:48, dimensionsUnit:'in', glassThickness:'White frame, low-E', installation:2, installationUnit:'unit', unitPrice:425, price:850 }], status: 'invoice', createdAt: now - 80000000 },
-      { job: 'Storefront Glass', date: '2026-05-15', name: 'Carlos Ruiz', address: '789 Pine Rd, Hialeah, FL', phone: '+1 (305) 555-0103', email: 'carlos@example.com', items: [{ id:1, temper:false, item:'Tempered Storefront 1/4"', description:'Aluminum frame incl.', dimensionsW:96, dimensionsH:84, dimensionsUnit:'in', glassThickness:'Aluminum frame, 1/4 laminated', installation:1, installationUnit:'unit', unitPrice:600, price:1800 },{ id:2, temper:true, item:'Side Panel', description:'Clear tempered', dimensionsW:36, dimensionsH:84, dimensionsUnit:'in', glassThickness:'Clear tempered', installation:2, installationUnit:'sqft', unitPrice:700, price:1400 }], status: 'estimado', createdAt: now - 70000000 },
-      { job: 'Frameless Shower Enclosure', date: '2026-05-12', name: 'Ana Lopez', address: '321 Beach Blvd, Miami Beach, FL', phone: '+1 (305) 555-0104', email: 'ana@example.com', items: [{ id:1, temper:true, item:'Neo-angle enclosure 48"x48"', description:'Chrome hinges, clear glass', dimensionsW:48, dimensionsH:76, dimensionsUnit:'in', glassThickness:'Chrome hinges, 3/8 clear', installation:1, installationUnit:'unit', unitPrice:700, price:2100 }], status: 'invoice', createdAt: now - 60000000 },
-      { job: 'Glass Railing', date: '2026-05-10', name: 'Robert Johnson', address: '555 Sunset Dr, Key Biscayne, FL', phone: '+1 (305) 555-0105', temper: true, items: [{ id:1, temper:true, item:'Staircase Panel 60"x42"', description:'Laminated safety glass', dimensionsW:60, dimensionsH:42, dimensionsUnit:'in', glassThickness:'Laminated safety, stainless posts', installation:12, installationUnit:'ft', unitPrice:583.33, price:1750 }], status: 'estimado', createdAt: now - 50000000 },
-      { job: 'Mirror Installation', date: '2026-05-08', name: 'Sofia Martinez', address: '777 Palm Way, Fort Lauderdale, FL', email: 'sofia@example.com', items: [{ id:1, temper:false, item:'Beveled Mirror 36"x48"', description:'Silver frame, beveled edges', dimensionsW:36, dimensionsH:48, dimensionsUnit:'in', glassThickness:'Silver frame, 1/4 beveled', installation:1, installationUnit:'unit', unitPrice:450, price:450 }], status: 'invoice', createdAt: now - 40000000 },
-      { job: 'Glass Table Top', date: '2026-05-05', name: 'David Chen', address: '999 Coral Way, Miami, FL', phone: '+1 (305) 555-0107', items: [{ id:1, temper:true, item:'Round Table Top 48"', description:'Polished edge, 1/2" thick', dimensionsW:48, dimensionsH:48, dimensionsUnit:'in', glassThickness:'Polished edge, 1/2 thick', installation:1, installationUnit:'unit', unitPrice:380, price:380 }], status: 'estimado', createdAt: now - 30000000 },
-      { job: 'Commercial Door Repair', date: '2026-05-03', name: 'Miami Office Suites', address: '1000 Brickell Ave, Miami, FL', phone: '+1 (305) 555-0108', email: 'info@miamioffices.com', items: [{ id:1, temper:true, item:'Commercial Door 1/4"', description:'New hinges & closer', dimensionsW:36, dimensionsH:80, dimensionsUnit:'in', glassThickness:'New hinges & closer, 1/4 tempered', installation:1, installationUnit:'unit', unitPrice:950, price:950 }], status: 'invoice', createdAt: now - 20000000 },
-      { job: 'Custom Mirrored Wall', date: '2026-04-28', name: 'Fit Gym LLC', address: '2000 Flagler St, Miami, FL', phone: '+1 (305) 555-0109', items: [{ id:1, temper:false, item:'Full Wall Mirror 96"x72"', description:'3/8" thick, mitred edges', dimensionsW:96, dimensionsH:72, dimensionsUnit:'in', glassThickness:'3/8 thick, mitred edges', installation:48, installationUnit:'sqft', unitPrice:700, price:1400 },{ id:2, temper:false, item:'Side Mirror 48"x72"', description:'3/8" thick', dimensionsW:48, dimensionsH:72, dimensionsUnit:'in', glassThickness:'3/8 thick', installation:24, installationUnit:'sqft', unitPrice:1400, price:1400 }], status: 'estimado', createdAt: now - 10000000 },
-      { job: 'Patio Door Glass', date: '2026-04-25', name: 'Linda Torres', address: '1500 SW 8th St, Miami, FL', email: 'linda@example.com', items: [{ id:1, temper:true, item:'Sliding Door Panel 72"x80"', description:'Tempered low-E glass', dimensionsW:72, dimensionsH:80, dimensionsUnit:'in', glassThickness:'Tempered low-E, anodized frame', installation:1, installationUnit:'unit', unitPrice:1100, price:1100 }], status: 'invoice', createdAt: now },
+      { id:'000000-03970', job:'Master Bath Shower Door', date:'2026-06-03', name:'James Sullivan', address:'8521 Ocean Dr, Miami Beach, FL 33139', phone:'+1 (305) 555-0147', email:'jim.sullivan@email.com', status:'estimado', createdAt:base-70000000, items:[{ id:1, temper:true, item:'Frameless Shower Door 3/8', description:'', dimensionsW:60, dimensionsH:72, dimensionsUnit:'in', glassThickness:'Brushed nickel, 3/8 clear tempered', installation:1, installationUnit:'unit', unitPrice:780, price:780 }] },
+      { id:'000000-03971', job:'Downtown Office Partitions', date:'2026-05-30', name:'Maria Lawson', address:'444 Brickell Ave Ste 200, Miami, FL 33131', phone:'+1 (305) 555-0892', email:'mlawson@lawgroup.com', status:'invoice', createdAt:base-60000000, items:[{ id:1, temper:true, item:'Glass Partition 72x96', description:'Full frame aluminum, frosted film', dimensionsW:72, dimensionsH:96, dimensionsUnit:'in', glassThickness:'Aluminum frame, 1/4 laminated', installation:3, installationUnit:'unit', unitPrice:950, price:2850 }] },
+      { id:'000000-03972', job:'Waterfront Balcony Railing', date:'2026-05-26', name:'Thomas Rivera', address:'1200 Alton Rd Unit 8B, Miami Beach, FL 33139', phone:'+1 (305) 555-0734', email:'trivera@email.com', status:'estimado', createdAt:base-50000000, items:[{ id:1, temper:true, item:'Glass Balustrade Panel 48x42', description:'', dimensionsW:48, dimensionsH:42, dimensionsUnit:'in', glassThickness:'Stainless steel post, 1/2 tempered', installation:20, installationUnit:'ft', unitPrice:1750, price:1750 }] },
+      { id:'000000-03973', job:'Retail Storefront Display', date:'2026-05-20', name:'Jennifer Park', address:'7890 SW 40th St, Miami, FL 33155', phone:'+1 (305) 555-0611', status:'invoice', createdAt:base-40000000, items:[{ id:1, temper:true, item:'Tempered Showcase Glass 36x60', description:'Tempered low-E, anodized frame', dimensionsW:36, dimensionsH:60, dimensionsUnit:'in', glassThickness:'Low-E tempered, anodized frame', installation:4, installationUnit:'unit', unitPrice:520, price:2080 }] },
+      { id:'000000-03974', job:'Hotel Lobby Mirror Wall', date:'2026-05-16', name:'Adrian Foster', address:'3000 Collins Ave, Miami Beach, FL 33140', phone:'+1 (305) 555-0945', email:'afoster@fostergroup.com', status:'estimado', createdAt:base-30000000, items:[{ id:1, temper:false, item:'Wall Mirror 120x84', description:'', dimensionsW:120, dimensionsH:84, dimensionsUnit:'in', glassThickness:'1/4 beveled edge', installation:70, installationUnit:'sqft', unitPrice:1200, price:1200 },{ id:2, temper:false, item:'Accent Mirror 48x48', description:'', dimensionsW:48, dimensionsH:48, dimensionsUnit:'in', glassThickness:'1/4 beveled edge', installation:16, installationUnit:'sqft', unitPrice:800, price:800 }] },
+      { id:'000000-03975', job:'Bathroom Vanity Glass Splash', date:'2026-05-12', name:'Diana Reyes', address:'5500 Sunset Dr, Coral Gables, FL 33146', phone:'+1 (305) 555-0322', status:'invoice', createdAt:base-20000000, items:[{ id:1, temper:true, item:'Glass Splash 36x24', description:'Brushed brass hardware', dimensionsW:36, dimensionsH:24, dimensionsUnit:'in', glassThickness:'Brushed brass, 3/8 clear', installation:1, installationUnit:'unit', unitPrice:340, price:680 }] },
     ];
+    const maxExisting = sample.reduce((m, j) => Math.max(m, parseInt(j.id.split('-')[1], 10) || 0), 3970);
+    idCounter = maxExisting + 1;
+    localStorage.setItem('liriano_id_counter', String(idCounter));
     lsWrite(sample);
   }
 
@@ -320,12 +342,17 @@
   }
 
   async function getJobById(id) {
+    if (!useRemote) {
+      const jobs = lsRead();
+      return jobs.find(j => j.id === id) || null;
+    }
     try {
       const res = await fetch(API + '?id=' + id);
       const data = await res.json();
       if (!res.ok) return null;
       return data;
     } catch {
+      useRemote = false;
       const jobs = lsRead();
       return jobs.find(j => j.id === id) || null;
     }
@@ -338,7 +365,7 @@
       return await tryAPI('POST', data);
     } catch {
       const jobs = lsRead();
-      data.id = Date.now();
+      data.id = nextId();
       jobs.push(data);
       lsWrite(jobs);
       return data;
@@ -376,7 +403,8 @@
     const job = await getJobById(id);
     if (!job) return null;
     job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
-    return await updateJob(id, { status: job.status });
+    delete job.id;
+    return await updateJob(id, job);
   }
 
   /* ===== TOAST ===== */
@@ -413,9 +441,10 @@
   async function updateCounts() {
     try {
       const jobs = await getJobs();
-      $('countAll').textContent = jobs.length;
+      $('countAll').textContent = jobs.filter(j => j.status !== 'done').length;
       $('countEstimado').textContent = jobs.filter(j => j.status === 'estimado').length;
       $('countInvoice').textContent = jobs.filter(j => j.status === 'invoice').length;
+
     } catch {}
   }
 
@@ -430,17 +459,17 @@
       return;
     }
     jobs.sort((a, b) => b.createdAt - a.createdAt);
-    if (filter === 'estimado') jobs = jobs.filter(j => j.status === 'estimado');
+    if (filter === 'all') jobs = jobs.filter(j => j.status !== 'done');
+    else if (filter === 'estimado') jobs = jobs.filter(j => j.status === 'estimado');
     else if (filter === 'invoice') jobs = jobs.filter(j => j.status === 'invoice');
     if (query) {
-      const words = query.split(/\s+/).filter(Boolean);
+      const words = query.split(/\s+/).filter(Boolean).map(w => w.replace(/[^a-z0-9]/g, ''));
       jobs = jobs.filter(j => {
         const itemText = (j.items || []).map(it => (it.item || '') + ' ' + (it.description || '')).join(' ');
         const total = calcTotal(j);
         const haystack = (
-          (j.name || '') + ' ' + (j.job || '') + ' ' + (j.phone || '') + ' ' +
-          (j.address || '') + ' ' + itemText + ' ' +
-          (total || '') + ' ' + (j.date || '')
+          (j.name || '') + ' ' + (j.job || '') + ' ' + (j.phone || '') + ' ' + (j.address || '') + ' ' + itemText + ' ' +
+          (total || '') + ' ' + (j.date || '') + ' ' + (j.phone || '').replace(/[^a-z0-9]/g, '')
         ).toLowerCase();
         return words.every(w => haystack.includes(w));
       });
@@ -454,8 +483,8 @@
     }
 
     jobList.innerHTML = jobs.map(j => {
-      const badgeClass = j.status === 'estimado' ? 'estimado' : 'invoice';
-      const badgeLabel = j.status === 'estimado' ? t('estimados').slice(0, -1) : t('facturas').slice(0, -1);
+      const badgeClass = j.status === 'estimado' ? 'estimado' : j.status === 'done' ? 'done' : 'invoice';
+      const badgeLabel = j.status === 'estimado' ? t('estimados').slice(0, -1) : j.status === 'done' ? t('done') : t('facturas').slice(0, -1);
       const total = calcTotal(j);
       const itemCount = (j.items || []).length;
       const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
@@ -474,6 +503,7 @@
           <div class="job-card-actions">
             <button class="job-action-btn view-pdf" data-id="${j.id}"><i class="fas fa-file-pdf"></i> ${t('view_pdf')}</button>
             ${j.status === 'estimado' ? `<button class="job-action-btn approve" data-id="${j.id}"><i class="fas fa-check-circle"></i> ${t('approve')}</button>` : ''}
+            ${j.status === 'invoice' ? `<button class="job-action-btn done" data-id="${j.id}"><i class="fas fa-check-double"></i> ${t('done')}</button>` : ''}
             <button class="job-action-btn edit-job" data-id="${j.id}"><i class="fas fa-pen"></i> ${t('edit')}</button>
             <button class="job-action-btn delete" data-id="${j.id}"><i class="fas fa-trash"></i> ${t('del')}</button>
           </div>
@@ -483,20 +513,23 @@
     jobList.querySelectorAll('.job-card').forEach(card => {
       card.addEventListener('click', e => {
         if (e.target.closest('.job-action-btn')) return;
-        showDetail(+card.dataset.id);
+        showDetail(card.dataset.id);
       });
     });
     jobList.querySelectorAll('.view-pdf').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); getJobById(+btn.dataset.id).then(j => showPDFPreview(j)); });
+      btn.addEventListener('click', e => { e.stopPropagation(); getJobById(btn.dataset.id).then(j => showPDFPreview(j)); });
     });
     jobList.querySelectorAll('.approve').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); showApproveModal(+btn.dataset.id); });
+      btn.addEventListener('click', e => { e.stopPropagation(); showApproveModal(btn.dataset.id); });
+    });
+    jobList.querySelectorAll('.done').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); showDoneModal(btn.dataset.id); });
     });
     jobList.querySelectorAll('.edit-job').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); openForm(+btn.dataset.id); });
+      btn.addEventListener('click', e => { e.stopPropagation(); openForm(btn.dataset.id); });
     });
     jobList.querySelectorAll('.delete').forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); showDeleteModal(+btn.dataset.id); });
+      btn.addEventListener('click', e => { e.stopPropagation(); showDeleteModal(btn.dataset.id); });
     });
   }
 
@@ -509,21 +542,28 @@
   /* ===== NAVIGATION ===== */
   function showView(view) {
     dashboardView.style.display = view === 'dashboard' ? 'block' : 'none';
+    jobsView.style.display = view === 'jobs' ? 'block' : 'none';
     formView.style.display = view === 'form' ? 'block' : 'none';
     detailView.style.display = view === 'detail' ? 'block' : 'none';
     itemFormView.style.display = 'none';
-    fabBtn.classList.toggle('hidden', view !== 'dashboard');
+    fabBtn.classList.toggle('hidden', view !== 'jobs');
   }
 
-  async function showDashboard() {
+  async function showJobs() {
+    lastView = 'jobs';
+    showView('jobs');
+    await renderDashboard(getCurrentFilter());
+  }
+
+  function showDashboard() {
     lastView = 'dashboard';
     showView('dashboard');
-    await renderDashboard(getCurrentFilter());
+    applyTranslations(dashboardView);
   }
 
   function openForm(jobId) {
     editingJobId = jobId || null;
-    lastView = jobId ? 'detail' : 'dashboard';
+    lastView = jobId ? 'detail' : 'jobs';
     showView('form');
     valeForm.reset();
 
@@ -532,6 +572,7 @@
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
       getJobById(editingJobId).then(j => {
         if (!j) return;
+        itemFormStatus = j.status || 'estimado';
         f.job.value = j.job || '';
         f.date.value = j.date || '';
         f.name.value = j.name || '';
@@ -543,6 +584,7 @@
         renderCompactItems();
       });
     } else {
+      itemFormStatus = 'estimado';
       formViewTitle.textContent = t('new_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
       f.date.value = new Date().toISOString().split('T')[0];
@@ -563,8 +605,8 @@
       const j = await getJobById(jobId);
       if (!j) { detailContent.innerHTML = `<p>${t('error_api')}</p>`; return; }
 
-      const badgeClass = j.status === 'estimado' ? 'estimado' : 'invoice';
-      const badgeLabel = j.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice');
+      const badgeClass = j.status === 'estimado' ? 'estimado' : j.status === 'done' ? 'done' : 'invoice';
+      const badgeLabel = j.status === 'estimado' ? t('pdf_estimate') : j.status === 'done' ? t('done') : t('pdf_invoice');
       const total = calcTotal(j);
       const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(lang === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
@@ -581,7 +623,10 @@
 
       detailContent.innerHTML = `
         <div class="detail-header">
-          <h3>${esc(j.job || '')}</h3>
+          <div>
+            <h3>${esc(j.job || '')}</h3>
+            <div class="detail-id">#${esc(j.id)}</div>
+          </div>
           <span class="detail-badge ${badgeClass}">${badgeLabel}</span>
         </div>
         <div class="detail-amount">$${total.toFixed(2)}</div>
@@ -614,6 +659,7 @@
         <div class="detail-actions">
           <button class="detail-btn pdf" id="dtlPdf"><i class="fas fa-file-pdf"></i> PDF</button>
           ${j.status === 'estimado' ? `<button class="detail-btn approve" id="dtlApprove"><i class="fas fa-check-circle"></i> ${t('approve')}</button>` : ''}
+          ${j.status === 'invoice' ? `<button class="detail-btn done" id="dtlDone"><i class="fas fa-check-double"></i> ${t('done')}</button>` : ''}
           <button class="detail-btn edit-btn" id="dtlEdit"><i class="fas fa-pen"></i> ${t('edit')}</button>
           <button class="detail-btn delete-btn" id="dtlDelete"><i class="fas fa-trash"></i> ${t('del')}</button>
         </div>`;
@@ -621,6 +667,9 @@
       $('dtlPdf').addEventListener('click', () => showPDFPreview(j));
       if (j.status === 'estimado') {
         $('dtlApprove').addEventListener('click', () => showApproveModal(j.id));
+      }
+      if (j.status === 'invoice') {
+        $('dtlDone').addEventListener('click', () => showDoneModal(j.id));
       }
       $('dtlEdit').addEventListener('click', () => openForm(j.id));
       $('dtlDelete').addEventListener('click', () => showDeleteModal(j.id));
@@ -666,7 +715,7 @@
       try {
         await deleteJob(id);
         showToast(t('deleted'));
-        if (lastView === 'detail') await showDashboard();
+        if (lastView === 'detail') await showJobs();
         else { await renderDashboard(getCurrentFilter()); await updateCounts(); }
       } catch { showToast(t('error_api'), 'error'); }
     });
@@ -681,6 +730,25 @@
         else { await renderDashboard(getCurrentFilter()); await updateCounts(); }
       } catch { showToast(t('error_api'), 'error'); }
     });
+  }
+
+  function showDoneModal(id) {
+    showModal(t('confirm_done_title'), t('confirm_done_msg'), t('confirm_yes'), false, async () => {
+      try {
+        await toggleJobDone(id);
+        showToast(t('completed'));
+        if (lastView === 'detail') await showJobs();
+        else { await renderDashboard(getCurrentFilter()); await updateCounts(); }
+      } catch { showToast(t('error_api'), 'error'); }
+    });
+  }
+
+  async function toggleJobDone(id) {
+    const job = await getJobById(id);
+    if (!job) return null;
+    job.status = 'done';
+    delete job.id;
+    return await updateJob(id, job);
   }
 
   /* ===== ITEMS (compact list + separate item form) ===== */
@@ -716,6 +784,14 @@
     editingItemId = itemId || null;
     formView.style.display = 'none';
     itemFormView.style.display = 'block';
+
+    const isEstimado = itemFormStatus === 'estimado';
+    const descGroup = document.querySelector('#itemFormDesc')?.closest('.form-group');
+    const unitPriceGroup = document.querySelector('#itemFormUnitPrice')?.closest('.form-group.price-wrap');
+    const glassLabel = document.querySelector('label[for="itemFormGlass"]');
+    if (descGroup) descGroup.style.display = isEstimado ? 'none' : '';
+    if (unitPriceGroup) unitPriceGroup.style.display = isEstimado ? '' : 'none';
+    if (glassLabel) glassLabel.textContent = isEstimado ? (lang === 'es' ? 'Grosor del Vidrio - Color Herraje' : 'Hardware Color Glass Thickness') : (lang === 'es' ? 'Grosor del Vidrio' : 'Glass Thickness');
 
     if (editingItemId) {
       const it = itemsData.find(x => x.id === editingItemId);
@@ -820,25 +896,29 @@
         const id = editingJobId;
         editingJobId = null;
         if (lastView === 'detail') await showDetail(id);
-        else await showDashboard();
+        else await showJobs();
       } else {
         const job = await createJob(data);
         showPDFPreview(job);
         editingJobId = null;
-        await showDashboard();
+        await showJobs();
       }
     } catch {
       showToast(t('error_api'), 'error');
     }
   });
 
+  $('headerBrand').addEventListener('click', () => {
+    if (lastView !== 'dashboard') showDashboard();
+  });
+  $('dashboardJobs').addEventListener('click', () => showJobs());
   formBack.addEventListener('click', () => {
     editingJobId = null;
-    showDashboard();
+    showJobs();
   });
 
   detailBack.addEventListener('click', () => {
-    showDashboard();
+    showJobs();
   });
 
   /* ===== PDF GENERATION ===== */

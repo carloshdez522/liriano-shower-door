@@ -355,6 +355,70 @@ button {
   color: var(--aquamarine);
 }
 
+.app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+}
+
+/* ===== HOME VIEW ===== */
+.home-content {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.home-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.home-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card-surface);
+  border: 1px solid rgba(102, 224, 192, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  color: var(--white);
+  text-align: left;
+  transition: var(--transition);
+  width: 100%;
+  font-family: var(--font-body);
+}
+
+.home-card:hover {
+  border-color: var(--aquamarine);
+  background: rgba(102, 224, 192, 0.06);
+  transform: translateY(-2px);
+}
+
+.home-card i {
+  font-size: 2rem;
+  color: var(--aquamarine);
+  width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.home-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  display: block;
+}
+
+.home-card-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  display: block;
+  margin-top: 2px;
+}
+
 .app-header-lang {
   display: flex;
   align-items: center;
@@ -568,6 +632,12 @@ button {
   border: 1px solid rgba(64, 192, 128, 0.25);
 }
 
+.job-card-badge.done {
+  background: rgba(96, 120, 180, 0.15);
+  color: #7888b0;
+  border: 1px solid rgba(96, 120, 180, 0.25);
+}
+
 .job-card-info {
   display: flex;
   flex-wrap: wrap;
@@ -605,9 +675,12 @@ button {
 .job-card-actions {
   display: flex;
   gap: 6px;
-  justify-content: flex-end;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.job-card-actions .job-action-btn {
+  flex: 1;
+  justify-content: center;
 }
 
 .job-action-btn {
@@ -648,6 +721,16 @@ button {
 }
 
 .job-action-btn.approve:hover {
+  border-color: var(--success);
+  background: rgba(64, 192, 128, 0.1);
+}
+
+.job-action-btn.done {
+  color: var(--success);
+  border-color: rgba(64, 192, 128, 0.2);
+}
+
+.job-action-btn.done:hover {
   border-color: var(--success);
   background: rgba(64, 192, 128, 0.1);
 }
@@ -717,6 +800,14 @@ button {
   line-height: 1.3;
 }
 
+.detail-id {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-body);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
 .detail-badge {
   font-size: 0.6rem;
   font-weight: 700;
@@ -738,6 +829,12 @@ button {
   background: rgba(64, 192, 128, 0.15);
   color: var(--success);
   border: 1px solid rgba(64, 192, 128, 0.25);
+}
+
+.detail-badge.done {
+  background: rgba(96, 120, 180, 0.15);
+  color: #7888b0;
+  border: 1px solid rgba(96, 120, 180, 0.25);
 }
 
 .detail-amount {
@@ -884,6 +981,16 @@ button {
 }
 
 .detail-btn.approve:hover {
+  border-color: var(--success);
+  background: rgba(64, 192, 128, 0.08);
+}
+
+.detail-btn.done {
+  color: var(--success);
+  border-color: rgba(64, 192, 128, 0.2);
+}
+
+.detail-btn.done:hover {
   border-color: var(--success);
   background: rgba(64, 192, 128, 0.08);
 }
@@ -1692,10 +1799,11 @@ input[type=number] {
   flex-wrap: nowrap;
   gap: 4px;
 }
-.job-action-btn {
-  padding: 5px 6px;
-  font-size: 0.6rem;
-  gap: 3px;
+.job-card-actions .job-action-btn {
+  flex: 1;
+  justify-content: center;
+  padding: 7px 4px;
+  font-size: 0.65rem;
 }
 .detail-btn {
   padding: 8px 6px;

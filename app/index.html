@@ -52,8 +52,10 @@
   <div class="app-container" id="appContainer" style="display:none">
     <header class="app-header">
       <div class="app-header-inner">
-        <img src="../images/logo.webp" alt="" class="app-header-logo">
-        <span class="app-header-title">Liriano <span>&amp;</span> Son</span>
+        <div class="app-header-brand" id="headerBrand">
+          <img src="../images/logo.webp" alt="" class="app-header-logo">
+          <span class="app-header-title">Liriano <span>&amp;</span> Son</span>
+        </div>
         <div class="app-header-lang">
           <button class="lang-btn active" data-lang="en">EN</button>
           <span class="lang-sep">|</span>
@@ -71,6 +73,18 @@
     <main class="app-main">
       <!-- ===== DASHBOARD ===== -->
       <div id="dashboardView">
+        <div class="home-content">
+          <div class="home-cards">
+            <button class="home-card" id="dashboardJobs">
+              <i class="fas fa-clipboard-list"></i>
+              <span class="home-card-title" data-i18n="manage_jobs">Manage Jobs</span>
+              <span class="home-card-desc" data-i18n="manage_jobs_desc">Estimates, invoices &amp; completed</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- ===== JOBS ===== -->
+      <div id="jobsView">
         <div class="dash-header">
           <div class="dash-search">
             <i class="fas fa-search"></i>
@@ -176,7 +190,7 @@
             <textarea id="itemFormDesc" data-i18n-placeholder="desc_ph" placeholder="Details, hardware color, finish..." rows="2"></textarea>
           </div>
           <div class="form-group">
-            <label for="itemFormGlass" data-i18n="glass_thickness">Hardware Color Glass Thickness</label>
+            <label for="itemFormGlass">Hardware Color Glass Thickness</label>
             <input type="text" id="itemFormGlass" placeholder="e.g. Brushed nickel, 3/8 tempered">
           </div>
           <div class="form-row row-dimensions">
