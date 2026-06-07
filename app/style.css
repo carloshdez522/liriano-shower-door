@@ -1689,7 +1689,20 @@ input[type=number] {
 }
 
 .job-card-actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.job-action-btn {
+  padding: 5px 6px;
+  font-size: 0.6rem;
+  gap: 3px;
+}
+.detail-btn {
+  padding: 8px 6px;
+  font-size: 0.65rem;
+}
+.detail-actions {
+  gap: 4px;
 }
 
 .modal-box {
