@@ -414,7 +414,7 @@ button {
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 12px 100px;
+  padding: 20px 12px 80px;
   position: relative;
 }
 
@@ -614,7 +614,7 @@ button {
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.5);
   padding: 6px 10px;
   font-size: 0.7rem;
   font-weight: 600;
@@ -632,6 +632,16 @@ button {
   color: var(--aquamarine);
 }
 
+.job-action-btn.view-pdf {
+  color: var(--error);
+  border-color: rgba(224, 96, 96, 0.2);
+}
+
+.job-action-btn.view-pdf:hover {
+  border-color: var(--error);
+  background: rgba(224, 96, 96, 0.08);
+}
+
 .job-action-btn.approve {
   color: var(--success);
   border-color: rgba(64, 192, 128, 0.2);
@@ -642,9 +652,24 @@ button {
   background: rgba(64, 192, 128, 0.1);
 }
 
+.job-action-btn.edit-job {
+  color: var(--aquamarine);
+  border-color: rgba(102, 224, 192, 0.2);
+}
+
+.job-action-btn.edit-job:hover {
+  border-color: var(--aquamarine);
+  background: rgba(102, 224, 192, 0.08);
+}
+
+.job-action-btn.delete {
+  color: var(--error);
+  border-color: rgba(224, 96, 96, 0.2);
+}
+
 .job-action-btn.delete:hover {
   border-color: var(--error);
-  color: var(--error);
+  background: rgba(224, 96, 96, 0.08);
 }
 
 /* ===== EMPTY STATE ===== */
@@ -1051,12 +1076,28 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  min-width: 0;
 }
+
 .form-row.row-dimensions {
   grid-template-columns: 7fr 3fr;
 }
+
 .form-row.row-installation {
   grid-template-columns: 7fr 3fr;
+}
+
+.form-row.item-temper-row {
+  grid-template-columns: 7fr 3fr;
+  gap: 8px;
+}
+
+.form-row.item-temper-row .form-group:last-child label:first-child {
+  display: block;
+  text-align: center;
+}
+.form-row.item-temper-row .form-group:last-child {
+  justify-content: center;
 }
 
 .form-group {
@@ -1097,12 +1138,12 @@ button {
   right: 0;
   z-index: 1000;
   background: var(--medium-teal);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
   display: none;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 .autocomplete-list.show {
@@ -1114,7 +1155,7 @@ button {
   cursor: pointer;
   color: var(--white);
   font-size: 0.85rem;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background var(--transition);
 }
 
@@ -1248,16 +1289,19 @@ button {
   align-items: center;
   gap: 6px;
 }
+
 .dimensions-row input {
   width: 60px;
   flex: none;
 }
+
 .dim-x {
   color: var(--aqua-light);
   font-weight: 700;
   font-size: 1rem;
   flex-shrink: 0;
 }
+
 .dimensions-row select {
   width: auto;
   min-width: 60px;
@@ -1270,10 +1314,12 @@ button {
   align-items: center;
   gap: 6px;
 }
+
 .install-row input {
   width: 70px;
   flex: none;
 }
+
 .install-row select {
   width: auto;
   min-width: 60px;
@@ -1286,6 +1332,7 @@ input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type=number] {
   -moz-appearance: textfield;
 }
@@ -1294,11 +1341,13 @@ input[type=number] {
 .price-wrap {
   position: relative;
 }
+
 .price-input {
   position: relative;
   display: flex;
   align-items: center;
 }
+
 .price-prefix {
   position: absolute;
   left: 12px;
@@ -1308,6 +1357,7 @@ input[type=number] {
   pointer-events: none;
   z-index: 1;
 }
+
 .price-input input {
   padding-left: 28px;
   width: 100%;
@@ -1318,15 +1368,14 @@ input[type=number] {
 .toggle-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 0;
+  gap: 6px;
 }
 
 .toggle-label {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 36px;
+  height: 20px;
   cursor: pointer;
 }
 
@@ -1340,7 +1389,7 @@ input[type=number] {
   position: absolute;
   inset: 0;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
+  border-radius: 20px;
   transition: background var(--transition);
 }
 
@@ -1349,12 +1398,12 @@ input[type=number] {
   position: absolute;
   left: 3px;
   top: 3px;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--white);
   transition: transform var(--transition);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-label input:checked+.toggle-slider {
@@ -1362,14 +1411,14 @@ input[type=number] {
 }
 
 .toggle-label input:checked+.toggle-slider::before {
-  transform: translateX(20px);
+  transform: translateX(16px);
 }
 
 .toggle-text {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--white);
-  min-width: 30px;
+  min-width: 24px;
 }
 
 /* ===== GENERATE / SAVE BUTTON ===== */
@@ -1542,7 +1591,7 @@ input[type=number] {
   }
 
   .app-main {
-    padding: 16px 10px 90px;
+    padding: 16px 10px 70px;
   }
 
   .dash-title {
@@ -1556,35 +1605,42 @@ input[type=number] {
 
   .form-row {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 12px;
   }
+
   .form-row.job-date-row {
-    grid-template-columns: 7fr 3fr;
+    grid-template-columns: 6.5fr 3.5fr;
+    gap: 6px;
   }
+
   .form-row.item-temper-row {
-    grid-template-columns: 4fr 1fr;
-    gap: 10px;
+    grid-template-columns: 7fr 3fr;
+    gap: 6px;
   }
+
   .form-row.row-dimensions {
     grid-template-columns: 7fr 3fr;
   }
+
   .form-row.row-installation {
     grid-template-columns: 7fr 3fr;
   }
 
-/* ===== JOB + DATE ROW ===== */
-.form-row.job-date-row {
-  grid-template-columns: 7fr 3fr;
-}
+  /* ===== JOB + DATE ROW ===== */
+  .form-row.job-date-row {
+    grid-template-columns: 6.5fr 3.5fr;
+    gap: 8px;
+  }
 
-/* ===== DATE INPUT - click anywhere opens calendar ===== */
-input[type="date"] {
-  cursor: pointer;
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  cursor: pointer;
-}
+  /* ===== DATE INPUT - click anywhere opens calendar ===== */
+  input[type="date"] {
+    cursor: pointer;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 
   .vale-form {
     padding: 20px 14px;
@@ -1592,7 +1648,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .modal-box {
-    padding: 24px 20px 16px;
+    padding: 20px 16px 14px;
+    max-width: 300px;
+  }
+
+  .modal-box h3 {
+    font-size: 0.95rem;
+  }
+
+  .modal-box p {
+    font-size: 0.75rem;
+    margin-bottom: 14px;
+  }
+
+  .modal-actions {
+    gap: 6px;
+  }
+
+  .modal-btn {
+    padding: 8px;
+    font-size: 0.7rem;
+  }
+
+  .modal-overlay {
+    padding: 10px;
   }
 }
 

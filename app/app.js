@@ -1237,15 +1237,11 @@
 
   /* ===== DATE PICKER: click anywhere opens calendar ===== */
   document.querySelectorAll('.form-group input[type="date"]').forEach(inp => {
-    const btn = document.createElement('div');
-    btn.style.cssText = 'position:absolute;inset:0;cursor:pointer;z-index:1';
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      inp.focus();
-      try { inp.showPicker(); } catch (_) { inp.click(); }
-    });
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:absolute;inset:0;cursor:pointer;z-index:1';
+    wrap.addEventListener('click', () => { try { inp.showPicker(); } catch(_) {} });
     inp.parentElement.style.position = 'relative';
-    inp.parentElement.appendChild(btn);
+    inp.parentElement.appendChild(wrap);
   });
 
   /* ===== LOGIN ===== */
