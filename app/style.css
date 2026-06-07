@@ -1054,7 +1054,7 @@ button {
 }
 
 /* ===== FLOATING ACTION BUTTON ===== */
-.fab {
+#fabBtn {
   position: fixed;
   top: 87.5%;
   left: 90%;
@@ -1079,16 +1079,16 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-.fab.hidden {
+#fabBtn.hidden {
   display: none;
 }
 
-.fab:hover {
+#fabBtn:hover {
   transform: scale(1.1) rotate(90deg);
   box-shadow: 0 6px 30px rgba(102, 224, 192, 0.5);
 }
 
-.fab:active {
+#fabBtn:active {
   transform: scale(0.95);
 }
 
@@ -1874,66 +1874,66 @@ input[type=number] {
   padding: 24px 20px 16px;
 }
 
-.pdf-overlay {
+.pdf-blur-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99999;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  flex-direction: column;
+  z-index: 99998;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.2s ease;
 }
 
-.pdf-overlay-container {
-  flex: 1;
+.pdf-float-actions {
+  position: fixed;
+  z-index: 99999;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  max-width: 100%;
-  max-height: 100%;
+  gap: 10px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  min-width: 200px;
+  animation: fadeIn 0.15s ease;
 }
 
-.pdf-toolbar {
+.pdf-float-actions .pdf-btn {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--deep-teal);
-  color: var(--white);
-}
-
-.pdf-toolbar-title {
-  font-size: 13px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 70%;
-}
-
-.pdf-toolbar-close {
-  background: none;
-  border: none;
-  color: var(--white);
-  font-size: 28px;
-  cursor: pointer;
-  line-height: 1;
-  padding: 0 4px;
-}
-
-.pdf-frame {
-  flex: 1;
-  border: none;
-  width: 100%;
-  background: #fff;
-}
-
-.pdf-actions {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--deep-teal);
   justify-content: center;
-  flex-wrap: wrap;
+  gap: 8px;
+  transition: opacity 0.15s;
+}
+
+.pdf-float-actions .pdf-btn:active {
+  opacity: 0.7;
+}
+
+.pdf-float-actions .pdf-btn.download {
+  background: var(--deep-teal);
+  color: var(--white);
+}
+
+.pdf-float-actions .pdf-btn.share {
+  background: #e8f0fe;
+  color: #1967d2;
+}
+
+.pdf-float-actions .pdf-btn.whatsapp {
+  background: #e8f5e9;
+  color: #075e54;
+}
 }
 
 .pdf-btn {

@@ -306,16 +306,12 @@
     </main>
   </div>
 
-  <button class="fab" id="fabBtn"><i class="fas fa-plus"></i></button>
+  <button id="fabBtn"><i class="fas fa-plus"></i></button>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="playfair-font.js"></script>
-  <script src="greatvibes-font.js"></script>
-  <script src="social-icons.js"></script>
   <script src="app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/app/sw.js');
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('/app/sw.js').catch(function(){});
     }
   </script>
 </body>
