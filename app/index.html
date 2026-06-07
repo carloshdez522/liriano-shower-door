@@ -6,6 +6,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Liriano & Son">
+  <script>
+    (function() {
+      var base = document.createElement('base');
+      base.href = location.protocol === 'file:'
+        ? location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1)
+        : '/app/';
+      document.head.appendChild(base);
+    })();
+  </script>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/webp" href="../images/logo.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,6 +167,46 @@
             <i class="fas fa-plus"></i> <span data-i18n="add_item">Add Item</span>
           </button>
 
+          <div class="section-divider">
+            <span data-i18n="summary">Summary</span>
+          </div>
+          <div class="form-row finance-row">
+            <div class="form-group">
+              <label data-i18n="subtotal">Subtotal</label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="text" id="fSubtotal" readonly>
+              </div>
+            </div>
+            <div class="form-group price-wrap">
+              <label for="fTaxRate" data-i18n="tax_rate">Tax Rate</label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="number" id="fTaxRate" step="0.01" min="0" value="0">
+              </div>
+            </div>
+          </div>
+          <div class="form-row finance-row">
+            <div class="form-group price-wrap">
+              <label for="fSalesTax" data-i18n="sales_tax">Sales Tax</label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="number" id="fSalesTax" step="0.01" min="0" value="0">
+              </div>
+            </div>
+            <div class="form-group price-wrap">
+              <label for="fDeposit"><span id="fDepositLabel" data-i18n="deposit_required">Deposit Required</span></label>
+              <div class="price-input">
+                <span class="price-prefix">$</span>
+                <input type="number" id="fDeposit" step="0.01" min="0" value="0">
+              </div>
+            </div>
+          </div>
+          <div class="finance-total-row">
+            <span class="finance-total-label" data-i18n="total_summary">Total</span>
+            <span class="finance-total-value" id="fTotalReadonly">$0.00</span>
+          </div>
+
           <button type="submit" class="generate-btn" id="saveBtn">
             <i class="fas fa-save"></i>
             <span data-i18n="save">Save</span>
@@ -260,6 +309,9 @@
   <button class="fab" id="fabBtn"><i class="fas fa-plus"></i></button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="playfair-font.js"></script>
+  <script src="greatvibes-font.js"></script>
+  <script src="social-icons.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
