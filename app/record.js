@@ -4,6 +4,7 @@
   const recordList = $('recordList');
 
   $('headerBrand').addEventListener('click', () => { location.href = 'index.html'; });
+  const dh = $('dashHome'); if (dh) dh.addEventListener('click', () => { location.href = 'index.html'; });
 
   async function loadRecords() {
     try {
@@ -22,7 +23,7 @@
         return `
           <div class="job-card" data-id="${j.id}">
             <div class="job-card-top">
-              <div class="job-card-title">${esc(j.job || j.name || '')}</div>
+              <div class="job-card-title">${esc(j.job || j.name || '')} <span class="job-card-id">${formatId(j.id)}</span></div>
               <span class="job-card-badge done">${t('completed')}</span>
             </div>
             <div class="job-card-info">
@@ -85,12 +86,11 @@
             <div class="detail-header">
               <div>
                 <h3>${esc(j.job || '')}</h3>
-                <div class="detail-id">#${esc(j.id)}</div>
+                <div class="detail-id">#${formatId(j.id)}</div>
               </div>
-              <span class="detail-badge done">${t('completed')}</span>
             </div>
             <div class="detail-amount">$${total.toFixed(2)}</div>
-            <div class="detail-field"><span class="detail-field-label">${t('name')}</span><span class="detail-field-value">${esc(j.name || '—')}</span></div>
+            <div class="detail-field name-row"><span class="detail-field-label">${t('name')}</span><span class="detail-field-value">${esc(j.name || '—')}</span><span class="detail-badge done" style="margin-left:auto">${t('completed')}</span></div>
             <div class="detail-field"><span class="detail-field-label">${t('date')}</span><span class="detail-field-value">${esc(dateStr)}</span></div>
             <div class="detail-field"><span class="detail-field-label">${t('address')}</span><span class="detail-field-value">${esc(j.address || '—')}</span></div>
             ${j.phone ? `<div class="detail-field"><span class="detail-field-label">${t('phone')}</span><span class="detail-field-value">${esc(j.phone)}</span></div>` : ''}

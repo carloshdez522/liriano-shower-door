@@ -47,6 +47,7 @@
       <!-- ===== JOBS LIST ===== -->
       <div id="jobsView">
         <div class="dash-header">
+          <button class="dash-home" id="dashHome"><i class="fas fa-home"></i></button>
           <div class="dash-search">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" data-i18n-placeholder="search_ph" placeholder="Search by name, job, phone...">
@@ -72,6 +73,9 @@
           <h2 class="form-view-title" id="formViewTitle">New Job</h2>
         </div>
         <form id="valeForm" class="vale-form">
+          <div class="edit-badge-wrap" id="editFormBadgeWrap" style="display:none">
+            <span class="edit-badge" id="editFormBadge"></span>
+          </div>
           <div class="section-divider">
             <span data-i18n="client">Client</span>
           </div>
@@ -260,6 +264,7 @@
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
   <script src="playfair-font.js"></script>
+  <script src="plantilla.js"></script>
   <script src="common.js"></script>
   <script src="jobs.js"></script>
   <script>

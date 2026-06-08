@@ -56,6 +56,14 @@
   let currentDetailId = null;
   let itemFormStatus = 'estimado';
   let lastView = 'jobs';
+  let skipPush = false;
+
+  function setUrl(path) {
+    if (location.protocol !== 'file:' && !skipPush) {
+      history.pushState(null, '', '/app' + path);
+    }
+    skipPush = false;
+  }
 
   /* ===== NAVIGATION ===== */
   function showView(view) {
@@ -71,6 +79,7 @@
     showView('jobs');
     getCurrentFilter();
     renderJobList(getCurrentFilter());
+    setUrl('/jobs');
   }
 
   /* ===== FILTERS ===== */
@@ -109,7 +118,8 @@
         const total = calcTotal(j);
         const haystack = (
           (j.name || '') + ' ' + (j.job || '') + ' ' + (j.phone || '') + ' ' + (j.address || '') + ' ' + itemText + ' ' +
-          (total || '') + ' ' + (j.date || '') + ' ' + (j.phone || '').replace(/[^a-z0-9]/g, '')
+          (total || '') + ' ' + (j.date || '') + ' ' + formatId(j.id) + ' ' + (j.id || '') + ' ' +
+          (j.phone || '').replace(/[^a-z0-9]/g, '')
         ).toLowerCase();
         return words.every(w => haystack.includes(w));
       });
@@ -131,7 +141,7 @@
       return `
         <div class="job-card" data-id="${j.id}">
           <div class="job-card-top">
-            <div class="job-card-title">${esc(j.job || j.name || '')}</div>
+            <div class="job-card-title">${esc(j.job || j.name || '')} <span class="job-card-id">${formatId(j.id)}</span></div>
             <span class="job-card-badge ${badgeClass}">${badgeLabel}</span>
           </div>
           <div class="job-card-info">
@@ -180,12 +190,19 @@
     showView('form');
     valeForm.reset();
 
+    setUrl('/jobs' + (jobId ? '/' + formatId(jobId) : '/new'));
+
     if (editingJobId) {
       formViewTitle.textContent = t('edit_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
       getJobById(editingJobId).then(j => {
         if (!j) return;
         itemFormStatus = j.status || 'estimado';
+        const badge = $('editFormBadge');
+        const wrap = $('editFormBadgeWrap');
+        badge.textContent = j.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice');
+        badge.className = 'edit-badge ' + (j.status === 'estimado' ? 'estimado' : 'invoice');
+        wrap.style.display = '';
         f.job.value = j.job || '';
         f.date.value = j.date || '';
         f.name.value = j.name || '';
@@ -203,6 +220,7 @@
       itemFormStatus = 'estimado';
       formViewTitle.textContent = t('new_job');
       saveBtn.innerHTML = `<i class="fas fa-save"></i> ${t('save')}`;
+      $('editFormBadgeWrap').style.display = 'none';
       f.date.value = new Date().toISOString().split('T')[0];
       fTaxRate.value = '';
       fSalesTax.value = '';
@@ -220,6 +238,7 @@
     lastView = 'detail';
     showView('detail');
     detailContent.innerHTML = `<div class="detail-loading"><i class="fas fa-spinner"></i></div>`;
+    setUrl('/jobs/' + formatId(jobId));
 
     try {
       const j = await getJobById(jobId);
@@ -230,22 +249,36 @@
       const total = calcTotal(j);
       const dateStr = j.date ? new Date(j.date + 'T12:00:00').toLocaleDateString(getLang() === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
-      const itemsHtml = (j.items || []).map(it => `
-        <div class="detail-item-row">
+      const isInvoice = j.status === 'invoice';
+      const itemsHtml = (j.items || []).map((it, idx) => {
+        const installVal = (parseFloat(it.installation) || 0) + (it.installationUnit ? ' ' + it.installationUnit : '');
+        return `
+        <div class="detail-item-row" data-item-index="${idx}">
           <div class="detail-item-info">
             <strong>${esc(it.item || '—')}</strong>
             ${(it.dimensionsW || it.dimensionsH) ? `<span class="detail-item-desc">${esc(it.dimensionsW || '?')} x ${esc(it.dimensionsH || '?')} ${esc(it.dimensionsUnit || 'in')}</span>` : ''}
             ${it.description ? `<span class="detail-item-desc">${esc(it.description)}</span>` : ''}
           </div>
-          <div class="detail-item-price">$${(parseFloat(it.price) || 0).toFixed(2)}</div>
+          <div class="detail-item-price">$${(parseFloat(it.price) || 0).toFixed(2)} <i class="fas fa-chevron-down detail-item-arrow"></i></div>
         </div>
-      `).join('');
+        <div class="detail-item-expand" id="itemExpand${idx}">
+          <div class="expand-grid">
+            <div class="expand-field"><span class="expand-label">${isInvoice ? t('description') : t('item')}</span><span class="expand-value">${isInvoice ? esc(it.description || '—') : esc(it.item || '—')}</span></div>
+            <div class="expand-field"><span class="expand-label">${t('temper')}</span><span class="expand-value">${it.temper ? t('yes') : t('no')}</span></div>
+            ${isInvoice ? '' : `<div class="expand-field"><span class="expand-label">${t('glass_thickness')}</span><span class="expand-value">${esc(it.glassThickness || '—')}</span></div>`}
+            <div class="expand-field"><span class="expand-label">${t('dimensions')}</span><span class="expand-value">${(it.dimensionsW || 0)} x ${(it.dimensionsH || 0)} ${esc(it.dimensionsUnit || 'in')}</span></div>
+            ${isInvoice ? `<div class="expand-field"><span class="expand-label">${t('glass_thickness')}</span><span class="expand-value">${esc(it.glassThickness || '—')}</span></div>` : `<div class="expand-field"><span class="expand-label">${t('unit_price')}</span><span class="expand-value">$${(parseFloat(it.unitPrice) || 0).toFixed(2)}</span></div>`}
+            <div class="expand-field"><span class="expand-label">${t('installation')}</span><span class="expand-value">${installVal}</span></div>
+            <div class="expand-field"><span class="expand-label">${t('price')}</span><span class="expand-value">$${(parseFloat(it.price) || 0).toFixed(2)}</span></div>
+          </div>
+        </div>
+      `;}).join('');
 
       detailContent.innerHTML = `
         <div class="detail-header">
           <div>
             <h3>${esc(j.job || '')}</h3>
-            <div class="detail-id">#${esc(j.id)}</div>
+            <div class="detail-id">#${formatId(j.id)}</div>
           </div>
           <span class="detail-badge ${badgeClass}">${badgeLabel}</span>
         </div>
@@ -280,6 +313,18 @@
       if (j.status === 'invoice') { $('dtlDone').addEventListener('click', () => showDoneModal(j.id)); }
       $('dtlEdit').addEventListener('click', () => openForm(j.id));
       $('dtlDelete').addEventListener('click', () => showDeleteModal(j.id));
+
+      detailContent.querySelectorAll('.detail-item-row').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = parseInt(el.dataset.itemIndex, 10);
+          const expand = document.getElementById('itemExpand' + idx);
+          if (expand) {
+            const isOpen = expand.classList.contains('open');
+            expand.classList.toggle('open');
+            el.classList.toggle('expanded', !isOpen);
+          }
+        });
+      });
     } catch {
       detailContent.innerHTML = `<div class="empty-state"><p>${t('error_api')}</p></div>`;
     }
@@ -487,6 +532,7 @@
   formBack.addEventListener('click', () => { editingJobId = null; showJobs(); });
   detailBack.addEventListener('click', () => { showJobs(); });
 
+  const dh = $('dashHome'); if (dh) dh.addEventListener('click', () => { location.href = 'index.html'; });
   searchInput.addEventListener('input', () => { renderJobList(getCurrentFilter()); });
 
   filterBar.addEventListener('click', e => {
@@ -576,7 +622,31 @@
   f.name.addEventListener('focus', () => { loadClientsCache(); showAutocomplete(f.name.value); });
   f.name.addEventListener('blur', () => { setTimeout(() => $('autocompleteList').classList.remove('show'), 200); });
 
-  /* ===== INIT ===== */
-  showJobs();
+  /* ===== URL ROUTE INIT ===== */
+  async function checkRoute() {
+    skipPush = true;
+    const path = location.pathname;
+    if (path.endsWith('jobs.html')) {
+      showJobs();
+      return;
+    }
+    const match = path.match(/^\/app\/jobs\/(.*)$/);
+    if (match) {
+      const route = match[1];
+      if (route === 'new') {
+        openForm(null);
+      } else if (/^\d{6}-\d{5}$/.test(route)) {
+        const num = parseInt(route.replace('-', ''), 10);
+        const id = num - 3999;
+        const job = await getJobById(id);
+        if (job) showDetail(id);
+        else showJobs();
+      } else showJobs();
+    } else showJobs();
+  }
+
+  window.addEventListener('popstate', checkRoute);
+
+  checkRoute();
 
 })();

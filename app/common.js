@@ -20,7 +20,7 @@
       pdf_email_body: 'Dear {name},\n\nPlease find attached the {job} document.\n\nTotal: ${amount}\n\nThank you,\nLiriano & Son Shower Doors Corp',
       client: 'Client', item_required: 'Item name is required', price_required: 'Price is required',
       add_item: 'Add Item', edit_item: 'Edit Item', remove: 'Remove', dimensions: 'Dimensions', unit: 'Unit',
-      glass_thickness: 'Hardware Color Glass Thickness', unit_price: 'Unit Price', installation: 'Installation',
+      glass_thickness: 'Glass Thickness', unit_price: 'Unit Price', installation: 'Installation',
       price: 'Price', done: 'Done', confirm_done_title: 'Mark as Done?', confirm_done_msg: 'This job will be moved to completed.',
       completed: 'Completed', manage_jobs: 'Manage Jobs', manage_jobs_desc: 'Estimates, invoices &amp; completed',
       summary: 'Summary', subtotal: 'Subtotal', tax_rate: 'Tax Rate', sales_tax: 'Sales Tax',
@@ -28,7 +28,7 @@
       records: 'Records', records_desc: 'Completed &amp; archived jobs',
       pdf_estimate: 'ESTIMATE', pdf_invoice: 'INVOICE',
       pdf_est_from: 'Estimate from:', pdf_inv_from: 'Invoice from:', pdf_est_to: 'Estimate to:', pdf_inv_to: 'Invoice to:',
-      pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No', pdf_col_glass: 'Glass', pdf_col_unit: 'Unit Price',
+      pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No',       pdf_col_glass: 'Glass Thickness', pdf_col_unit: 'Unit Price', pdf_col_desc: 'Description',
       pdf_thanks: 'Thank you for choosing us!',
     },
     es: {
@@ -49,7 +49,7 @@
       pdf_email_body: 'Estimado {name},\n\nAdjunto encontrará el documento de {job}.\n\nTotal: ${amount}\n\nGracias,\nLiriano & Son Shower Doors Corp',
       client: 'Cliente', item_required: 'El nombre del artículo es requerido', price_required: 'El precio es requerido',
       add_item: 'Agregar Artículo', edit_item: 'Editar Artículo', remove: 'Quitar', dimensions: 'Dimensiones', unit: 'Unidad',
-      glass_thickness: 'Grosor del Vidrio - Color Herraje', unit_price: 'Precio Unitario', installation: 'Instalación',
+      glass_thickness: 'Grosor del Vidrio', unit_price: 'Precio Unitario', installation: 'Instalación',
       price: 'Precio', done: 'Completado', confirm_done_title: '¿Marcar como Completado?',
       confirm_done_msg: 'Este trabajo se moverá a completados.', completed: 'Completado',
       manage_jobs: 'Gestionar Trabajos', manage_jobs_desc: 'Estimados, facturas &amp; completados',
@@ -58,7 +58,7 @@
       records: 'Registros', records_desc: 'Trabajos completados &amp; archivados',
       pdf_estimate: 'ESTIMADO', pdf_invoice: 'FACTURA',
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
-      pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No', pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.',
+      pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
       pdf_thanks: '¡Gracias por preferirnos!',
     },
   };
@@ -313,16 +313,17 @@
     const isEstimado = job.status === 'estimado';
     const items = job.items || [];
     const lang = getLang();
+    const _t = (key) => i18n.en[key] || key;
+    const t = _t;
 
     const pfB64 = window.playfairBoldB64;
     if (!pfB64) throw new Error('Playfair font not loaded');
 
-    const templateUrl = 'plantilla.pdf';
-
-    const tmplResp = await fetch(templateUrl);
-    const tmplBytes = await tmplResp.arrayBuffer();
-
     const { PDFDocument, StandardFonts, rgb } = PDFLib;
+
+    const tmplB64 = window.plantillaB64;
+    if (!tmplB64) throw new Error('Template PDF not loaded');
+    const tmplBytes = Uint8Array.from(atob(tmplB64), c => c.charCodeAt(0));
     const pdfDoc = await PDFDocument.load(tmplBytes);
     pdfDoc.registerFontkit(window.fontkit);
     const page = pdfDoc.getPages()[0];
@@ -375,7 +376,7 @@
     dText(isEstimado ? t('pdf_estimate') : t('pdf_invoice'), 201, 25, 44, pfF, cDark, 'right');
 
     const prefix = isEstimado ? t('pdf_est_no') : t('pdf_inv_no');
-    dText(prefix + ': ' + (job.id || ''), 200, 32, 12, hv, cGray, 'right');
+    dText(prefix + ': ' + formatId(job.id), 200, 32, 12, hv, cGray, 'right');
     dText(t('job') + ': ' + (job.job || ''), 200, 38, 12, hv, cGray, 'right');
     dText(t('date') + ': ' + (job.date || ''), 200, 44, 12, hv, cGray, 'right');
 
@@ -392,7 +393,9 @@
     if (job.phone) dText(job.phone, 200, 84, 10.5, hv, cGray, 'right');
 
     const cols = [10, 25, 50, 100, 122, 153, 173];
-    const headers = [t('temper'), t('item'), t('pdf_col_glass'), t('dimensions'), t('pdf_col_unit'), t('installation'), t('price')];
+    const headers = isEstimado
+      ? [t('temper'), t('item'), t('pdf_col_glass'), t('dimensions'), t('pdf_col_unit'), t('installation'), t('price')]
+      : [t('temper'), t('item'), t('pdf_col_desc'), t('dimensions'), t('pdf_col_glass'), t('installation'), t('price')];
     const rowH = 12;
     const tableY = 96;
     const tLeft = 10;
@@ -428,9 +431,11 @@
       const dims = (it.dimensionsW || it.dimensionsH)
         ? (it.dimensionsW || '?') + ' x ' + (it.dimensionsH || '?') + ' ' + (it.dimensionsUnit || 'in')
         : '';
-      const unitPriceStr = it.unitPrice != null ? String(it.unitPrice) : '';
+      const unitPriceStr = it.unitPrice != null ? '$' + String(it.unitPrice) : '';
       const installStr = it.installation != null ? String(it.installation) + (it.installationUnit ? ' ' + it.installationUnit : '') : '';
-      const vals = [temper, it.item || '', it.glassThickness || '', dims, unitPriceStr, installStr, '$' + (parseFloat(it.price) || 0).toFixed(2)];
+      const vals = isEstimado
+        ? [temper, it.item || '', it.glassThickness || '', dims, unitPriceStr, installStr, '$' + (parseFloat(it.price) || 0).toFixed(2)]
+        : [temper, it.item || '', it.description || '', dims, it.glassThickness || '', installStr, '$' + (parseFloat(it.price) || 0).toFixed(2)];
 
       const cellLines = [];
       let maxLines = 1;
@@ -467,7 +472,7 @@
     const taxRateVal = parseFloat(job.taxRate) || 0;
     const salesTaxVal = parseFloat(job.salesTax) || 0;
     const depositVal = parseFloat(job.deposit) || 0;
-    const totalCalc = calcSubtotal + taxRateVal + salesTaxVal;
+    const totalCalc = calcSubtotal + taxRateVal + salesTaxVal - (isEstimado ? 0 : depositVal);
 
     const nums = [
       calcSubtotal.toFixed(2),
@@ -524,98 +529,85 @@
     return await pdfDoc.save();
   }
   async function showPDFPreview(job) {
-    if (!job) return;
-    const pdfBytes = await buildPDFDoc(job);
-    if (!pdfBytes) return;
-    const filename = `${job.job || job.name || 'document'}_${job.status}.pdf`;
+    try {
+      if (!job) return;
+      const pdfBytes = await buildPDFDoc(job);
+      if (!pdfBytes) return;
 
-    const isMobile = window.innerWidth < 768;
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const blobUrl = URL.createObjectURL(blob);
-    const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+      const prefix = job.status === 'estimado' ? 'Estimate' : 'Invoice';
+      const filename = `${prefix}-${formatId(job.id)} ${job.name || job.job || 'document'}.pdf`;
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+      const canShare = typeof navigator.share === 'function' && typeof File === 'function';
 
-    const overlay = document.createElement('div');
-    overlay.className = 'pdf-overlay';
+      const body = document.createElement('div');
+      body.style.cssText = 'padding:24px;display:flex;flex-direction:column;gap:12px';
 
-    if (isMobile) {
-      overlay.innerHTML = `
-        <div class="pdf-overlay-container" style="max-width:90vw;">
-          <div class="pdf-toolbar">
-            <span class="pdf-toolbar-title">${esc(filename)}</span>
-            <button class="pdf-toolbar-close" id="pdfClose">&times;</button>
-          </div>
-          <div class="pdf-actions" style="padding:20px;">
-            <button class="pdf-btn download" id="pdfDl" style="width:100%;margin-bottom:10px;"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
-            ${canShare ? `
-            <button class="pdf-btn share" id="pdfShare" style="width:100%;"><i class="fas fa-share-alt"></i> ${t('pdf_share')}</button>
-            ` : `
-            ${job.phone ? `<button class="pdf-btn whatsapp" id="pdfWa" style="width:100%;margin-bottom:10px;"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
-            ${job.email ? `<button class="pdf-btn email" id="pdfMail" style="width:100%;"><i class="fas fa-envelope"></i> Email</button>` : ''}
-            `}
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-    } else {
-      overlay.innerHTML = `
-        <div class="pdf-overlay-container">
-          <div class="pdf-toolbar">
-            <span class="pdf-toolbar-title">${esc(filename)}</span>
-            <button class="pdf-toolbar-close" id="pdfClose">&times;</button>
-          </div>
-          <iframe class="pdf-frame" src="${blobUrl}"></iframe>
-          <div class="pdf-actions">
-            <button class="pdf-btn download" id="pdfDl"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
-            ${canShare ? `
-            <button class="pdf-btn share" id="pdfShare"><i class="fas fa-share-alt"></i> ${t('pdf_share')}</button>
-            ` : `
-            ${job.phone ? `<button class="pdf-btn whatsapp" id="pdfWa"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
-            ${job.email ? `<button class="pdf-btn email" id="pdfMail"><i class="fas fa-envelope"></i> Email</button>` : ''}
-            `}
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-    }
-
-    function closePreview() {
-      URL.revokeObjectURL(blobUrl);
-      overlay.remove();
-    }
-
-    $('pdfClose').addEventListener('click', closePreview);
-    overlay.addEventListener('click', e => { if (e.target === overlay) closePreview(); });
-    $('pdfDl').addEventListener('click', () => {
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      a.click();
-    });
-
-    if (canShare) {
-      $('pdfShare').addEventListener('click', async () => {
-        const file = new File([blob], filename, { type: 'application/pdf' });
-        const shareData = {
-          files: [file],
-          title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`,
-          text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2))
-        };
-        try { await navigator.share(shareData); } catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'pdf-btn download';
+      dlBtn.innerHTML = '<i class="fas fa-download"></i> ' + t('view_pdf');
+      dlBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.click();
       });
-    } else {
-      if (job.phone) {
-        $('pdfWa').addEventListener('click', () => {
-          const phone = job.phone.replace(/[^0-9]/g, '');
-          const msg = encodeURIComponent(t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)));
-          window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+      body.appendChild(dlBtn);
+
+      if (canShare) {
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'pdf-btn share';
+        shareBtn.innerHTML = '<i class="fas fa-share-alt"></i> ' + t('pdf_share');
+        shareBtn.addEventListener('click', async () => {
+          const file = new File([blob], filename, { type: 'application/pdf' });
+          try { await navigator.share({ files: [file], title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`, text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)) }); }
+          catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
         });
+        body.appendChild(shareBtn);
+      } else {
+        if (job.phone) {
+          const waBtn = document.createElement('button');
+          waBtn.className = 'pdf-btn whatsapp';
+          waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+          waBtn.addEventListener('click', () => {
+            const phone = job.phone.replace(/[^0-9]/g, '');
+            window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2))), '_blank');
+          });
+          body.appendChild(waBtn);
+        }
+        if (job.email) {
+          const mailBtn = document.createElement('button');
+          mailBtn.className = 'pdf-btn email';
+          mailBtn.innerHTML = '<i class="fas fa-envelope"></i> Email';
+          mailBtn.addEventListener('click', () => {
+            window.open('mailto:' + job.email + '?subject=' + encodeURIComponent((job.status === 'estimado' ? 'Estimate' : 'Invoice') + ' - ' + (job.job || job.name)) + '&body=' + encodeURIComponent(t('pdf_email_body').replace('{name}', job.name || '').replace('{job}', job.job || '').replace('{amount}', calcTotal(job).toFixed(2))), '_blank');
+          });
+          body.appendChild(mailBtn);
+        }
       }
-      if (job.email) {
-        $('pdfMail').addEventListener('click', () => {
-          const subject = encodeURIComponent(`${job.status === 'estimado' ? 'Estimate' : 'Invoice'} - ${job.job || job.name}`);
-          const body = encodeURIComponent(t('pdf_email_body').replace('{name}', job.name || '').replace('{job}', job.job || '').replace('{amount}', calcTotal(job).toFixed(2)));
-          window.open(`mailto:${job.email}?subject=${subject}&body=${body}`, '_blank');
-        });
-      }
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay active';
+      overlay.innerHTML = '<div class="modal-box"><h3>' + esc(filename) + '</h3></div>';
+      overlay.querySelector('.modal-box').appendChild(body);
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-btn cancel';
+      closeBtn.textContent = t('confirm_cancel');
+      closeBtn.style.marginTop = '8px';
+      closeBtn.addEventListener('click', () => { URL.revokeObjectURL(blobUrl); overlay.remove(); });
+      body.appendChild(closeBtn);
+      document.body.appendChild(overlay);
+    } catch (err) {
+      showToast('PDF error: ' + err.message, 'error');
+      console.error(err);
     }
+  }
+
+  /* ===== ID FORMAT ===== */
+  function formatId(id) {
+    const num = parseInt(id, 10) + 3999;
+    const s = String(num).padStart(11, '0');
+    return s.slice(0, 6) + '-' + s.slice(6);
   }
 
   /* ===== GLOBAL EXPORTS ===== */
@@ -637,6 +629,7 @@
   window.setLanguage = setLanguage;
   window.showInstallModal = showInstallModal;
   window.getLang = getLang;
+  window.formatId = formatId;
   window.buildPDFDoc = buildPDFDoc;
   window.showPDFPreview = showPDFPreview;
 

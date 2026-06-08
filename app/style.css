@@ -484,8 +484,22 @@ button {
 
 /* ===== DASHBOARD ===== */
 .dash-header {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
+
+.dash-home {
+  background: none; border: none; color: var(--aquamarine);
+  font-size: 1rem; cursor: pointer; opacity: 0.55;
+  padding: 6px 4px; transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.dash-home:hover { opacity: 1; }
+.dash-search { flex: 1; }
+.dash-filters { width: 100%; }
 
 .dash-title {
   font-family: var(--font-heading);
@@ -497,7 +511,6 @@ button {
 
 .dash-search {
   position: relative;
-  margin-bottom: 14px;
 }
 
 .dash-search i {
@@ -666,6 +679,15 @@ button {
   color: rgba(255, 255, 255, 0.4);
 }
 
+.job-card-id {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: var(--font-body);
+  display: block;
+  margin-top: 1px;
+}
+
 .job-card-amount {
   font-size: 1.05rem;
   font-weight: 700;
@@ -809,14 +831,29 @@ button {
 }
 
 .detail-badge {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 4px 12px;
+  padding: 2px 8px;
   border-radius: 20px;
   white-space: nowrap;
   flex-shrink: 0;
+}
+.detail-badge.estimado {
+  background: rgba(224, 160, 48, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(224, 160, 48, 0.25);
+}
+.detail-badge.invoice {
+  background: rgba(64, 192, 128, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(64, 192, 128, 0.25);
+}
+.detail-badge.done {
+  background: rgba(96, 120, 180, 0.15);
+  color: #7888b0;
+  border: 1px solid rgba(96, 120, 180, 0.25);
 }
 
 .detail-badge.estimado {
@@ -852,6 +889,7 @@ button {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+
 .detail-field:last-of-type {
   border-bottom: none;
 }
@@ -872,13 +910,59 @@ button {
 }
 
 .detail-section-title {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   color: var(--aquamarine);
-  margin-bottom: 8px;
   opacity: 0.8;
+  margin-bottom: 8px;
+}
+.detail-items-list + .detail-section-title,
+.detail-finance + .detail-section-title {
+  margin-top: 16px;
+}
+
+.detail-item-expand {
+  display: none;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  margin-top: -6px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: none;
+}
+.detail-item-expand.open { display: block; }
+.detail-item-row.expanded {
+  border-radius: 8px 8px 0 0;
+  background: rgba(255, 255, 255, 0.07);
+}
+.expand-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+.expand-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.expand-field.expand-full {
+  grid-column: 1 / -1;
+}
+.expand-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--aquamarine);
+  opacity: 0.7;
+}
+.expand-value {
+  font-size: 0.85rem;
+  color: var(--white);
+  line-height: 1.4;
 }
 
 .detail-items-list {
@@ -896,7 +980,10 @@ button {
   background: rgba(255, 255, 255, 0.04);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.detail-item-row:hover { background: rgba(255, 255, 255, 0.08); }
 
 .detail-item-info {
   display: flex;
@@ -917,10 +1004,21 @@ button {
 }
 
 .detail-item-price {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: var(--aqua-light);
+  color: var(--aquamarine);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.detail-item-arrow {
+  font-size: 0.6rem;
+  opacity: 0.35;
+  transition: transform 0.25s;
+}
+.detail-item-row.expanded .detail-item-arrow {
+  transform: rotate(180deg);
 }
 
 .detail-actions {
@@ -1105,6 +1203,30 @@ button {
 .form-view-title {
   text-align: center;
   font-size: 1.1rem;
+}
+
+.edit-badge-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.edit-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 16px;
+  border-radius: 20px;
+}
+.edit-badge.estimado {
+  background: rgba(224, 160, 48, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(224, 160, 48, 0.25);
+}
+.edit-badge.invoice {
+  background: rgba(64, 192, 128, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(64, 192, 128, 0.25);
 }
 
 .form-back {
@@ -1537,6 +1659,16 @@ input[type=number] {
 .form-group input[readonly] {
   opacity: 0.7;
   cursor: default;
+}
+
+.finance-row .form-group {
+  align-items: center;
+}
+.finance-row .form-group label {
+  text-align: center;
+}
+.finance-row .form-group input {
+  text-align: center;
 }
 
 .finance-total-row {
