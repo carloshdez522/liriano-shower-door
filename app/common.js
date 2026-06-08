@@ -1,8 +1,6 @@
 (function () {
   'use strict';
 
-  const API = '/app/api/';
-
   const i18n = {
     en: {
       login_user_ph: 'Username', login_pass_ph: 'Password', login_btn: 'Log In', login_error: 'Invalid credentials',
@@ -125,7 +123,25 @@
     return items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
   }
 
-  /* ===== API (no localStorage fallback) ===== */
+  /* ===== DATA: localStorage (file://) / API (server) ===== */
+  const USE_LOCAL = location.protocol === 'file:';
+  const API = '/app/api/';
+  const STORAGE_KEY = 'liriano_jobs';
+
+  function loadLocalJobs() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch (_) { return []; }
+  }
+  function saveLocalJobs(jobs) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+  }
+  function nextLocalId() {
+    const jobs = loadLocalJobs();
+    let max = 0;
+    for (const j of jobs) { const id = parseInt(j.id, 10); if (id > max) max = id; }
+    return String(max + 1);
+  }
+
   async function apiFetch(method, query, body) {
     let url = API;
     if (query) url += '?' + query;
@@ -137,20 +153,58 @@
     return data;
   }
 
-  async function getJobs() { return await apiFetch('GET'); }
-  async function getJobById(id) { return await apiFetch('GET', 'id=' + encodeURIComponent(id)); }
+  async function getJobs() {
+    if (USE_LOCAL) return loadLocalJobs();
+    return await apiFetch('GET');
+  }
+  async function getJobById(id) {
+    if (USE_LOCAL) return loadLocalJobs().find(j => j.id === id) || null;
+    return await apiFetch('GET', 'id=' + encodeURIComponent(id));
+  }
   async function createJob(data) {
+    if (USE_LOCAL) {
+      data.id = nextLocalId();
+      data.status = 'estimado';
+      data.createdAt = Date.now();
+      const jobs = loadLocalJobs();
+      jobs.push(data);
+      saveLocalJobs(jobs);
+      return data;
+    }
     data.status = 'estimado';
     data.createdAt = Date.now();
     return await apiFetch('POST', null, data);
   }
   async function updateJob(id, data) {
+    if (USE_LOCAL) {
+      data.id = id;
+      const jobs = loadLocalJobs();
+      const idx = jobs.findIndex(j => j.id === id);
+      if (idx === -1) throw new Error('Job not found');
+      jobs[idx] = data;
+      saveLocalJobs(jobs);
+      return data;
+    }
     data.id = id;
     return await apiFetch('PUT', null, data);
   }
-  async function deleteJob(id) { return await apiFetch('DELETE', 'id=' + encodeURIComponent(id)); }
+  async function deleteJob(id) {
+    if (USE_LOCAL) {
+      saveLocalJobs(loadLocalJobs().filter(j => j.id !== id));
+      return { success: true };
+    }
+    return await apiFetch('DELETE', 'id=' + encodeURIComponent(id));
+  }
 
   async function toggleJobStatus(id) {
+    if (USE_LOCAL) {
+      const jobs = loadLocalJobs();
+      const job = jobs.find(j => j.id === id);
+      if (!job) return null;
+      job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
+      saveLocalJobs(jobs);
+      return job;
+    }
     const job = await getJobById(id);
     if (!job) return null;
     job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
@@ -158,6 +212,14 @@
   }
 
   async function toggleJobDone(id) {
+    if (USE_LOCAL) {
+      const jobs = loadLocalJobs();
+      const job = jobs.find(j => j.id === id);
+      if (!job) return null;
+      job.status = 'done';
+      saveLocalJobs(jobs);
+      return job;
+    }
     const job = await getJobById(id);
     if (!job) return null;
     job.status = 'done';
@@ -240,6 +302,322 @@
     btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
   });
 
+  /* ===== PDF GENERATION ===== */
+
+  function getLang() {
+    return localStorage.getItem('liriano_lang') || 'en';
+  }
+
+  async function buildPDFDoc(job) {
+    if (!job) return null;
+    const isEstimado = job.status === 'estimado';
+    const items = job.items || [];
+    const lang = getLang();
+
+    const pfB64 = window.playfairBoldB64;
+    if (!pfB64) throw new Error('Playfair font not loaded');
+
+    const templateUrl = 'plantilla.pdf';
+
+    const tmplResp = await fetch(templateUrl);
+    const tmplBytes = await tmplResp.arrayBuffer();
+
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const pdfDoc = await PDFDocument.load(tmplBytes);
+    pdfDoc.registerFontkit(window.fontkit);
+    const page = pdfDoc.getPages()[0];
+    const ph = page.getHeight();
+
+    const pfBytes = Uint8Array.from(atob(pfB64), c => c.charCodeAt(0));
+    const pfF = await pdfDoc.embedFont(pfBytes);
+    const hv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const hb = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const cDark = rgb(0.098, 0.161, 0.239);
+    const cGray = rgb(0.333, 0.333, 0.333);
+    const cBody = rgb(0.2, 0.2, 0.2);
+    const cWhite = rgb(1, 1, 1);
+
+    const mm = 72 / 25.4;
+    function jsY(y) { return ph - y * mm; }
+    function jsRect(y, h) { return ph - (y + h) * mm; }
+
+    function dText(text, x, y, size, font, color, align) {
+      let xp = x * mm;
+      if (align === 'right' || align === 'end') xp -= font.widthOfTextAtSize(text, size);
+      else if (align === 'center') xp -= font.widthOfTextAtSize(text, size) / 2;
+      page.drawText(text, { x: xp, y: jsY(y), size, font, color });
+    }
+
+    function tWidth(text, size, font) {
+      return font.widthOfTextAtSize(text, size);
+    }
+
+    function splitText(text, maxWidthPt, font, size) {
+      if (!text) return [''];
+      text = String(text);
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = '';
+      for (const word of words) {
+        const test = line ? line + ' ' + word : word;
+        if (tWidth(test, size, font) <= maxWidthPt) {
+          line = test;
+        } else {
+          if (line) lines.push(line);
+          line = word;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.length ? lines : [text === '' ? '' : text];
+    }
+
+    dText(isEstimado ? t('pdf_estimate') : t('pdf_invoice'), 201, 25, 44, pfF, cDark, 'right');
+
+    const prefix = isEstimado ? t('pdf_est_no') : t('pdf_inv_no');
+    dText(prefix + ': ' + (job.id || ''), 200, 32, 12, hv, cGray, 'right');
+    dText(t('job') + ': ' + (job.job || ''), 200, 38, 12, hv, cGray, 'right');
+    dText(t('date') + ': ' + (job.date || ''), 200, 44, 12, hv, cGray, 'right');
+
+    const fromLabel = isEstimado ? t('pdf_est_from') : t('pdf_inv_from');
+    dText(fromLabel, 10, 66, 13.5, hv, cGray, 'left');
+    dText('Liriano & Son Shower Doors Corp', 10, 72, 14.5, hb, cDark, 'left');
+    dText('24528 SW 130 CT Homestead FL 33032', 10, 78, 10.5, hv, cGray, 'left');
+    dText('+1 786 222 4264', 10, 84, 10.5, hv, cGray, 'left');
+
+    const toLabel = isEstimado ? t('pdf_est_to') : t('pdf_inv_to');
+    dText(toLabel, 200, 66, 13.5, hv, cGray, 'right');
+    dText(job.name || '', 200, 72, 14.5, hb, cDark, 'right');
+    if (job.address) dText(job.address, 200, 78, 10.5, hv, cGray, 'right');
+    if (job.phone) dText(job.phone, 200, 84, 10.5, hv, cGray, 'right');
+
+    const cols = [10, 25, 50, 100, 122, 153, 173];
+    const headers = [t('temper'), t('item'), t('pdf_col_glass'), t('dimensions'), t('pdf_col_unit'), t('installation'), t('price')];
+    const rowH = 12;
+    const tableY = 96;
+    const tLeft = 10;
+    const tRight = 200;
+    const tWidth2 = tRight - tLeft;
+
+    page.drawRectangle({ x: tLeft * mm, y: jsRect(tableY, rowH), width: tWidth2 * mm, height: rowH * mm, color: cDark });
+
+    for (let ci = 0; ci < cols.length; ci++) {
+      page.drawLine({
+        start: { x: cols[ci] * mm, y: jsY(tableY) },
+        end: { x: cols[ci] * mm, y: jsY(tableY + rowH) },
+        color: cDark, thickness: 0.5,
+      });
+    }
+    page.drawLine({
+      start: { x: tRight * mm, y: jsY(tableY) },
+      end: { x: tRight * mm, y: jsY(tableY + rowH) },
+      color: cDark, thickness: 0.5,
+    });
+
+    for (let ci = 0; ci < cols.length; ci++) {
+      const cw = (ci < cols.length - 1 ? cols[ci + 1] - cols[ci] : tRight - cols[ci]);
+      dText(headers[ci], cols[ci] + cw / 2, tableY + rowH / 2 + 1, 10, hv, cWhite, 'center');
+    }
+
+    let rowY = tableY + rowH;
+    const lineH = 5.5;
+
+    for (let ri = 0; ri < items.length; ri++) {
+      const it = items[ri];
+      const temper = it.temper === true || it.temper === 'Yes' ? 'x' : '';
+      const dims = (it.dimensionsW || it.dimensionsH)
+        ? (it.dimensionsW || '?') + ' x ' + (it.dimensionsH || '?') + ' ' + (it.dimensionsUnit || 'in')
+        : '';
+      const unitPriceStr = it.unitPrice != null ? String(it.unitPrice) : '';
+      const installStr = it.installation != null ? String(it.installation) + (it.installationUnit ? ' ' + it.installationUnit : '') : '';
+      const vals = [temper, it.item || '', it.glassThickness || '', dims, unitPriceStr, installStr, '$' + (parseFloat(it.price) || 0).toFixed(2)];
+
+      const cellLines = [];
+      let maxLines = 1;
+      for (let ci = 0; ci < cols.length; ci++) {
+        const cw = (ci < cols.length - 1 ? cols[ci + 1] - cols[ci] : tRight - cols[ci]);
+        const lines = splitText(String(vals[ci] || ''), (cw - 2) * mm, hv, 9.5);
+        cellLines.push(lines);
+        if (lines.length > maxLines) maxLines = lines.length;
+      }
+
+      const rowH2 = maxLines * lineH + 2;
+
+      for (let ci = 0; ci < cols.length; ci++) {
+        const cw = (ci < cols.length - 1 ? cols[ci + 1] - cols[ci] : tRight - cols[ci]);
+        const lines = cellLines[ci];
+        const cellOffset = (rowH2 - lines.length * lineH) / 2;
+        const xPos = ci === 6 ? cols[ci] + cw - 1 : cols[ci] + cw / 2;
+        const align = ci === 6 ? 'right' : 'center';
+        for (let li = 0; li < lines.length; li++) {
+          const ly = rowY + cellOffset + li * lineH + lineH * 0.70;
+          dText(lines[li], xPos, ly, 9.5, hv, cBody, align);
+        }
+      }
+
+      page.drawLine({
+        start: { x: tLeft * mm, y: jsY(rowY + rowH2) },
+        end: { x: tRight * mm, y: jsY(rowY + rowH2) },
+        color: cDark, thickness: 0.5,
+      });
+      rowY += rowH2;
+    }
+
+    const calcSubtotal = items.reduce((s, it) => s + (parseFloat(it.price) || 0), 0);
+    const taxRateVal = parseFloat(job.taxRate) || 0;
+    const salesTaxVal = parseFloat(job.salesTax) || 0;
+    const depositVal = parseFloat(job.deposit) || 0;
+    const totalCalc = calcSubtotal + taxRateVal + salesTaxVal;
+
+    const nums = [
+      calcSubtotal.toFixed(2),
+      taxRateVal.toFixed(2),
+      salesTaxVal.toFixed(2),
+      depositVal.toFixed(2),
+      totalCalc.toFixed(2),
+    ];
+    const labels = [t('subtotal'), t('tax_rate'), t('sales_tax'),
+      isEstimado ? t('deposit_required') : t('deposit_received'),
+      t('total_summary').toUpperCase()];
+
+    const longestNum = nums.reduce((a, b) => a.length > b.length ? a : b, '');
+    const dollarX = 198 * mm - tWidth(longestNum, 9.5, hv) - tWidth(' ', 9.5, hv);
+
+    for (let si = 0; si < labels.length; si++) {
+      const isTotal = si === labels.length - 1;
+      const labelLines = splitText(labels[si], 18 * mm, hv, 9.5);
+      const numLines = splitText(nums[si], 25 * mm, hv, 9.5);
+      const maxSl = Math.max(labelLines.length, numLines.length, 1);
+      const rowH2 = maxSl * lineH + 2;
+
+      if (isTotal) {
+        page.drawRectangle({ x: 153 * mm, y: jsRect(rowY, rowH2), width: 20 * mm, height: rowH2 * mm, color: cDark });
+        page.drawRectangle({ x: 173 * mm, y: jsRect(rowY, rowH2), width: 27 * mm, height: rowH2 * mm, color: cDark });
+      }
+
+      const lo = (rowH2 - labelLines.length * lineH) / 2;
+      for (let li = 0; li < labelLines.length; li++) {
+        const ly = rowY + lo + li * lineH + lineH * 0.70;
+        dText(labelLines[li], 153 + 10, ly, 9.5, isTotal ? hb : hv, isTotal ? cWhite : cBody, 'center');
+      }
+
+      const dollarY = rowY + (rowH2 - lineH) / 2 + lineH * 0.70;
+      dText('$', dollarX / mm, dollarY, 9.5, isTotal ? hb : hv, isTotal ? cWhite : cBody, 'center');
+
+      const no = (rowH2 - numLines.length * lineH) / 2;
+      for (let li = 0; li < numLines.length; li++) {
+        const ly = rowY + no + li * lineH + lineH * 0.70;
+        dText(numLines[li], 198, ly, 9.5, isTotal ? hb : hv, isTotal ? cWhite : cBody, 'right');
+      }
+
+      rowY += rowH2;
+    }
+
+    const fy = 235;
+    const fl = 85;
+    page.drawLine({
+      start: { x: (108 - fl) * mm, y: jsY(fy) },
+      end: { x: (108 + fl) * mm, y: jsY(fy) },
+      color: cDark, thickness: 0.5,
+    });
+
+    return await pdfDoc.save();
+  }
+  async function showPDFPreview(job) {
+    if (!job) return;
+    const pdfBytes = await buildPDFDoc(job);
+    if (!pdfBytes) return;
+    const filename = `${job.job || job.name || 'document'}_${job.status}.pdf`;
+
+    const isMobile = window.innerWidth < 768;
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const blobUrl = URL.createObjectURL(blob);
+    const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'pdf-overlay';
+
+    if (isMobile) {
+      overlay.innerHTML = `
+        <div class="pdf-overlay-container" style="max-width:90vw;">
+          <div class="pdf-toolbar">
+            <span class="pdf-toolbar-title">${esc(filename)}</span>
+            <button class="pdf-toolbar-close" id="pdfClose">&times;</button>
+          </div>
+          <div class="pdf-actions" style="padding:20px;">
+            <button class="pdf-btn download" id="pdfDl" style="width:100%;margin-bottom:10px;"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
+            ${canShare ? `
+            <button class="pdf-btn share" id="pdfShare" style="width:100%;"><i class="fas fa-share-alt"></i> ${t('pdf_share')}</button>
+            ` : `
+            ${job.phone ? `<button class="pdf-btn whatsapp" id="pdfWa" style="width:100%;margin-bottom:10px;"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
+            ${job.email ? `<button class="pdf-btn email" id="pdfMail" style="width:100%;"><i class="fas fa-envelope"></i> Email</button>` : ''}
+            `}
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    } else {
+      overlay.innerHTML = `
+        <div class="pdf-overlay-container">
+          <div class="pdf-toolbar">
+            <span class="pdf-toolbar-title">${esc(filename)}</span>
+            <button class="pdf-toolbar-close" id="pdfClose">&times;</button>
+          </div>
+          <iframe class="pdf-frame" src="${blobUrl}"></iframe>
+          <div class="pdf-actions">
+            <button class="pdf-btn download" id="pdfDl"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
+            ${canShare ? `
+            <button class="pdf-btn share" id="pdfShare"><i class="fas fa-share-alt"></i> ${t('pdf_share')}</button>
+            ` : `
+            ${job.phone ? `<button class="pdf-btn whatsapp" id="pdfWa"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
+            ${job.email ? `<button class="pdf-btn email" id="pdfMail"><i class="fas fa-envelope"></i> Email</button>` : ''}
+            `}
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+
+    function closePreview() {
+      URL.revokeObjectURL(blobUrl);
+      overlay.remove();
+    }
+
+    $('pdfClose').addEventListener('click', closePreview);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closePreview(); });
+    $('pdfDl').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      a.click();
+    });
+
+    if (canShare) {
+      $('pdfShare').addEventListener('click', async () => {
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        const shareData = {
+          files: [file],
+          title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`,
+          text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2))
+        };
+        try { await navigator.share(shareData); } catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
+      });
+    } else {
+      if (job.phone) {
+        $('pdfWa').addEventListener('click', () => {
+          const phone = job.phone.replace(/[^0-9]/g, '');
+          const msg = encodeURIComponent(t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)));
+          window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        });
+      }
+      if (job.email) {
+        $('pdfMail').addEventListener('click', () => {
+          const subject = encodeURIComponent(`${job.status === 'estimado' ? 'Estimate' : 'Invoice'} - ${job.job || job.name}`);
+          const body = encodeURIComponent(t('pdf_email_body').replace('{name}', job.name || '').replace('{job}', job.job || '').replace('{amount}', calcTotal(job).toFixed(2)));
+          window.open(`mailto:${job.email}?subject=${subject}&body=${body}`, '_blank');
+        });
+      }
+    }
+  }
+
   /* ===== GLOBAL EXPORTS ===== */
   window.$ = $;
   window.t = t;
@@ -258,6 +636,9 @@
   window.applyTranslations = applyTranslations;
   window.setLanguage = setLanguage;
   window.showInstallModal = showInstallModal;
+  window.getLang = getLang;
+  window.buildPDFDoc = buildPDFDoc;
+  window.showPDFPreview = showPDFPreview;
 
   /* ===== INIT ===== */
   if (isStandalone) localStorage.setItem('liriano_installed', 'true');

@@ -46,7 +46,7 @@
       });
 
       recordList.querySelectorAll('.view-pdf').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); getJobById(btn.dataset.id).then(j => showPDFPreview(j)); });
+        btn.addEventListener('click', async e => { e.stopPropagation(); const j = await getJobById(btn.dataset.id); await showPDFPreview(j); });
       });
 
       recordList.querySelectorAll('.delete').forEach(btn => {
