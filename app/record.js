@@ -414,7 +414,7 @@
   [filterFrom, filterTo].forEach(inp => {
     if (!inp) return;
     const wrapper = document.createElement('span');
-    wrapper.style.cssText = 'position:relative;display:inline-flex;flex:1;max-width:160px';
+    wrapper.className = 'date-filter-wrapper';
     inp.parentElement.insertBefore(wrapper, inp);
     wrapper.appendChild(inp);
     const wrap = document.createElement('div');

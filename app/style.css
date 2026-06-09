@@ -581,6 +581,7 @@ button {
   width: 100%;
   margin-top: 4px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 .date-filter-label {
   font-size: 0.72rem;
@@ -633,6 +634,12 @@ button {
 .date-filter-input::-webkit-calendar-picker-indicator {
   filter: invert(1);
   cursor: pointer;
+}
+.date-filter-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex: 1;
+  max-width: 160px;
 }
 
 .dash-title {
@@ -2294,6 +2301,11 @@ input[type=number] {
 }
 
 /* ===== REVIEWS ADMIN ===== */
+.review-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .reviews-admin-stats {
   display: flex;
   gap: 10px;
@@ -2439,6 +2451,18 @@ input[type=number] {
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
+  }
+
+  .date-filter-bar {
+    gap: 6px;
+  }
+  .date-filter-wrapper,
+  .date-filter-input {
+    max-width: none;
+    min-width: 0;
+  }
+  .date-filter-bar .filter-clear-btn {
+    margin-left: 0;
   }
 
   .vale-form {
@@ -2618,6 +2642,11 @@ input[type=number] {
   }
   .stat-value {
     font-size: 1.1rem;
+  }
+
+  .date-filter-bar .filter-clear-btn {
+    width: 100%;
+    justify-content: center;
   }
   .detail-overlay {
     padding: 8px;
