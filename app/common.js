@@ -155,7 +155,11 @@
 
   function calcTotal(job) {
     if (!job || !job.items || !job.items.length) return 0;
-    return job.items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
+    const itemsTotal = job.items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
+    if (job.status === 'invoice' || job.status === 'done') {
+      return itemsTotal - (parseFloat(job.deposit) || 0);
+    }
+    return itemsTotal;
   }
 
   function calcItemsTotal(items) {

@@ -7,8 +7,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
-/* GET público (approved=true) no requiere auth */
-$isPublic = ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['approved']));
+/* GET público (approved=true) y POST público (crear review) no requieren auth */
+$isPublic = (
+  ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['approved'])) ||
+  $_SERVER['REQUEST_METHOD'] === 'POST'
+);
 
 if (!$isPublic) {
   requireAuth();
