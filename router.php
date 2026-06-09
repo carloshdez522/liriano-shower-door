@@ -17,7 +17,22 @@ if ($path === '/app/records' || $path === '/app/records/') {
 }
 
 if ($path === '/app/login' || $path === '/app/login/') {
-  include __DIR__ . '/app/login.html';
+  include __DIR__ . '/app/index.html';
+  return true;
+}
+
+if ($path === '/app/dashboard' || $path === '/app/dashboard/') {
+  include __DIR__ . '/app/dashboard.html';
+  return true;
+}
+
+if ($path === '/app/reviews' || $path === '/app/reviews/') {
+  include __DIR__ . '/app/reviews.html';
+  return true;
+}
+
+if ($path === '/reviews' || $path === '/reviews/') {
+  include __DIR__ . '/reviews.html';
   return true;
 }
 

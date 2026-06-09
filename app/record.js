@@ -55,90 +55,34 @@
 
     function rec(jobId, status, daysOffset) {
       const job = idMap[String(jobId)];
+      if (!job) return null;
+      const createdAt = seedYMD(2026, 3, daysOffset);
       return {
-        id: String(seedId++),
-        jobId: job.id,
-        status: status,
-        jobName: job.job || '',
-        clientName: job.name || '',
-        snapshot: snap(job),
-        createdAt: seedYMD(2026, 3, daysOffset),
+        jobId: job.id, status: status,
+        jobName: job.job || '', clientName: job.name || '',
+        snapshot: snap(job), createdAt: createdAt,
       };
     }
 
-    var seedId = 1;
+    var records = [
+      rec(1001, 'estimado', 1), rec(1001, 'edited', 5),
+      rec(1002, 'estimado', 1), rec(1002, 'edited', 4), rec(1002, 'invoice', 8),
+      rec(1004, 'estimado', 1), rec(1004, 'edited', 3), rec(1004, 'invoice', 8), rec(1004, 'edited', 11),
+      rec(1006, 'estimado', 1), rec(1006, 'edited', 6), rec(1006, 'invoice', 13),
+      rec(1008, 'estimado', 1), rec(1008, 'invoice', 9), rec(1008, 'done', 17),
+      rec(1010, 'estimado', 1), rec(1010, 'invoice', 8), rec(1010, 'edited', 12), rec(1010, 'deleted', 17),
+    ].filter(Boolean);
 
-    /* Helper to create records in chronological order */
-    function make(jobId, transitions) {
-      var day = 0;
-      return transitions.map(t => {
-        day += t.days;
-        return rec(jobId, t.status, day);
-      });
+    for (const r of records) {
+      await apiFetch('POST', null, r, RECORDS_API);
     }
-
-    var records = [].concat(
-      make('1', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 4 },
-      ]),
-      make('2', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 3 },
-        { status: 'invoice',  days: 4 },
-      ]),
-      make('4', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 2 },
-        { status: 'invoice',  days: 5 },
-        { status: 'edited',   days: 3 },
-      ]),
-      make('6', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 5 },
-        { status: 'invoice',  days: 7 },
-      ]),
-      make('8', [
-        { status: 'estimado', days: 1 },
-        { status: 'invoice',  days: 8 },
-        { status: 'done',     days: 8 },
-      ]),
-      make('10', [
-        { status: 'estimado', days: 1 },
-        { status: 'invoice',  days: 7 },
-        { status: 'edited',   days: 4 },
-        { status: 'deleted',  days: 5 },
-      ]),
-      make('15', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 4 },
-        { status: 'edited',   days: 5 },
-        { status: 'invoice',  days: 5 },
-      ]),
-      make('16', [
-        { status: 'estimado', days: 1 },
-        { status: 'invoice',  days: 7 },
-        { status: 'edited',   days: 6 },
-        { status: 'done',     days: 7 },
-      ]),
-      make('17', [
-        { status: 'estimado', days: 1 },
-        { status: 'edited',   days: 2 },
-        { status: 'invoice',  days: 3 },
-        { status: 'done',     days: 5 },
-      ]),
-      make('18', [
-        { status: 'estimado', days: 1 },
-        { status: 'invoice',  days: 10 },
-        { status: 'done',     days: 16 },
-      ]),
-    );
-
-    localStorage.setItem('liriano_records', JSON.stringify(records));
   }
 
   window.resetRecords = async function () {
-    localStorage.removeItem('liriano_records');
+    var all = await getRecords();
+    for (const r of all) {
+      await deleteRecord(r.id);
+    }
     await seedRealisticRecords();
     location.reload();
   };
@@ -156,7 +100,6 @@
     try {
       const prevStatus = (snap.status === 'estimado' || snap.status === 'invoice' || snap.status === 'done') ? snap.status : 'estimado';
       await window.restoreJob(snap, rec.jobId);
-      await window.createRecord(snap, prevStatus);
       showToast(t('records_recovered'));
       loadRecords();
     } catch (e) {
@@ -224,7 +167,6 @@
         </div>`;
     }).join('');
 
-    /* ===== Card click → toggle timeline ===== */
     recordList.querySelectorAll('.job-card').forEach(card => {
       card.addEventListener('click', e => {
         if (e.target.closest('.record-expand-btn, .timeline-action')) return;
@@ -233,7 +175,6 @@
       });
     });
 
-    /* ===== Expand/collapse ===== */
     recordList.querySelectorAll('.record-expand-btn').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
@@ -244,7 +185,6 @@
       });
     });
 
-    /* ===== Timeline entry: view detail ===== */
     recordList.querySelectorAll('.timeline-action.view').forEach(btn => {
       btn.addEventListener('click', async e => {
         e.stopPropagation();
@@ -253,7 +193,6 @@
       });
     });
 
-    /* ===== Timeline entry: download PDF ===== */
     recordList.querySelectorAll('.timeline-action.pdf').forEach(btn => {
       btn.addEventListener('click', async e => {
         e.stopPropagation();
@@ -265,7 +204,6 @@
       });
     });
 
-    /* ===== Timeline entry: restore deleted job ===== */
     recordList.querySelectorAll('.timeline-action.recover').forEach(btn => {
       btn.addEventListener('click', async e => {
         e.stopPropagation();
@@ -398,7 +336,6 @@
 
       allRecords.sort((a, b) => b.createdAt - a.createdAt);
 
-      /* Group by jobId */
       const map = {};
       for (const r of allRecords) {
         if (!map[r.jobId]) {
@@ -421,12 +358,10 @@
         });
       }
 
-      /* Status filter */
       if (activeFilter !== 'all') {
         groups = groups.filter(g => cardStatus(g) === activeFilter);
       }
 
-      /* Date filter (by job's date field) */
       const fromVal = filterFrom.value;
       const toVal = filterTo.value;
       if (fromVal || toVal) {
@@ -452,7 +387,6 @@
   if (filterFrom) filterFrom.addEventListener('change', loadRecords);
   if (filterTo) filterTo.addEventListener('change', loadRecords);
 
-  /* Status filter buttons */
   document.querySelectorAll('#filterBar .filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#filterBar .filter-btn').forEach(b => b.classList.remove('active'));
@@ -462,7 +396,6 @@
     });
   });
 
-  /* Clear filters button */
   const filterClear = $('filterClear');
   if (filterClear) {
     filterClear.addEventListener('click', () => {
@@ -477,7 +410,6 @@
     });
   }
 
-  /* Date picker: make entire input clickable */
   [filterFrom, filterTo].forEach(inp => {
     if (!inp) return;
     const wrapper = document.createElement('span');

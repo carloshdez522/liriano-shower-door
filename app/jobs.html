@@ -25,6 +25,7 @@
   <title>Liriano & Son — Jobs</title>
 </head>
 <body>
+<script>(function(){fetch('/app/api/auth.php',{credentials:'same-origin'}).then(function(r){if(!r.ok)window.location.href='/app/'}).catch(function(){window.location.href='/app/'})})();</script>
   <div class="app-container" id="appContainer" style="display:flex">
     <header class="app-header">
       <div class="app-header-inner">
@@ -270,6 +271,7 @@
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('sw.js');
     }
+    startHeartbeat();
   </script>
 </body>
 </html>

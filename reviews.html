@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Share Your Experience - Liriano &amp; Son Shower Doors Corp</title>
+  <link rel="icon" type="image/webp" href="images/logo.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="reviews.css">
+</head>
+<body>
+
+  <nav class="nav" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <img src="images/logo.webp" alt="Liriano &amp; Son" class="nav-logo-img">
+        <span class="nav-logo-text">
+          <span class="nav-logo-top">Liriano <span>&amp;</span> Son</span>
+          <span class="nav-logo-sub">Shower Doors Corp</span>
+        </span>
+      </a>
+      <div class="nav-lang" id="navLang">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <span class="lang-sep">|</span>
+        <button class="lang-btn" data-lang="es">ES</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="reviews-form-section" id="reviewFormSection">
+    <div class="reviews-form-bg" style="background-image:url('images/hero-bg.webp');"></div>
+    <div class="reviews-form-overlay"></div>
+    <div class="container reviews-form-container">
+      <div class="reviews-form-panel">
+        <div class="reviews-form-info">
+          <span class="section-label" style="color:var(--aquamarine)" data-i18n="reviews_form_label">Leave a Review</span>
+          <h3 data-i18n="reviews_form_title">Tell Us About Your Experience</h3>
+          <p data-i18n="reviews_form_p">Your feedback helps us improve and helps others choose with confidence.</p>
+        </div>
+        <form class="reviews-form-body" id="reviewForm" novalidate>
+          <input type="hidden" id="reviewRating" value="0">
+
+          <div class="reviews-form-group">
+            <label data-i18n="reviews_form_name">Your Name</label>
+            <input type="text" id="reviewName" required data-i18n-placeholder="reviews_form_name_ph" placeholder="John Doe">
+          </div>
+
+          <div class="reviews-form-group">
+            <label data-i18n="reviews_form_service">Service Received</label>
+            <select id="reviewService" data-i18n-placeholder="reviews_form_select">
+              <option value="" data-i18n="reviews_form_select">Select a service</option>
+              <option value="Shower Doors">Shower Doors</option>
+              <option value="Custom Cabinets">Custom Cabinets</option>
+              <option value="Partitions & Railings">Partitions & Railings</option>
+              <option value="Repair & Replacement">Repair & Replacement</option>
+              <option value="Custom Mirrors & Glass">Custom Mirrors & Glass</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="reviews-form-group">
+            <label data-i18n="reviews_form_rating">Rating</label>
+            <div class="star-rating" id="starRating">
+              <i class="fas fa-star" data-value="1"></i>
+              <i class="fas fa-star" data-value="2"></i>
+              <i class="fas fa-star" data-value="3"></i>
+              <i class="fas fa-star" data-value="4"></i>
+              <i class="fas fa-star" data-value="5"></i>
+            </div>
+          </div>
+
+          <div class="reviews-form-group">
+            <label data-i18n="reviews_form_review">Your Review</label>
+            <textarea id="reviewText" rows="4" data-i18n-placeholder="reviews_form_review_ph" placeholder="Tell us about your experience..."></textarea>
+          </div>
+
+          <div class="reviews-form-group">
+            <label data-i18n="reviews_form_photo">Photo (optional)</label>
+            <div class="photo-upload" id="photoUpload" onclick="document.getElementById('reviewPhoto').click()">
+              <i class="fas fa-camera"></i>
+              <span data-i18n="reviews_form_photo_btn">Add a photo of your project</span>
+            </div>
+            <div class="photo-preview" id="photoPreview" style="display:none">
+              <img id="photoPreviewImg" alt="Preview">
+              <button type="button" id="photoRemove" class="photo-remove"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="file" id="reviewPhoto" accept="image/*" style="display:none">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="reviewSubmitBtn">
+            <span data-i18n="reviews_form_submit">Submit Review</span>
+          </button>
+          <div class="reviews-form-success" id="reviewSuccess">
+            <i class="fas fa-check-circle"></i>
+            <span data-i18n="reviews_form_success">Thank you! Your review has been submitted and is pending approval.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer__gradient"></div>
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <div class="nav-logo">
+          <img src="images/logo.webp" alt="Liriano &amp; Son" class="nav-logo-img">
+          <span class="nav-logo-text">
+            <span class="nav-logo-top">Liriano <span>&amp;</span> Son</span>
+            <span class="nav-logo-sub">Shower Doors Corp</span>
+          </span>
+        </div>
+        <p data-i18n="footer_p">Excellence in glass since 2019. Free estimates for all of Miami, Miami-Dade and Broward!</p>
+      </div>
+      <div class="footer__right">
+        <div class="footer__social">
+          <a href="https://www.instagram.com/liriano_and_son_showers_doors/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.facebook.com/misael.liriano.79" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://wa.me/17862224264" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="footer__info">
+          <a href="mailto:misaelliriano75@gmail.com"><i class="fas fa-envelope"></i> misaelliriano75@gmail.com</a>
+          <a href="tel:+17862224264"><i class="fas fa-phone"></i> +1 (786) 222-4264</a>
+        </div>
+        <div class="footer__copy" data-i18n="footer_copy">&copy; 2026 Liriano and Son Shower Doors Corp</div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="review-modal" id="reviewModal">
+    <div class="review-modal-backdrop"></div>
+    <div class="review-modal-content">
+      <div class="review-modal-icon"><i class="fas fa-check-circle"></i></div>
+      <h2 data-i18n="review_modal_title">Thank You!</h2>
+      <p data-i18n="review_modal_msg">Your review has been submitted successfully and is pending approval.</p>
+      <div class="review-modal-stars" id="modalStars"></div>
+      <a href="https://lirianosonglassprofessional.com" class="btn btn-primary" data-i18n="review_modal_exit">Exit</a>
+    </div>
+  </div>
+
+  <script src="reviews.js"></script>
+</body>
+</html>

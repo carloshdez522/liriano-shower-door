@@ -37,6 +37,15 @@
       pdf_est_from: 'Estimate from:', pdf_inv_from: 'Invoice from:', pdf_est_to: 'Estimate to:', pdf_inv_to: 'Invoice to:',
       pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No',       pdf_col_glass: 'Glass Thickness', pdf_col_unit: 'Unit Price', pdf_col_desc: 'Description',
       pdf_thanks: 'Thank you for choosing us!',
+      dashboard_stats: 'Overview', total_value: 'Total Value', deposits: 'Deposits', conversion_rate: 'Conv. Rate',
+      dashboard: 'Dashboard', pending_reviews: 'Pending Reviews',
+      reviews_card: 'Pending Reviews', reviews_title: 'Reviews',
+      reviews_all: 'Total', reviews_pending: 'Pending', reviews_approved: 'Approved', reviews_rejected: 'Rejected',
+      reviews_approve: 'Approve', reviews_reject: 'Reject',
+      reviews_approved_msg: 'Review approved!', reviews_rejected_msg: 'Review rejected.',
+      reviews_delete_msg: 'This review will be permanently deleted.',
+      reviews_empty_list: 'No reviews yet.',
+      reviews_loading: 'Loading...',
     },
     es: {
       login_user_ph: 'Usuario', login_pass_ph: 'Contraseña', login_btn: 'Entrar', login_error: 'Credenciales inválidas',
@@ -74,6 +83,13 @@
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
       pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
       pdf_thanks: '¡Gracias por preferirnos!',
+      reviews_card: 'Reseñas Pendientes', reviews_title: 'Reseñas',
+      reviews_all: 'Total', reviews_pending: 'Pendientes', reviews_approved: 'Aprobadas', reviews_rejected: 'Rechazadas',
+      reviews_approve: 'Aprobar', reviews_reject: 'Rechazar',
+      reviews_approved_msg: '¡Reseña aprobada!', reviews_rejected_msg: 'Reseña rechazada.',
+      reviews_delete_msg: 'Esta reseña se eliminará permanentemente.',
+      reviews_empty_list: 'Sin reseñas aún.',
+      reviews_loading: 'Cargando...',
     },
   };
 
@@ -137,173 +153,60 @@
     return items.reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
   }
 
-  /* ===== DATA: localStorage (file://) / API (server) ===== */
-  const USE_LOCAL = location.protocol === 'file:';
+  /* ===== API (siempre remoto) ===== */
   const API = '/app/api/';
-  const STORAGE_KEY = 'liriano_jobs';
-  const STORAGE_KEY_RECORDS = 'liriano_records';
+  const REVIEWS_API = '/app/api/reviews.php';
+  const RECORDS_API = '/app/api/records.php';
 
-  function loadLocalJobs() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch (_) { return []; }
-  }
-  function saveLocalJobs(jobs) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  }
-  function nextLocalId() {
-    const jobs = loadLocalJobs();
-    let max = 0;
-    for (const j of jobs) { const id = parseInt(j.id, 10); if (id > max) max = id; }
-    return String(max + 1);
-  }
-
-  /* ===== RECORDS (history log) ===== */
-  function loadLocalRecords() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY_RECORDS)) || []; }
-    catch (_) { return []; }
-  }
-  function saveLocalRecords(records) {
-    localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
-  }
-  function nextLocalRecordId() {
-    const records = loadLocalRecords();
-    let max = 0;
-    for (const r of records) { const id = parseInt(r.id, 10); if (id > max) max = id; }
-    return String(max + 1);
-  }
-
-  async function createRecord(job, status) {
-    const record = {
-      id: nextLocalRecordId(),
-      jobId: job.id,
-      status: status,
-      jobName: job.job || '',
-      clientName: job.name || '',
-      snapshot: JSON.parse(JSON.stringify(job)),
-      createdAt: Date.now(),
-    };
-    const records = loadLocalRecords();
-    records.push(record);
-    saveLocalRecords(records);
-    return record;
-  }
-
-  async function getRecords() {
-    return loadLocalRecords();
-  }
-
-  async function getRecordById(id) {
-    return loadLocalRecords().find(r => String(r.id) === String(id)) || null;
-  }
-
-  async function deleteRecord(id) {
-    saveLocalRecords(loadLocalRecords().filter(r => r.id !== id));
-    return { success: true };
-  }
-
-  async function apiFetch(method, query, body) {
-    let url = API;
+  async function apiFetch(method, query, body, customUrl) {
+    let url = customUrl || API;
     if (query) url += '?' + query;
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const opts = { method, headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin' };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
+    if (res.status === 401) {
+      window.location.href = '/app/';
+      throw new Error('Session expired');
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || t('error_api'));
     return data;
   }
 
-  function loadSeedFromScript() {
-    return new Promise(function (resolve) {
-      var s = document.createElement('script');
-      s.src = 'data/jobs.js';
-      s.onload = function () { resolve(window._seedJobs || null); };
-      s.onerror = function () { resolve(null); };
-      document.head.appendChild(s);
-    });
-  }
-
+  /* ===== JOBS ===== */
   async function getJobs() {
-    if (USE_LOCAL) {
-      var jobs = loadLocalJobs();
-      if (jobs.length === 0) {
-        try {
-          var res = await fetch('data/jobs.json');
-          if (res.ok) { jobs = await res.json(); saveLocalJobs(jobs); }
-        } catch {}
-        if (jobs.length === 0) {
-          var seed = await loadSeedFromScript();
-          if (seed) { jobs = seed; saveLocalJobs(jobs); }
-        }
-      }
-      return jobs;
-    }
     return await apiFetch('GET');
   }
+
   async function getJobById(id) {
-    if (USE_LOCAL) return loadLocalJobs().find(j => String(j.id) === String(id)) || null;
     return await apiFetch('GET', 'id=' + encodeURIComponent(id));
   }
+
   async function createJob(data) {
-    let job;
-    if (USE_LOCAL) {
-      data.id = nextLocalId();
-      data.status = 'estimado';
-      data.createdAt = Date.now();
-      const jobs = loadLocalJobs();
-      jobs.push(data);
-      saveLocalJobs(jobs);
-      job = data;
-    } else {
-      data.status = 'estimado';
-      data.createdAt = Date.now();
-      job = await apiFetch('POST', null, data);
-    }
+    data.status = 'estimado';
+    data.createdAt = Date.now();
+    const job = await apiFetch('POST', null, data);
     await createRecord(job, 'estimado');
     return job;
   }
+
   async function updateJob(id, data) {
-    if (USE_LOCAL) {
-      const jobs = loadLocalJobs();
-      const idx = jobs.findIndex(j => String(j.id) === String(id));
-      if (idx === -1) throw new Error('Job not found');
-      const job = jobs[idx];
-      var merged = Object.assign({}, job, data);
-      merged.id = job.id;
-      merged.createdAt = job.createdAt;
-      if (!data.status) merged.status = job.status;
-      jobs[idx] = merged;
-      saveLocalJobs(jobs);
-      var isPartialStatus = Object.keys(data).length === 1 && 'status' in data;
-      var recordStatus = isPartialStatus ? data.status : 'edited';
-      await createRecord(merged, recordStatus);
-      return merged;
-    }
     data.id = id;
-    var result = await apiFetch('PUT', null, data);
-    await createRecord(result, result.status || 'edited');
+    const result = await apiFetch('PUT', null, data);
+    const isPartialStatus = Object.keys(data).length === 1 && 'status' in data;
+    const recordStatus = isPartialStatus ? data.status : 'edited';
+    await createRecord(result, recordStatus || 'edited');
     return result;
   }
+
   async function deleteJob(id) {
-    if (USE_LOCAL) {
-      const jobs = loadLocalJobs();
-      var job = jobs.find(j => String(j.id) === String(id));
-      if (job) await createRecord(job, 'deleted');
-      saveLocalJobs(jobs.filter(j => String(j.id) !== String(id)));
-      return { success: true };
-    }
-    var job = await getJobById(id);
+    const job = await getJobById(id);
     if (job) await createRecord(job, 'deleted');
     return await apiFetch('DELETE', 'id=' + encodeURIComponent(id));
   }
 
   async function toggleJobStatus(id) {
-    if (USE_LOCAL) {
-      const jobs = loadLocalJobs();
-      var job = jobs.find(j => String(j.id) === String(id));
-      if (!job) return null;
-      return await updateJob(id, { status: job.status === 'estimado' ? 'invoice' : 'estimado' });
-    }
-    var job = await getJobById(id);
+    const job = await getJobById(id);
     if (!job) return null;
     return await updateJob(id, { status: job.status === 'estimado' ? 'invoice' : 'estimado' });
   }
@@ -313,18 +216,91 @@
   }
 
   async function toggleJobArchive(id) {
-    if (USE_LOCAL) {
-      const jobs = loadLocalJobs();
-      const job = jobs.find(j => String(j.id) === String(id));
-      if (!job) return null;
-      job.archived = !job.archived;
-      saveLocalJobs(jobs);
-      return job;
-    }
     const job = await getJobById(id);
     if (!job) return null;
     job.archived = !job.archived;
     return await updateJob(id, job);
+  }
+
+  /* ===== REVIEWS ===== */
+  async function getReviews() {
+    const res = await fetch(REVIEWS_API, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(t('error_api'));
+    return await res.json();
+  }
+
+  async function createReview(data) {
+    const res = await fetch(REVIEWS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'same-origin',
+    });
+    if (!res.ok) throw new Error(t('error_api'));
+    return await res.json();
+  }
+
+  async function updateReview(id, data) {
+    data.id = id;
+    const res = await fetch(REVIEWS_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'same-origin',
+    });
+    if (!res.ok) throw new Error(t('error_api'));
+    return await res.json();
+  }
+
+  async function deleteReview(id) {
+    const res = await fetch(REVIEWS_API + '?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    });
+    if (!res.ok) throw new Error(t('error_api'));
+    return await res.json();
+  }
+
+  /* ===== RECORDS (historial via API) ===== */
+  async function createRecord(job, status) {
+    const record = {
+      jobId: job.id,
+      status: status,
+      jobName: job.job || '',
+      clientName: job.name || '',
+      snapshot: JSON.parse(JSON.stringify(job)),
+      createdAt: Date.now(),
+    };
+    return await apiFetch('POST', null, record, RECORDS_API);
+  }
+
+  async function getRecords() {
+    return await apiFetch('GET', null, null, RECORDS_API);
+  }
+
+  async function getRecordById(id) {
+    return await apiFetch('GET', 'id=' + encodeURIComponent(id), null, RECORDS_API);
+  }
+
+  async function deleteRecord(id) {
+    return await apiFetch('DELETE', 'id=' + encodeURIComponent(id), null, RECORDS_API);
+  }
+
+  async function restoreJob(snapshot, jobId) {
+    if (!snapshot) return;
+    var prevStatus = (snapshot.status === 'estimado' || snapshot.status === 'invoice' || snapshot.status === 'done') ? snapshot.status : 'estimado';
+    var job = JSON.parse(JSON.stringify(snapshot));
+    job.status = prevStatus;
+    job.id = jobId;
+    job.createdAt = Date.now();
+    try {
+      return await updateJob(jobId, job);
+    } catch (e) {
+      job._restore = true;
+      const created = await apiFetch('POST', null, job);
+      await createRecord(created, prevStatus);
+      return created;
+    }
   }
 
   /* ===== MODAL ===== */
@@ -632,6 +608,7 @@
 
     return await pdfDoc.save();
   }
+
   async function showPDFPreview(job, anchorEl) {
     try {
       if (!job) return;
@@ -643,6 +620,7 @@
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const blobUrl = URL.createObjectURL(blob);
       const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+      const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
 
       const overlay = document.createElement('div');
       overlay.className = 'pdf-blur-overlay';
@@ -653,18 +631,23 @@
       let anchorClone = null;
 
       if (anchorEl) {
+        var btnCount = 1;
+        if (canShare) btnCount++;
+        if (phone) btnCount++;
+        var fabHeight = btnCount * 52 + (btnCount - 1) * 12;
         const rect = anchorEl.getBoundingClientRect();
         const gap = 10;
-        const rightSpace = window.innerWidth - rect.right;
-        const left = rightSpace >= 70 ? rect.right + gap : rect.left - 62 - gap;
-        const belowSpace = window.innerHeight - rect.top;
-        const fabHeight = 52 * 2 + 12;
+        const left = rect.left + rect.width + gap;
+        var belowSpace = window.innerHeight - rect.bottom;
         if (belowSpace >= fabHeight) {
-          fabContainer.style.cssText = 'position:fixed;top:' + rect.top + 'px;left:' + left + 'px;bottom:auto;right:auto;';
+          fabContainer.style.cssText = 'position:fixed;top:' + (rect.bottom + gap) + 'px;left:' + left + 'px;bottom:auto;right:auto;';
         } else {
-          fabContainer.style.cssText = 'position:fixed;bottom:' + (window.innerHeight - rect.bottom) + 'px;left:' + left + 'px;top:auto;right:auto;';
+          fabContainer.style.cssText = 'position:fixed;bottom:' + (window.innerHeight - rect.top + gap) + 'px;left:' + left + 'px;top:auto;right:auto;';
         }
-
+        if (left + 62 > window.innerWidth) {
+          fabContainer.style.left = 'auto';
+          fabContainer.style.right = '14px';
+        }
         anchorClone = anchorEl.cloneNode(true);
         anchorClone.style.cssText = 'position:fixed;top:' + rect.top + 'px;left:' + rect.left + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:100000;margin:0;pointer-events:none;';
         anchorClone.className = anchorEl.className;
@@ -707,20 +690,39 @@
           } catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
         });
         fabContainer.appendChild(shareFab);
-      } else {
-        const shareFab = document.createElement('button');
-        shareFab.className = 'pdf-fab share';
-        shareFab.innerHTML = '<i class="fab fa-whatsapp"></i>';
-        shareFab.setAttribute('aria-label', 'WhatsApp');
-        shareFab.addEventListener('click', e => {
+      }
+
+      if (phone) {
+        const REVIEW_URL = 'https://lirianosonglassprofessional.com/reviews';
+        const waFab = document.createElement('button');
+        waFab.className = 'pdf-fab whatsapp';
+        waFab.setAttribute('aria-label', 'WhatsApp');
+        waFab.innerHTML = '<i class="fab fa-whatsapp"></i>';
+        waFab.addEventListener('click', async e => {
           e.stopPropagation();
-          const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
-          if (phone) {
-            window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2))), '_blank');
-            dismiss();
+          const isEst = job.status === 'estimado';
+          const totalAmt = calcTotal(job).toFixed(2);
+          var msg = 'Hello, we are Liriano & Son Shower Doors Corp and this is your '
+            + (isEst ? 'estimate' : 'invoice')
+            + ' for the job: ' + (job.job || job.name || '')
+            + ' - Total: $' + totalAmt;
+          if (!isEst) {
+            msg += '\n\nIf you were satisfied with the work, we would appreciate your review at: ' + REVIEW_URL;
           }
+          try {
+            if (typeof navigator.share === 'function' && typeof File === 'function') {
+              const file = new File([blob], filename, { type: 'application/pdf' });
+              await navigator.share({ files: [file], text: msg });
+              dismiss();
+              return;
+            }
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+          window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+          dismiss();
         });
-        fabContainer.appendChild(shareFab);
+        fabContainer.appendChild(waFab);
       }
 
       document.body.appendChild(overlay);
@@ -737,6 +739,34 @@
     const num = parseInt(id, 10) + 3999;
     const s = String(num).padStart(11, '0');
     return s.slice(0, 6) + '-' + s.slice(6);
+  }
+
+  /* ===== AUTO-LOGOUT HEARTBEAT ===== */
+  let heartbeatInterval = null;
+
+  function startHeartbeat() {
+    if (heartbeatInterval) return;
+    heartbeatInterval = setInterval(async () => {
+      try {
+        const res = await fetch('/app/api/auth.php', { credentials: 'same-origin' });
+        if (!res.ok) {
+          clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
+          showToast('Session expired', 'error');
+          setTimeout(() => { window.location.href = '/app/'; }, 1000);
+        }
+      } catch (_) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
+      }
+    }, 180000);
+  }
+
+  function stopHeartbeat() {
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
+    }
   }
 
   /* ===== GLOBAL EXPORTS ===== */
@@ -766,18 +796,13 @@
   window.getRecords = getRecords;
   window.getRecordById = getRecordById;
   window.deleteRecord = deleteRecord;
-  window.restoreJob = async function (snapshot, jobId) {
-    if (!snapshot) return;
-    var prevStatus = (snapshot.status === 'estimado' || snapshot.status === 'invoice' || snapshot.status === 'done') ? snapshot.status : 'estimado';
-    var job = JSON.parse(JSON.stringify(snapshot));
-    job.status = prevStatus;
-    job.id = jobId;
-    job.createdAt = Date.now();
-    var jobs = loadLocalJobs();
-    var idx = jobs.findIndex(j => String(j.id) === String(job.id));
-    if (idx !== -1) { jobs[idx] = job; } else { jobs.push(job); }
-    saveLocalJobs(jobs);
-  };
+  window.getReviews = getReviews;
+  window.createReview = createReview;
+  window.updateReview = updateReview;
+  window.deleteReview = deleteReview;
+  window.restoreJob = restoreJob;
+  window.startHeartbeat = startHeartbeat;
+  window.stopHeartbeat = stopHeartbeat;
 
   /* ===== INIT ===== */
   if (isStandalone) localStorage.setItem('liriano_installed', 'true');

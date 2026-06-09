@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../config.php';
+requireAuth();
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -79,9 +82,26 @@ try {
 
     case 'POST':
       $jobs = readJobs();
-      $input['id'] = findNextId($jobs);
+      /* Restore: permitir ID específico si no hay conflicto */
+      if (!empty($input['_restore']) && !empty($input['id'])) {
+        $restoreId = (int)$input['id'];
+        unset($input['_restore']);
+        $conflict = false;
+        foreach ($jobs as $j) {
+          if ((int)$j['id'] === $restoreId) { $conflict = true; break; }
+        }
+        $input['id'] = $conflict ? findNextId($jobs) : $restoreId;
+      } else {
+        $input['id'] = findNextId($jobs);
+      }
       $input['status'] = $input['status'] ?? 'estimado';
       $input['createdAt'] = $input['createdAt'] ?? (int)(microtime(true) * 1000);
+      /* Sanitizar strings */
+      if (isset($input['job'])) $input['job'] = strip_tags($input['job']);
+      if (isset($input['name'])) $input['name'] = strip_tags($input['name']);
+      if (isset($input['address'])) $input['address'] = strip_tags($input['address']);
+      if (isset($input['phone'])) $input['phone'] = strip_tags($input['phone']);
+      if (isset($input['email'])) $input['email'] = strip_tags($input['email']);
       $jobs[] = $input;
       writeJobs($jobs);
       echo json_encode($input);
@@ -93,6 +113,12 @@ try {
       foreach ($jobs as &$j) {
         if ((int)$j['id'] === (int)$input['id']) {
           foreach ($input as $k => $v) { $j[$k] = $v; }
+          /* Sanitizar strings */
+          if (isset($j['job'])) $j['job'] = strip_tags($j['job']);
+          if (isset($j['name'])) $j['name'] = strip_tags($j['name']);
+          if (isset($j['address'])) $j['address'] = strip_tags($j['address']);
+          if (isset($j['phone'])) $j['phone'] = strip_tags($j['phone']);
+          if (isset($j['email'])) $j['email'] = strip_tags($j['email']);
           $found = true;
           $updated = $j;
           break;

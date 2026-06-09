@@ -80,6 +80,7 @@
       nav_about: 'About Us',
       nav_services: 'Services',
       nav_gallery: 'Gallery',
+      nav_reviews: 'Reviews',
       nav_contact: 'Contact',
 
       hero_badge: 'Premium Craftsmanship',
@@ -165,6 +166,7 @@
       nav_about: 'Nosotros',
       nav_services: 'Servicios',
       nav_gallery: 'Galer\u00eda',
+      nav_reviews: 'Rese\u00f1as',
       nav_contact: 'Contacto',
 
       hero_badge: 'Artesan\u00eda Premium',

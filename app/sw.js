@@ -1,14 +1,18 @@
-const CACHE = 'liriano-app-v4';
+const CACHE = 'liriano-app-v9';
 const ASSETS = [
   '/app/',
   '/app/index.html',
   '/app/jobs.html',
   '/app/record.html',
+  '/app/reviews.html',
+  '/app/dashboard.html',
+  '/app/dashboard.js',
   '/app/style.css',
   '/app/common.js',
   '/app/index.js',
   '/app/jobs.js',
   '/app/record.js',
+  '/app/reviews.js',
   '/app/manifest.json',
   '/app/plantilla.js',
   '/app/assets/PlayfairDisplay-Bold.ttf',
