@@ -19,8 +19,8 @@ if (!is_dir($dataDir)) {
 function readRecords() {
   global $dataFile;
   $fp = @fopen($dataFile, 'c+');
-  if (!$fp) return [];
-  if (!flock($fp, LOCK_SH)) { fclose($fp); return []; }
+  if (!$fp) { logError('records.php: fopen failed for ' . $dataFile); return []; }
+  if (!flock($fp, LOCK_SH)) { logError('records.php: flock(LOCK_SH) failed for ' . $dataFile); fclose($fp); return []; }
   $data = stream_get_contents($fp);
   flock($fp, LOCK_UN);
   fclose($fp);
@@ -31,8 +31,8 @@ function readRecords() {
 function writeRecords($records) {
   global $dataFile;
   $fp = @fopen($dataFile, 'c+');
-  if (!$fp) return false;
-  if (!flock($fp, LOCK_EX)) { fclose($fp); return false; }
+  if (!$fp) { logError('records.php: fopen(c+) failed for writeRecords'); return false; }
+  if (!flock($fp, LOCK_EX)) { logError('records.php: flock(LOCK_EX) failed for writeRecords'); fclose($fp); return false; }
   ftruncate($fp, 0);
   rewind($fp);
   fwrite($fp, json_encode($records, JSON_PRETTY_PRINT));
@@ -85,10 +85,12 @@ try {
       $input['createdAt'] = $input['createdAt'] ?? (int)(microtime(true) * 1000);
       $records[] = $input;
       if (!writeRecords($records)) {
+        logError('records.php: writeRecords failed on POST');
         http_response_code(500);
         echo json_encode(['error' => 'Failed to save']);
         exit;
       }
+      backupData();
       echo json_encode($input);
       break;
 
@@ -103,6 +105,7 @@ try {
       }
       if ($deleted) {
         writeRecords($newRecords);
+        backupData();
         echo json_encode(['ok' => true]);
       } else {
         http_response_code(404);
@@ -115,6 +118,7 @@ try {
       echo json_encode(['error' => 'Method not allowed']);
   }
 } catch (Exception $e) {
+  logError('records.php: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
   http_response_code(500);
   echo json_encode(['error' => 'Internal server error']);
 }
