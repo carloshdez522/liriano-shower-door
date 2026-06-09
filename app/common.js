@@ -32,7 +32,7 @@
       records_export_csv: 'Export CSV', records_archive: 'Archive', records_unarchive: 'Restore',
       confirm_archive_title: 'Archive Record?', confirm_archive_msg: 'This record will be hidden from the active list.',
       confirm_unarchive_title: 'Restore Record?', confirm_unarchive_msg: 'This record will return to the active list.',
-      records_stats_all: 'Records', records_stats_total: 'Total Collected', records_stats_count: 'Records Completed', records_no_results: 'No records match your search.', records_filter_from: 'From', records_filter_to: 'To', records_filter_clear: 'Clear',
+      records_stats_all: 'Records', records_stats_total: 'Total Collected', records_stats_count: 'Records Completed', records_no_results: 'No records match your search.', records_filter_from: 'From', records_filter_to: 'To', records_filter_clear: 'Clear', records_recover: 'Restore', records_recovered: 'Job restored successfully.',
       pdf_estimate: 'ESTIMATE', pdf_invoice: 'INVOICE',
       pdf_est_from: 'Estimate from:', pdf_inv_from: 'Invoice from:', pdf_est_to: 'Estimate to:', pdf_inv_to: 'Invoice to:',
       pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No',       pdf_col_glass: 'Glass Thickness', pdf_col_unit: 'Unit Price', pdf_col_desc: 'Description',
@@ -69,7 +69,7 @@
       records_export_csv: 'Exportar CSV', records_archive: 'Archivar', records_unarchive: 'Restaurar',
       confirm_archive_title: '¿Archivar Registro?', confirm_archive_msg: 'Este registro se ocultará de la lista activa.',
       confirm_unarchive_title: '¿Restaurar Registro?', confirm_unarchive_msg: 'Este registro volverá a la lista activa.',
-      records_stats_all: 'Registros', records_stats_total: 'Total Recaudado', records_stats_count: 'Completados', records_no_results: 'Ningún registro coincide con tu búsqueda.', records_filter_from: 'Desde', records_filter_to: 'Hasta', records_filter_clear: 'Limpiar',
+      records_stats_all: 'Registros', records_stats_total: 'Total Recaudado', records_stats_count: 'Completados', records_no_results: 'Ningún registro coincide con tu búsqueda.', records_filter_from: 'Desde', records_filter_to: 'Hasta', records_filter_clear: 'Limpiar', records_recover: 'Restaurar', records_recovered: 'Trabajo restaurado exitosamente.',
       pdf_estimate: 'ESTIMADO', pdf_invoice: 'FACTURA',
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
       pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
@@ -766,6 +766,18 @@
   window.getRecords = getRecords;
   window.getRecordById = getRecordById;
   window.deleteRecord = deleteRecord;
+  window.restoreJob = async function (snapshot, jobId) {
+    if (!snapshot) return;
+    var prevStatus = (snapshot.status === 'estimado' || snapshot.status === 'invoice' || snapshot.status === 'done') ? snapshot.status : 'estimado';
+    var job = JSON.parse(JSON.stringify(snapshot));
+    job.status = prevStatus;
+    job.id = jobId;
+    job.createdAt = Date.now();
+    var jobs = loadLocalJobs();
+    var idx = jobs.findIndex(j => String(j.id) === String(job.id));
+    if (idx !== -1) { jobs[idx] = job; } else { jobs.push(job); }
+    saveLocalJobs(jobs);
+  };
 
   /* ===== INIT ===== */
   if (isStandalone) localStorage.setItem('liriano_installed', 'true');

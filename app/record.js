@@ -43,6 +43,106 @@
     statTotal.textContent = '$' + total.toFixed(2);
   }
 
+  function seedYMD(y,m,d) { return new Date(y,m-1,d,12,0,0).getTime(); }
+
+  async function seedRealisticRecords() {
+    const jobs = await getJobs();
+    if (!jobs || jobs.length === 0) return;
+    const idMap = {};
+    for (const j of jobs) idMap[String(j.id)] = j;
+
+    function snap(job) { return JSON.parse(JSON.stringify(job)); }
+
+    function rec(jobId, status, daysOffset) {
+      const job = idMap[String(jobId)];
+      return {
+        id: String(seedId++),
+        jobId: job.id,
+        status: status,
+        jobName: job.job || '',
+        clientName: job.name || '',
+        snapshot: snap(job),
+        createdAt: seedYMD(2026, 3, daysOffset),
+      };
+    }
+
+    var seedId = 1;
+
+    /* Helper to create records in chronological order */
+    function make(jobId, transitions) {
+      var day = 0;
+      return transitions.map(t => {
+        day += t.days;
+        return rec(jobId, t.status, day);
+      });
+    }
+
+    var records = [].concat(
+      make('1', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 4 },
+      ]),
+      make('2', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 3 },
+        { status: 'invoice',  days: 4 },
+      ]),
+      make('4', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 2 },
+        { status: 'invoice',  days: 5 },
+        { status: 'edited',   days: 3 },
+      ]),
+      make('6', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 5 },
+        { status: 'invoice',  days: 7 },
+      ]),
+      make('8', [
+        { status: 'estimado', days: 1 },
+        { status: 'invoice',  days: 8 },
+        { status: 'done',     days: 8 },
+      ]),
+      make('10', [
+        { status: 'estimado', days: 1 },
+        { status: 'invoice',  days: 7 },
+        { status: 'edited',   days: 4 },
+        { status: 'deleted',  days: 5 },
+      ]),
+      make('15', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 4 },
+        { status: 'edited',   days: 5 },
+        { status: 'invoice',  days: 5 },
+      ]),
+      make('16', [
+        { status: 'estimado', days: 1 },
+        { status: 'invoice',  days: 7 },
+        { status: 'edited',   days: 6 },
+        { status: 'done',     days: 7 },
+      ]),
+      make('17', [
+        { status: 'estimado', days: 1 },
+        { status: 'edited',   days: 2 },
+        { status: 'invoice',  days: 3 },
+        { status: 'done',     days: 5 },
+      ]),
+      make('18', [
+        { status: 'estimado', days: 1 },
+        { status: 'invoice',  days: 10 },
+        { status: 'done',     days: 16 },
+      ]),
+    );
+
+    localStorage.setItem('liriano_records', JSON.stringify(records));
+  }
+
+  window.resetRecords = async function () {
+    localStorage.removeItem('liriano_records');
+    await seedRealisticRecords();
+    location.reload();
+  };
+
   function formatTime(ts) {
     const d = new Date(ts);
     const dateStr = d.toLocaleDateString(getLang() === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -50,8 +150,23 @@
     return dateStr + ' ' + timeStr;
   }
 
+  async function restoreFromRecord(rec) {
+    const snap = rec.snapshot;
+    if (!snap) { showToast('No data to restore', 'error'); return; }
+    try {
+      const prevStatus = (snap.status === 'estimado' || snap.status === 'invoice' || snap.status === 'done') ? snap.status : 'estimado';
+      await window.restoreJob(snap, rec.jobId);
+      await window.createRecord(snap, prevStatus);
+      showToast(t('records_recovered'));
+      loadRecords();
+    } catch (e) {
+      showToast('Error restoring: ' + e.message, 'error');
+    }
+  }
+
   function timelineEntryHtml(r) {
     const snap = r.snapshot || r;
+    const isDeleted = r.status === 'deleted';
     return `
       <div class="timeline-entry">
         <div class="timeline-dot ${badgeClass(r.status)}"></div>
@@ -60,7 +175,9 @@
           <span class="timeline-time">${formatTime(r.createdAt)}</span>
           <div class="timeline-actions">
             <button class="timeline-action view" data-record-id="${r.id}" title="View details"><i class="fas fa-eye"></i></button>
-            <button class="timeline-action pdf" data-record-id="${r.id}" title="Download PDF"><i class="fas fa-download"></i></button>
+            ${isDeleted
+              ? `<button class="timeline-action recover" data-record-id="${r.id}" title="${t('records_recover')}"><i class="fas fa-undo-alt"></i></button>`
+              : `<button class="timeline-action pdf" data-record-id="${r.id}" title="Download PDF"><i class="fas fa-download"></i></button>`}
           </div>
         </div>
       </div>`;
@@ -90,7 +207,9 @@
             ${g.entries.length === 1 ? `
             <span class="record-info-actions">
               <button class="timeline-action view" data-record-id="${g.latest.id}" title="View details"><i class="fas fa-eye"></i></button>
-              <button class="timeline-action pdf" data-record-id="${g.latest.id}" title="Download PDF"><i class="fas fa-download"></i></button>
+              ${g.latest.status === 'deleted'
+                ? `<button class="timeline-action recover" data-record-id="${g.latest.id}" title="${t('records_recover')}"><i class="fas fa-undo-alt"></i></button>`
+                : `<button class="timeline-action pdf" data-record-id="${g.latest.id}" title="Download PDF"><i class="fas fa-download"></i></button>`}
             </span>` : ''}
           </div>
           <div class="record-expand-wrap">
@@ -143,6 +262,15 @@
           const pdfBytes = await buildPDFDoc(rec.snapshot);
           if (pdfBytes) downloadPDF(pdfBytes, rec);
         }
+      });
+    });
+
+    /* ===== Timeline entry: restore deleted job ===== */
+    recordList.querySelectorAll('.timeline-action.recover').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const rec = await getRecordById(btn.dataset.recordId);
+        if (rec) await restoreFromRecord(rec);
       });
     });
   }
@@ -264,13 +392,8 @@
       let allRecords = await getRecords();
 
       if (allRecords.length === 0) {
-        const jobs = await getJobs();
-        if (jobs.length > 0) {
-          for (const job of jobs) {
-            await createRecord(job, job.status);
-          }
-          allRecords = await getRecords();
-        }
+        await seedRealisticRecords();
+        allRecords = await getRecords();
       }
 
       allRecords.sort((a, b) => b.createdAt - a.createdAt);
