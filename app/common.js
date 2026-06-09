@@ -46,6 +46,11 @@
       reviews_delete_msg: 'This review will be permanently deleted.',
       reviews_empty_list: 'No reviews yet.',
       reviews_loading: 'Loading...',
+      wa_hello: 'Hello, we are Liriano & Son Shower Doors Corp and this is your ',
+      wa_estimate: 'estimate',
+      wa_invoice: 'invoice',
+      wa_total: ' - Total: $',
+      wa_review: '\n\nIf you were satisfied with the work, we would appreciate your review at: ',
     },
     es: {
       login_user_ph: 'Usuario', login_pass_ph: 'Contraseña', login_btn: 'Entrar', login_error: 'Credenciales inválidas',
@@ -90,6 +95,11 @@
       reviews_delete_msg: 'Esta reseña se eliminará permanentemente.',
       reviews_empty_list: 'Sin reseñas aún.',
       reviews_loading: 'Cargando...',
+      wa_hello: 'Hola, somos Liriano & Son Shower Doors Corp y este es su ',
+      wa_estimate: 'presupuesto',
+      wa_invoice: 'factura',
+      wa_total: ' - Total: $',
+      wa_review: '\n\nSi quedó satisfecho con el trabajo, agradeceríamos su reseña en: ',
     },
   };
 
@@ -390,7 +400,7 @@
     const isEstimado = job.status === 'estimado';
     const items = job.items || [];
     const lang = getLang();
-    const _t = (key) => i18n.en[key] || key;
+    const _t = (key) => i18n[lang]?.[key] || i18n.en[key] || key;
     const t = _t;
 
     const { PDFDocument, StandardFonts, rgb } = PDFLib;
@@ -702,12 +712,11 @@
           e.stopPropagation();
           const isEst = job.status === 'estimado';
           const totalAmt = calcTotal(job).toFixed(2);
-          var msg = 'Hello, we are Liriano & Son Shower Doors Corp and this is your '
-            + (isEst ? 'estimate' : 'invoice')
+          var msg = t('wa_hello') + (isEst ? t('wa_estimate') : t('wa_invoice'))
             + ' for the job: ' + (job.job || job.name || '')
-            + ' - Total: $' + totalAmt;
+            + t('wa_total') + totalAmt;
           if (!isEst) {
-            msg += '\n\nIf you were satisfied with the work, we would appreciate your review at: ' + REVIEW_URL;
+            msg += t('wa_review') + REVIEW_URL;
           }
           try {
             if (typeof navigator.share === 'function' && typeof File === 'function') {

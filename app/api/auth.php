@@ -8,6 +8,12 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
+function sessionCookie() {
+  session_set_cookie_params([
+    'lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax',
+  ]);
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
@@ -15,9 +21,7 @@ if ($method === 'POST') {
 
   if (!empty($input['action']) && $input['action'] === 'logout') {
     if (session_status() === PHP_SESSION_NONE) {
-      session_set_cookie_params([
-        'lifetime' => 0, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax',
-      ]);
+      sessionCookie();
       session_start();
     }
     $_SESSION = [];
@@ -31,9 +35,7 @@ if ($method === 'POST') {
 
   if ($user === ADMIN_USER && password_verify($pass, ADMIN_PASS_HASH)) {
     if (session_status() === PHP_SESSION_NONE) {
-      session_set_cookie_params([
-        'lifetime' => 0, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax',
-      ]);
+      sessionCookie();
       session_start();
     }
     session_regenerate_id(true);
@@ -43,7 +45,7 @@ if ($method === 'POST') {
     echo json_encode(['ok' => true, 'user' => $user]);
   } else {
     http_response_code(401);
-    echo json_encode(['error' => 'Credenciales inválidas']);
+    echo json_encode(['error_code' => 'invalid_credentials']);
   }
   exit;
 }

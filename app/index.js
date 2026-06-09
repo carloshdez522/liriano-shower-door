@@ -66,8 +66,7 @@
       if (res.ok) {
         await showApp();
       } else {
-        const data = await res.json();
-        loginError.textContent = data.error || t('login_error');
+        loginError.textContent = t('login_error');
       }
     } catch (_) {
       loginError.textContent = t('login_error');
