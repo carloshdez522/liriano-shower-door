@@ -417,9 +417,6 @@
     const _t = (key) => i18n.en[key] || key;
     const t = _t;
 
-    const pfB64 = window.playfairBoldB64;
-    if (!pfB64) throw new Error('Playfair font not loaded');
-
     const { PDFDocument, StandardFonts, rgb } = PDFLib;
 
     const tmplB64 = window.plantillaB64;
@@ -430,8 +427,14 @@
     const page = pdfDoc.getPages()[0];
     const ph = page.getHeight();
 
-    const pfBytes = Uint8Array.from(atob(pfB64), c => c.charCodeAt(0));
-    const pfF = await pdfDoc.embedFont(pfBytes);
+    let pfF;
+    try {
+      const resp = await fetch('assets/PlayfairDisplay-Bold.ttf');
+      const buf = await resp.arrayBuffer();
+      pfF = await pdfDoc.embedFont(new Uint8Array(buf));
+    } catch (e) {
+      pfF = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    }
     const hv = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const hb = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 

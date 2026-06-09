@@ -1,4 +1,4 @@
-const CACHE = 'liriano-app-v3';
+const CACHE = 'liriano-app-v4';
 const ASSETS = [
   '/app/',
   '/app/index.html',
@@ -11,7 +11,7 @@ const ASSETS = [
   '/app/record.js',
   '/app/manifest.json',
   '/app/plantilla.js',
-  '/app/playfair-font.js',
+  '/app/assets/PlayfairDisplay-Bold.ttf',
   '/images/logo.webp',
   '/images/icon-192.png',
   '/images/icon-512.png',
