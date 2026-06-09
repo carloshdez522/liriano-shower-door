@@ -2453,14 +2453,18 @@ input[type=number] {
     cursor: pointer;
   }
 
+  .reviews-admin-stats {
+    gap: 6px;
+  }
   .reviews-admin-stats .stat-item {
-    padding: 10px 8px;
+    padding: 10px 6px;
   }
   .reviews-admin-stats .stat-item .stat-value {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
   .reviews-admin-stats .stat-item .stat-label {
-    font-size: 0.6rem;
+    font-size: 0.5rem;
+    letter-spacing: 0.5px;
   }
 
   .date-filter-bar {
