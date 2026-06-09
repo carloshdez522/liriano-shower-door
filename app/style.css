@@ -803,6 +803,7 @@ button {
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   transition: all var(--transition);
   text-transform: uppercase;
@@ -2390,53 +2391,45 @@ input[type=number] {
 .pdf-float-actions {
   position: fixed;
   z-index: 99999;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 30px;
+  right: 30px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: var(--white);
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-  min-width: 200px;
-  animation: fadeIn 0.15s ease;
+  gap: 12px;
+  animation: fabIn 0.2s ease;
 }
 
-.pdf-float-actions .pdf-btn {
-  width: 100%;
-  padding: 12px 20px;
+.pdf-fab {
+  width: 52px;
+  height: 52px;
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: opacity 0.15s;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s, opacity 0.15s;
+  color: #fff;
 }
 
-.pdf-float-actions .pdf-btn:active {
-  opacity: 0.7;
+.pdf-fab:active {
+  transform: scale(0.9);
 }
 
-.pdf-float-actions .pdf-btn.download {
-  background: var(--deep-teal);
-  color: var(--white);
+.pdf-fab.download {
+  background: var(--aquamarine);
+  color: var(--deep-teal);
 }
 
-.pdf-float-actions .pdf-btn.share {
-  background: #e8f0fe;
-  color: #1967d2;
+.pdf-fab.share {
+  background: #25D366;
 }
 
-.pdf-float-actions .pdf-btn.whatsapp {
-  background: #e8f5e9;
-  color: #075e54;
-}
+@keyframes fabIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 .pdf-btn {

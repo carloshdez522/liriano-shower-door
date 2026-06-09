@@ -632,7 +632,7 @@
 
     return await pdfDoc.save();
   }
-  async function showPDFPreview(job) {
+  async function showPDFPreview(job, anchorEl) {
     try {
       if (!job) return;
       const pdfBytes = await buildPDFDoc(job);
@@ -644,63 +644,88 @@
       const blobUrl = URL.createObjectURL(blob);
       const canShare = typeof navigator.share === 'function' && typeof File === 'function';
 
-      const body = document.createElement('div');
-      body.style.cssText = 'padding:24px;display:flex;flex-direction:column;gap:12px';
+      const overlay = document.createElement('div');
+      overlay.className = 'pdf-blur-overlay';
 
-      const dlBtn = document.createElement('button');
-      dlBtn.className = 'pdf-btn download';
-      dlBtn.innerHTML = '<i class="fas fa-download"></i> ' + t('view_pdf');
-      dlBtn.addEventListener('click', () => {
+      const fabContainer = document.createElement('div');
+      fabContainer.className = 'pdf-float-actions';
+
+      let anchorClone = null;
+
+      if (anchorEl) {
+        const rect = anchorEl.getBoundingClientRect();
+        const gap = 10;
+        const rightSpace = window.innerWidth - rect.right;
+        const left = rightSpace >= 70 ? rect.right + gap : rect.left - 62 - gap;
+        const belowSpace = window.innerHeight - rect.top;
+        const fabHeight = 52 * 2 + 12;
+        if (belowSpace >= fabHeight) {
+          fabContainer.style.cssText = 'position:fixed;top:' + rect.top + 'px;left:' + left + 'px;bottom:auto;right:auto;';
+        } else {
+          fabContainer.style.cssText = 'position:fixed;bottom:' + (window.innerHeight - rect.bottom) + 'px;left:' + left + 'px;top:auto;right:auto;';
+        }
+
+        anchorClone = anchorEl.cloneNode(true);
+        anchorClone.style.cssText = 'position:fixed;top:' + rect.top + 'px;left:' + rect.left + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:100000;margin:0;pointer-events:none;';
+        anchorClone.className = anchorEl.className;
+      }
+
+      function dismiss() {
+        URL.revokeObjectURL(blobUrl);
+        overlay.remove();
+        fabContainer.remove();
+        if (anchorClone) anchorClone.remove();
+      }
+
+      overlay.addEventListener('click', dismiss);
+
+      const dlFab = document.createElement('button');
+      dlFab.className = 'pdf-fab download';
+      dlFab.setAttribute('aria-label', t('view_pdf'));
+      dlFab.innerHTML = '<i class="fas fa-download"></i>';
+      dlFab.addEventListener('click', e => {
+        e.stopPropagation();
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = filename;
         a.click();
+        dismiss();
       });
-      body.appendChild(dlBtn);
+      fabContainer.appendChild(dlFab);
 
       if (canShare) {
-        const shareBtn = document.createElement('button');
-        shareBtn.className = 'pdf-btn share';
-        shareBtn.innerHTML = '<i class="fas fa-share-alt"></i> ' + t('pdf_share');
-        shareBtn.addEventListener('click', async () => {
+        const shareFab = document.createElement('button');
+        shareFab.className = 'pdf-fab share';
+        shareFab.setAttribute('aria-label', t('pdf_share'));
+        shareFab.innerHTML = '<i class="fas fa-share-alt"></i>';
+        shareFab.addEventListener('click', async e => {
+          e.stopPropagation();
           const file = new File([blob], filename, { type: 'application/pdf' });
-          try { await navigator.share({ files: [file], title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`, text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)) }); }
-          catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
+          try {
+            await navigator.share({ files: [file], title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`, text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)) });
+            dismiss();
+          } catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
         });
-        body.appendChild(shareBtn);
+        fabContainer.appendChild(shareFab);
       } else {
-        if (job.phone) {
-          const waBtn = document.createElement('button');
-          waBtn.className = 'pdf-btn whatsapp';
-          waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
-          waBtn.addEventListener('click', () => {
-            const phone = job.phone.replace(/[^0-9]/g, '');
+        const shareFab = document.createElement('button');
+        shareFab.className = 'pdf-fab share';
+        shareFab.innerHTML = '<i class="fab fa-whatsapp"></i>';
+        shareFab.setAttribute('aria-label', 'WhatsApp');
+        shareFab.addEventListener('click', e => {
+          e.stopPropagation();
+          const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
+          if (phone) {
             window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2))), '_blank');
-          });
-          body.appendChild(waBtn);
-        }
-        if (job.email) {
-          const mailBtn = document.createElement('button');
-          mailBtn.className = 'pdf-btn email';
-          mailBtn.innerHTML = '<i class="fas fa-envelope"></i> Email';
-          mailBtn.addEventListener('click', () => {
-            window.open('mailto:' + job.email + '?subject=' + encodeURIComponent((job.status === 'estimado' ? 'Estimate' : 'Invoice') + ' - ' + (job.job || job.name)) + '&body=' + encodeURIComponent(t('pdf_email_body').replace('{name}', job.name || '').replace('{job}', job.job || '').replace('{amount}', calcTotal(job).toFixed(2))), '_blank');
-          });
-          body.appendChild(mailBtn);
-        }
+            dismiss();
+          }
+        });
+        fabContainer.appendChild(shareFab);
       }
 
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay active';
-      overlay.innerHTML = '<div class="modal-box"><h3>' + esc(filename) + '</h3></div>';
-      overlay.querySelector('.modal-box').appendChild(body);
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'modal-btn cancel';
-      closeBtn.textContent = t('confirm_cancel');
-      closeBtn.style.marginTop = '8px';
-      closeBtn.addEventListener('click', () => { URL.revokeObjectURL(blobUrl); overlay.remove(); });
-      body.appendChild(closeBtn);
       document.body.appendChild(overlay);
+      document.body.appendChild(fabContainer);
+      if (anchorClone) document.body.appendChild(anchorClone);
     } catch (err) {
       showToast('PDF error: ' + err.message, 'error');
       console.error(err);

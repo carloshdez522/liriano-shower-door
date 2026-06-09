@@ -74,4 +74,34 @@
 
 ---
 
+---
+## 5. jobs.js  — MODIFICADO (PDF FAB positioning)
+   showPDFPreview ahora acepta segundo argumento (anchorEl) para
+   posicionar los FABs junto al botón PDF.
+   - Línea 170: showPDFPreview(j, btn) — pasa el botón como anchor
+   - Línea 311: showPDFPreview(j, $('dtlPdf')) — pasa el botón del detalle
+   - Línea 521: showPDFPreview(job) — sin anchor, usa posición default
+
+## 6. jobs.html  — MODIFICADO (eliminado playfair-font.js)
+   Se eliminó <script src="playfair-font.js"> de la carga de scripts.
+
+## 7. record.html  — MODIFICADO (eliminado playfair-font.js)
+   Se eliminó <script src="playfair-font.js"> de la carga de scripts.
+
+## 8. common.js  — PDF FABs (showPDFPreview reescrito)
+   showPDFPreview ahora muestra dos FABs circulares flotantes
+   (Download y Share/WhatsApp) con backdrop blur, en lugar del
+   viejo modal. Acepta anchorEl opcional para posicionamiento.
+
+## 9. style.css  — PDF FAB styles
+   Reemplazados .pdf-float-actions y .pdf-btn por .pdf-fab (52px,
+   circular, sombra, animación fabIn).
+   .pdf-blur-overlay (backdrop-filter: blur(6px)).
+
+## 10. sw.js  — Actualizado
+    CACHE v3 → v4, playfair-font.js → assets/PlayfairDisplay-Bold.ttf
+
+## 11. playfair-font.js  — ELIMINADO
+    Reemplazado por fetch de assets/PlayfairDisplay-Bold.ttf en buildPDFDoc.
+
 Última actualización: 2026-06-08

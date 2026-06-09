@@ -167,7 +167,7 @@
       });
     });
     jobList.querySelectorAll('.view-pdf').forEach(btn => {
-      btn.addEventListener('click', async e => { e.stopPropagation(); const j = await getJobById(btn.dataset.id); await showPDFPreview(j); });
+      btn.addEventListener('click', async e => { e.stopPropagation(); const j = await getJobById(btn.dataset.id); await showPDFPreview(j, btn); });
     });
     jobList.querySelectorAll('.approve').forEach(btn => {
       btn.addEventListener('click', e => { e.stopPropagation(); showApproveModal(btn.dataset.id); });
@@ -308,7 +308,7 @@
           <button class="detail-btn delete-btn" id="dtlDelete"><i class="fas fa-trash"></i> ${t('del')}</button>
         </div>`;
 
-      $('dtlPdf').addEventListener('click', async () => { await showPDFPreview(j); });
+      $('dtlPdf').addEventListener('click', async () => { await showPDFPreview(j, $('dtlPdf')); });
       if (j.status === 'estimado') { $('dtlApprove').addEventListener('click', () => showApproveModal(j.id)); }
       if (j.status === 'invoice') { $('dtlDone').addEventListener('click', () => showDoneModal(j.id)); }
       $('dtlEdit').addEventListener('click', () => openForm(j.id));
