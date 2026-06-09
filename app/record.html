@@ -44,10 +44,48 @@
     </header>
 
     <main class="app-main">
-      <div class="dash-header">
-        <button class="dash-home" id="dashHome"><i class="fas fa-home"></i></button>
-        <h2 class="form-view-title" data-i18n="records" style="margin:0;flex:1">Records</h2>
+      <div class="records-stats" id="recordsStats">
+        <div class="stat-item">
+          <span class="stat-value" id="statAllCount">0</span>
+          <span class="stat-label" data-i18n="records_stats_all">Records</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="statCount">0</span>
+          <span class="stat-label" data-i18n="records_stats_count">Records Completed</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="statTotal">$0.00</span>
+          <span class="stat-label" data-i18n="records_stats_total">Total Collected</span>
+        </div>
       </div>
+
+      <div class="dash-header records-controls">
+        <button class="dash-home" id="dashHome"><i class="fas fa-home"></i></button>
+        <div class="dash-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" data-i18n-placeholder="records_search_ph" placeholder="Search records...">
+        </div>
+        <button class="job-action-btn" id="exportCsvBtn" style="flex-shrink:0;padding:8px 12px">
+          <i class="fas fa-download"></i> <span data-i18n="records_export_csv">Export CSV</span>
+        </button>
+      </div>
+
+      <div class="dash-filters" id="filterBar">
+        <button class="filter-btn active" data-filter="all"><span data-i18n="all">All</span></button>
+        <button class="filter-btn" data-filter="estimado"><span data-i18n="estimados">Estimates</span></button>
+        <button class="filter-btn" data-filter="invoice"><span data-i18n="facturas">Invoices</span></button>
+        <button class="filter-btn" data-filter="done"><span data-i18n="completed">Completed</span></button>
+        <button class="filter-btn" data-filter="deleted"><span data-i18n="deleted">Deleted</span></button>
+      </div>
+      <div class="date-filter-bar" id="dateFilterBar">
+        <span class="date-filter-label" data-i18n="records_filter_from">From</span>
+        <input type="date" id="filterFrom" class="date-filter-input">
+        <span class="date-filter-label" data-i18n="records_filter_to">To</span>
+        <input type="date" id="filterTo" class="date-filter-input">
+        <button class="filter-clear-btn" id="filterClear" title="Clear filters"><span data-i18n="records_filter_clear">Clear</span> <i class="fas fa-times"></i></button>
+      </div>
+
+
       <div class="job-list" id="recordList">
         <div class="empty-state">
           <i class="fas fa-folder-open"></i>

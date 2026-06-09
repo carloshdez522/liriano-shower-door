@@ -26,6 +26,13 @@
       summary: 'Summary', subtotal: 'Subtotal', tax_rate: 'Tax Rate', sales_tax: 'Sales Tax',
       deposit_required: 'Deposit Required', deposit_received: 'Deposit Received', total_summary: 'Total',
       records: 'Records', records_desc: 'Completed &amp; archived jobs',
+      records_changes: 'changes', records_no_changes: 'No changes yet', edited: 'Edited',
+      records_search_ph: 'Search records...',
+      records_active: 'Active', records_archived: 'Archived', records_all_records: 'All',
+      records_export_csv: 'Export CSV', records_archive: 'Archive', records_unarchive: 'Restore',
+      confirm_archive_title: 'Archive Record?', confirm_archive_msg: 'This record will be hidden from the active list.',
+      confirm_unarchive_title: 'Restore Record?', confirm_unarchive_msg: 'This record will return to the active list.',
+      records_stats_all: 'Records', records_stats_total: 'Total Collected', records_stats_count: 'Records Completed', records_no_results: 'No records match your search.', records_filter_from: 'From', records_filter_to: 'To', records_filter_clear: 'Clear',
       pdf_estimate: 'ESTIMATE', pdf_invoice: 'INVOICE',
       pdf_est_from: 'Estimate from:', pdf_inv_from: 'Invoice from:', pdf_est_to: 'Estimate to:', pdf_inv_to: 'Invoice to:',
       pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No',       pdf_col_glass: 'Glass Thickness', pdf_col_unit: 'Unit Price', pdf_col_desc: 'Description',
@@ -56,6 +63,13 @@
       summary: 'Resumen', subtotal: 'Subtotal', tax_rate: 'Tasa de Impuesto', sales_tax: 'Impuesto de Venta',
       deposit_required: 'Depósito Requerido', deposit_received: 'Depósito Recibido', total_summary: 'Total',
       records: 'Registros', records_desc: 'Trabajos completados &amp; archivados',
+      records_changes: 'cambios', records_no_changes: 'Sin cambios aún', edited: 'Editado',
+      records_search_ph: 'Buscar registros...',
+      records_active: 'Activos', records_archived: 'Archivados', records_all_records: 'Todos',
+      records_export_csv: 'Exportar CSV', records_archive: 'Archivar', records_unarchive: 'Restaurar',
+      confirm_archive_title: '¿Archivar Registro?', confirm_archive_msg: 'Este registro se ocultará de la lista activa.',
+      confirm_unarchive_title: '¿Restaurar Registro?', confirm_unarchive_msg: 'Este registro volverá a la lista activa.',
+      records_stats_all: 'Registros', records_stats_total: 'Total Recaudado', records_stats_count: 'Completados', records_no_results: 'Ningún registro coincide con tu búsqueda.', records_filter_from: 'Desde', records_filter_to: 'Hasta', records_filter_clear: 'Limpiar',
       pdf_estimate: 'ESTIMADO', pdf_invoice: 'FACTURA',
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
       pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
@@ -127,6 +141,7 @@
   const USE_LOCAL = location.protocol === 'file:';
   const API = '/app/api/';
   const STORAGE_KEY = 'liriano_jobs';
+  const STORAGE_KEY_RECORDS = 'liriano_records';
 
   function loadLocalJobs() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -142,6 +157,50 @@
     return String(max + 1);
   }
 
+  /* ===== RECORDS (history log) ===== */
+  function loadLocalRecords() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY_RECORDS)) || []; }
+    catch (_) { return []; }
+  }
+  function saveLocalRecords(records) {
+    localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+  }
+  function nextLocalRecordId() {
+    const records = loadLocalRecords();
+    let max = 0;
+    for (const r of records) { const id = parseInt(r.id, 10); if (id > max) max = id; }
+    return String(max + 1);
+  }
+
+  async function createRecord(job, status) {
+    const record = {
+      id: nextLocalRecordId(),
+      jobId: job.id,
+      status: status,
+      jobName: job.job || '',
+      clientName: job.name || '',
+      snapshot: JSON.parse(JSON.stringify(job)),
+      createdAt: Date.now(),
+    };
+    const records = loadLocalRecords();
+    records.push(record);
+    saveLocalRecords(records);
+    return record;
+  }
+
+  async function getRecords() {
+    return loadLocalRecords();
+  }
+
+  async function getRecordById(id) {
+    return loadLocalRecords().find(r => String(r.id) === String(id)) || null;
+  }
+
+  async function deleteRecord(id) {
+    saveLocalRecords(loadLocalRecords().filter(r => r.id !== id));
+    return { success: true };
+  }
+
   async function apiFetch(method, query, body) {
     let url = API;
     if (query) url += '?' + query;
@@ -153,15 +212,39 @@
     return data;
   }
 
+  function loadSeedFromScript() {
+    return new Promise(function (resolve) {
+      var s = document.createElement('script');
+      s.src = 'data/jobs.js';
+      s.onload = function () { resolve(window._seedJobs || null); };
+      s.onerror = function () { resolve(null); };
+      document.head.appendChild(s);
+    });
+  }
+
   async function getJobs() {
-    if (USE_LOCAL) return loadLocalJobs();
+    if (USE_LOCAL) {
+      var jobs = loadLocalJobs();
+      if (jobs.length === 0) {
+        try {
+          var res = await fetch('data/jobs.json');
+          if (res.ok) { jobs = await res.json(); saveLocalJobs(jobs); }
+        } catch {}
+        if (jobs.length === 0) {
+          var seed = await loadSeedFromScript();
+          if (seed) { jobs = seed; saveLocalJobs(jobs); }
+        }
+      }
+      return jobs;
+    }
     return await apiFetch('GET');
   }
   async function getJobById(id) {
-    if (USE_LOCAL) return loadLocalJobs().find(j => j.id === id) || null;
+    if (USE_LOCAL) return loadLocalJobs().find(j => String(j.id) === String(id)) || null;
     return await apiFetch('GET', 'id=' + encodeURIComponent(id));
   }
   async function createJob(data) {
+    let job;
     if (USE_LOCAL) {
       data.id = nextLocalId();
       data.status = 'estimado';
@@ -169,60 +252,78 @@
       const jobs = loadLocalJobs();
       jobs.push(data);
       saveLocalJobs(jobs);
-      return data;
+      job = data;
+    } else {
+      data.status = 'estimado';
+      data.createdAt = Date.now();
+      job = await apiFetch('POST', null, data);
     }
-    data.status = 'estimado';
-    data.createdAt = Date.now();
-    return await apiFetch('POST', null, data);
+    await createRecord(job, 'estimado');
+    return job;
   }
   async function updateJob(id, data) {
     if (USE_LOCAL) {
-      data.id = id;
       const jobs = loadLocalJobs();
-      const idx = jobs.findIndex(j => j.id === id);
+      const idx = jobs.findIndex(j => String(j.id) === String(id));
       if (idx === -1) throw new Error('Job not found');
-      jobs[idx] = data;
+      const job = jobs[idx];
+      var merged = Object.assign({}, job, data);
+      merged.id = job.id;
+      merged.createdAt = job.createdAt;
+      if (!data.status) merged.status = job.status;
+      jobs[idx] = merged;
       saveLocalJobs(jobs);
-      return data;
+      var isPartialStatus = Object.keys(data).length === 1 && 'status' in data;
+      var recordStatus = isPartialStatus ? data.status : 'edited';
+      await createRecord(merged, recordStatus);
+      return merged;
     }
     data.id = id;
-    return await apiFetch('PUT', null, data);
+    var result = await apiFetch('PUT', null, data);
+    await createRecord(result, result.status || 'edited');
+    return result;
   }
   async function deleteJob(id) {
     if (USE_LOCAL) {
-      saveLocalJobs(loadLocalJobs().filter(j => j.id !== id));
+      const jobs = loadLocalJobs();
+      var job = jobs.find(j => String(j.id) === String(id));
+      if (job) await createRecord(job, 'deleted');
+      saveLocalJobs(jobs.filter(j => String(j.id) !== String(id)));
       return { success: true };
     }
+    var job = await getJobById(id);
+    if (job) await createRecord(job, 'deleted');
     return await apiFetch('DELETE', 'id=' + encodeURIComponent(id));
   }
 
   async function toggleJobStatus(id) {
     if (USE_LOCAL) {
       const jobs = loadLocalJobs();
-      const job = jobs.find(j => j.id === id);
+      var job = jobs.find(j => String(j.id) === String(id));
       if (!job) return null;
-      job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
-      saveLocalJobs(jobs);
-      return job;
+      return await updateJob(id, { status: job.status === 'estimado' ? 'invoice' : 'estimado' });
     }
-    const job = await getJobById(id);
+    var job = await getJobById(id);
     if (!job) return null;
-    job.status = job.status === 'estimado' ? 'invoice' : 'estimado';
-    return await updateJob(id, job);
+    return await updateJob(id, { status: job.status === 'estimado' ? 'invoice' : 'estimado' });
   }
 
   async function toggleJobDone(id) {
+    return await updateJob(id, { status: 'done' });
+  }
+
+  async function toggleJobArchive(id) {
     if (USE_LOCAL) {
       const jobs = loadLocalJobs();
-      const job = jobs.find(j => j.id === id);
+      const job = jobs.find(j => String(j.id) === String(id));
       if (!job) return null;
-      job.status = 'done';
+      job.archived = !job.archived;
       saveLocalJobs(jobs);
       return job;
     }
     const job = await getJobById(id);
     if (!job) return null;
-    job.status = 'done';
+    job.archived = !job.archived;
     return await updateJob(id, job);
   }
 
@@ -624,6 +725,7 @@
   window.deleteJob = deleteJob;
   window.toggleJobStatus = toggleJobStatus;
   window.toggleJobDone = toggleJobDone;
+  window.toggleJobArchive = toggleJobArchive;
   window.showModal = showModal;
   window.applyTranslations = applyTranslations;
   window.setLanguage = setLanguage;
@@ -632,6 +734,10 @@
   window.formatId = formatId;
   window.buildPDFDoc = buildPDFDoc;
   window.showPDFPreview = showPDFPreview;
+  window.createRecord = createRecord;
+  window.getRecords = getRecords;
+  window.getRecordById = getRecordById;
+  window.deleteRecord = deleteRecord;
 
   /* ===== INIT ===== */
   if (isStandalone) localStorage.setItem('liriano_installed', 'true');
