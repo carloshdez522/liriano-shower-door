@@ -2453,6 +2453,16 @@ input[type=number] {
     cursor: pointer;
   }
 
+  .reviews-admin-stats .stat-item {
+    padding: 10px 8px;
+  }
+  .reviews-admin-stats .stat-item .stat-value {
+    font-size: 1rem;
+  }
+  .reviews-admin-stats .stat-item .stat-label {
+    font-size: 0.6rem;
+  }
+
   .date-filter-bar {
     gap: 6px;
   }
