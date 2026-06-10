@@ -1,4 +1,4 @@
-const CACHE = 'liriano-app-v11';
+const CACHE = 'liriano-app-v12';
 const ASSETS = [
   '/app/',
   '/app/index.html',
@@ -35,6 +35,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.pathname.startsWith('/app/api/')) {
+    e.respondWith(fetch(e.request).catch(() => new Response(null, { status: 503 })));
+    return;
+  }
   e.respondWith(
     fetch(e.request)
       .then(res => {
