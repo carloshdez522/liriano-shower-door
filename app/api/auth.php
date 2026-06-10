@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../config.php';
 
+sendSecurityHeaders();
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -35,7 +35,7 @@ if ($method === 'POST') {
 
   $authOk = false;
   foreach ($ADMIN_USERS as $u) {
-    if ($user === $u['username'] && password_verify($pass, $u['hash'])) { $authOk = true; break; }
+    if (password_verify($user, $u['username']) && password_verify($pass, $u['hash'])) { $authOk = true; break; }
   }
   if ($authOk) {
     if (session_status() === PHP_SESSION_NONE) {

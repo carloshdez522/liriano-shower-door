@@ -1,7 +1,19 @@
+Options -Indexes
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /app/
+
   RewriteRule ^index\.html$ - [L]
+
+  # Security: block direct access to sensitive files and dirs
+  RewriteRule ^config\.php$ - [F,L]
+  RewriteRule ^data/ - [F,L]
+  RewriteRule ^plantilla\.(js|pdf)$ - [F,L]
+  RewriteRule ^cambios-en-otros-archivos\.txt$ - [F,L]
+  RewriteRule ^assets/ - [F,L]
+
+  # SPA routing
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^$ /app/index.html [L]
