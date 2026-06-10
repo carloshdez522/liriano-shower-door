@@ -31,9 +31,9 @@
   }
 
   function hideApp() {
-    loginCard.style.display = 'flex';
+    loginCard.style.display = '';
     const bg = document.querySelector('.login-bg');
-    if (bg) bg.style.display = 'block';
+    if (bg) bg.style.display = '';
     document.body.classList.add('login-page');
     appContainer.style.display = 'none';
     stopHeartbeat();
