@@ -16,6 +16,50 @@ function sessionCookie() {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+/* ===== Rate limiting ===== */
+$rateLimitFile = DATA_DIR . '/login_attempts.json';
+$rateLimitWindow = 900; /* 15 minutos */
+$rateLimitMax = 6; /* max intentos por ventana */
+
+function getClientIP() {
+  if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    return trim($ips[0]);
+  }
+  return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+function checkRateLimit($file, $window, $max) {
+  $ip = getClientIP();
+  $now = time();
+  $data = [];
+  if (file_exists($file)) {
+    $raw = file_get_contents($file);
+    $data = json_decode($raw, true) ?? [];
+  }
+  /* limpiar entradas expiradas */
+  $data = array_values(array_filter($data, function($e) use($now, $window) { return $e['time'] > ($now - $window); }));
+  $attempts = array_values(array_filter($data, function($e) use($ip) { return $e['ip'] === $ip; }));
+  if (count($attempts) >= $max) {
+    http_response_code(429);
+    echo json_encode(['error_code' => 'rate_limited', 'retry_after' => $window]);
+    exit;
+  }
+  $data[] = ['ip' => $ip, 'time' => $now];
+  $dir = dirname($file);
+  if (!is_dir($dir)) mkdir($dir, 0755, true);
+  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
+}
+
+function clearRateLimit($file) {
+  $ip = getClientIP();
+  if (!file_exists($file)) return;
+  $raw = file_get_contents($file);
+  $data = json_decode($raw, true) ?? [];
+  $data = array_values(array_filter($data, function($e) use($ip) { return $e['ip'] !== $ip; }));
+  file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT), LOCK_EX);
+}
+
 if ($method === 'POST') {
   $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
@@ -30,6 +74,8 @@ if ($method === 'POST') {
     exit;
   }
 
+  checkRateLimit($rateLimitFile, $rateLimitWindow, $rateLimitMax);
+
   $user = $input['username'] ?? '';
   $pass = $input['password'] ?? '';
 
@@ -38,6 +84,7 @@ if ($method === 'POST') {
     if (password_verify($user, $u['username']) && password_verify($pass, $u['hash'])) { $authOk = true; break; }
   }
   if ($authOk) {
+    clearRateLimit($rateLimitFile);
     if (session_status() === PHP_SESSION_NONE) {
       sessionCookie();
       session_start();

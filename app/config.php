@@ -22,7 +22,7 @@ function sendSecurityHeaders() {
 
 $ADMIN_USERS = [
   ['username' => '$2b$12$VNSz1CWyVMVsFm22pOM5XugJ1BsLTfXhBi22ZokU8KWeMMo0MYDmC', 'hash' => ADMIN_PASS_HASH],
-  ['username' => '$2b$12$Ccw3U.myTR5FLTBiZYkjlOAO8r0tTQCYk1l2jZQ02pGxmLiX/cKGy', 'hash' => '$2y$12$o.l6KyeawZebZD3LgoOPxO/ug1YeiWD0/mhiY4bZVz48UHazZVQjS'],
+  ['username' => '$2b$12$Ccw3U.myTR5FLTBiZYkjlOAO8r0tTQCYk1l2jZQ02pGxmLiX/cKGy', 'hash' => '$2y$12$5fLr9HtpJm0ZI20iMInQH.Dn3sxkyrqxjWY.Rad8n45ZB3quQzmuG'],
 ];
 
 function requireAuth() {

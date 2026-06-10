@@ -246,6 +246,13 @@
       </div>
     `).join('');
 
+    const itemsSubtotal = (snap.items || []).reduce((s, it) => s + (parseFloat(it.price) || 0), 0);
+    const taxRateVal = parseFloat(snap.taxRate) || 0;
+    const salesTaxVal = parseFloat(snap.salesTax) || 0;
+    const depositVal = parseFloat(snap.deposit) || 0;
+    const isEstimado = snap.status === 'estimado';
+    const grandTotal = itemsSubtotal + taxRateVal + salesTaxVal - (isEstimado ? 0 : depositVal);
+
     const html = `
       <div class="detail-overlay" id="detailOverlay">
         <div class="detail-card">
@@ -267,6 +274,14 @@
           ${snap.phone ? `<div class="detail-field"><span class="detail-field-label">${t('phone')}</span><span class="detail-field-value">${esc(snap.phone)}</span></div>` : ''}
           <div class="detail-field"><span class="detail-field-label">${t('email')}</span><span class="detail-field-value">${esc(snap.email || '—')}</span></div>
           ${(snap.items || []).length > 0 ? `<div class="detail-section-title" style="margin-top:16px">${t('items')}</div><div class="detail-items-list">${itemsHtml}</div>` : ''}
+          <div class="detail-section-title" style="margin-top:16px">${t('summary')}</div>
+          <div class="detail-finance">
+            <div class="detail-field"><span class="detail-field-label">${t('subtotal')}</span><span class="detail-field-value">$${itemsSubtotal.toFixed(2)}</span></div>
+            <div class="detail-field"><span class="detail-field-label">${t('tax_rate')}</span><span class="detail-field-value">$${taxRateVal.toFixed(2)}</span></div>
+            <div class="detail-field"><span class="detail-field-label">${t('sales_tax')}</span><span class="detail-field-value">$${salesTaxVal.toFixed(2)}</span></div>
+            <div class="detail-field"><span class="detail-field-label">${isEstimado ? t('deposit_required') : t('deposit_received')}</span><span class="detail-field-value">$${depositVal.toFixed(2)}</span></div>
+            <div class="detail-field detail-field-total"><span class="detail-field-label">${t('total_summary')}</span><span class="detail-field-value">$${grandTotal.toFixed(2)}</span></div>
+          </div>
           <div class="detail-actions" style="margin-top:20px">
             <button class="detail-btn pdf" id="dtlPdf"><i class="fas fa-download"></i> ${t('view_pdf')}</button>
           </div>
