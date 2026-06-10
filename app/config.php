@@ -21,8 +21,8 @@ function sendSecurityHeaders() {
 }
 
 $ADMIN_USERS = [
-  ['username' => '$2b$12$VNSz1CWyVMVsFm22pOM5XugJ1BsLTfXhBi22ZokU8KWeMMo0MYDmC', 'hash' => ADMIN_PASS_HASH],
-  ['username' => '$2b$12$Ccw3U.myTR5FLTBiZYkjlOAO8r0tTQCYk1l2jZQ02pGxmLiX/cKGy', 'hash' => '$2y$12$5fLr9HtpJm0ZI20iMInQH.Dn3sxkyrqxjWY.Rad8n45ZB3quQzmuG'],
+  ['username' => '$2y$12$vvlpWdW7eEQUVh3slKHPn.ZigeEyuel0vYu6cgt6yaKe7RQB/Ilo6', 'hash' => ADMIN_PASS_HASH],
+  ['username' => '$2y$12$.YuCjD2RnbwFW6K652VD3.y8s6WBAASZ2HnMlQ9p6FRkYVkW5.Ei6', 'hash' => '$2y$12$5fLr9HtpJm0ZI20iMInQH.Dn3sxkyrqxjWY.Rad8n45ZB3quQzmuG'],
 ];
 
 function requireAuth() {
