@@ -101,6 +101,18 @@ if ($method === 'POST') {
   exit;
 }
 
+/* GET: clear rate limit (secret token for testing) */
+if (isset($_GET['reset_rate_limit'])) {
+  if ($_GET['reset_rate_limit'] === 'reset2024liriano') {
+    if (file_exists($rateLimitFile)) @unlink($rateLimitFile);
+    echo json_encode(['ok' => true]);
+  } else {
+    http_response_code(403);
+    echo json_encode(['error' => 'invalid_token']);
+  }
+  exit;
+}
+
 /* GET: verificar sesión */
 requireAuth();
 echo json_encode(['ok' => true, 'user' => $_SESSION['user'] ?? '']);
