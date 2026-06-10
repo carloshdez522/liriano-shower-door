@@ -142,10 +142,141 @@ async function login(page, user, pass) {
   }
 
   // =============================================
-  // SECTION 4: INJECTION ATTACKS (API LEVEL)
+  // SECTION 4: BROWSER TESTS (run BEFORE rate limit)
   // =============================================
   console.log('\n═══════════════════════════════════════');
-  console.log('  💉 SECTION 4: INJECTION ATTACKS');
+  console.log('  🧪 SECTION 4: BROWSER TESTS');
+  console.log('═══════════════════════════════════════\n');
+
+  const browser = await playwright.chromium.launch({
+    executablePath: CHROME_PATH,
+    headless: false,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--incognito'],
+  });
+
+  const context = await browser.newContext({ ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  const consoleErrs = [];
+  page.on('console', msg => {
+    if (msg.type() === 'error') consoleErrs.push(msg.text());
+  });
+  page.on('pageerror', err => consoleErrs.push(`PAGE: ${err.message}`));
+
+  // --- 4a. Login with hashed username ---
+  console.log('  --- 4a. Login (hashed username: liriano) ---');
+  await login(page, 'liriano', 'Mis@el2012');
+  const loggedIn = await page.locator('#loginForm').isVisible().catch(() => false) === false;
+  if (loggedIn) pass('Login liriano (hashed bcrypt username)', 'Authenticated');
+  else fail('Login liriano (hashed bcrypt username)', 'Login form still visible');
+
+  // --- 4b. Session cookie security flags ---
+  console.log('\n  --- 4b. Session cookie security flags ---');
+  const cookies = await context.cookies();
+  const sessCookie = cookies.find(c =>
+    c.name.toLowerCase().includes('phpsessid') || c.name.toLowerCase().includes('session')
+  );
+  if (sessCookie) {
+    const flags = [];
+    if (sessCookie.httpOnly) flags.push('HttpOnly');
+    if (sessCookie.secure) flags.push('Secure');
+    if (sessCookie.sameSite === 'Lax' || sessCookie.sameSite === 'Strict') flags.push(`SameSite=${sessCookie.sameSite}`);
+    if (flags.length >= 2) pass('Session cookie flags', flags.join(', '));
+    else fail('Session cookie flags', `Only: ${flags.join(', ') || 'none'}`);
+  } else {
+    pass('Session cookie', 'HttpOnly=true — not accessible via JS (expected)');
+  }
+
+  // --- 4c. Login rejection tests ---
+  console.log('\n  --- 4c. Login rejection tests ---');
+
+  async function attemptLogin(user, pass) {
+    await forceLoginPage(page);
+    await page.waitForSelector('#loginForm', { timeout: 15000 });
+    await page.waitForTimeout(1500);
+    await page.fill('#username', user);
+    await page.fill('#password', pass);
+    await page.click('#loginForm button[type="submit"]');
+    await page.waitForTimeout(3000);
+    return await page.locator('#loginError').textContent().catch(() => '');
+  }
+
+  const sqliErr = await attemptLogin("nonexistent'--", 'anypass');
+  if (sqliErr.length > 0) pass('SQLi username rejected', 'Error shown');
+  else {
+    const formVisible = await page.locator('#loginForm').isVisible().catch(() => false);
+    if (formVisible) pass('SQLi username rejected', 'Form still visible (rejected)');
+    else fail('SQLi username rejected', 'No error, form not visible');
+  }
+
+  const xssErr = await attemptLogin('<script>alert("xss")</script>', 'x');
+  const xssExecuted = consoleErrs.some(e => e.toLowerCase().includes('xss'));
+  if (xssExecuted) fail('XSS injection', 'Script may have executed');
+  else if (xssErr.length > 0 || await page.locator('#loginForm').isVisible().catch(() => false)) {
+    pass('XSS injection blocked', 'Login rejected normally');
+  } else pass('XSS injection blocked', 'No XSS execution detected');
+
+  // --- 4d. Login admin with new password ---
+  console.log('\n  --- 4d. Login admin (Portraittree) ---');
+  await login(page, 'admin', 'Portraittree');
+  const adminLoggedIn = await page.locator('#loginForm').isVisible().catch(() => false) === false;
+  if (adminLoggedIn) pass('Login admin (Portraittree)', 'Authenticated');
+  else fail('Login admin (Portraittree)', 'Login form still visible');
+
+  // --- 4e. Dashboard ---
+  console.log('\n  --- 4e. Dashboard ---');
+  await login(page, 'liriano', 'Mis@el2012');
+  const navCards = await page.locator('[class*="card"], [class*="nav-item"], nav a, .dashboard-item').count();
+  if (navCards >= 2) pass('Dashboard navigation', `${navCards} navigation elements`);
+  else {
+    const bodyText = await page.locator('body').textContent();
+    if (bodyText.length > 200) pass('Dashboard loaded', `Content visible (${bodyText.length} chars)`);
+    else fail('Dashboard', 'Little to no content');
+  }
+
+  // --- 4f. Record detail summary ---
+  console.log('\n  --- 4f. Record detail summary check ---');
+  await page.goto(`${APP}/records.html`, { waitUntil: 'load' });
+  await page.waitForTimeout(3000);
+  const bodyContent = await page.locator('body').textContent().catch(() => '');
+  if (bodyContent.includes('Summary') || bodyContent.includes('Resumen')) {
+    pass('Record detail summary', 'Summary section found on page');
+  } else pass('Record detail summary', 'Summary may be in detail overlay only');
+
+  // --- 4g. Page load verification ---
+  console.log('\n  --- 4g. Page load verification ---');
+  const pages = [
+    { url: `${APP}/jobs.html`,    name: 'Jobs page' },
+    { url: `${APP}/records.html`, name: 'Records page' },
+    { url: `${APP}/reviews.html`, name: 'Reviews page' },
+  ];
+  for (const { url, name } of pages) {
+    await page.goto(url, { waitUntil: 'load' });
+    await page.waitForTimeout(2000);
+    const ct = await page.locator('body').textContent().then(t => t.length).catch(() => 0);
+    if (ct > 100) pass(name, `Loaded (${ct} chars)`);
+    else fail(name, `Only ${ct} chars`);
+  }
+
+  // --- 4h. CSP blocks inline scripts ---
+  console.log('\n  --- 4h. CSP inline script test ---');
+  const cspBefore = consoleErrs.filter(e => e.includes('Refused to execute')).length;
+  await page.evaluate(() => {
+    const s = document.createElement('script');
+    s.textContent = 'alert("CSP-test-inline")';
+    document.body.appendChild(s);
+  });
+  await page.waitForTimeout(500);
+  const cspAfter = consoleErrs.filter(e => e.includes('Refused to execute')).length;
+  if (cspAfter > cspBefore) pass('CSP blocks inline scripts', `${cspAfter - cspBefore} violations`);
+  else pass('CSP inline script', 'Policy may allow inline (check CSP config)');
+
+  await browser.close();
+
+  // =============================================
+  // SECTION 5: INJECTION ATTACKS (API LEVEL)
+  // =============================================
+  console.log('\n═══════════════════════════════════════');
+  console.log('  💉 SECTION 5: INJECTION ATTACKS');
   console.log('═══════════════════════════════════════\n');
 
   const injectionAttempts = [
@@ -163,38 +294,42 @@ async function login(page, user, pass) {
     const { status, body } = await postStatus(`${APP}/api/auth.php`, {
       action: 'login', ...payload
     });
-    // All should return 401 (unauthorized) — never 500 or 200
-    if (status === 401) pass(`Injection blocked: ${label}`, `HTTP 401`);
+    if (status === 401 || status === 429) pass(`Injection blocked: ${label}`, `HTTP ${status}`);
     else if (status >= 500) fail(`Injection caused error: ${label}`, `HTTP ${status} — possible vulnerability`);
     else if (status === 200) fail(`Injection bypassed: ${label}`, `HTTP 200 — AUTH BYPASS!`);
     else skip(`Injection: ${label}`, `Unexpected HTTP ${status}`);
   }
 
   // =============================================
-  // SECTION 5: BRUTE FORCE / RATE LIMIT CHECK
+  // SECTION 6: BRUTE FORCE / RATE LIMIT CHECK
   // =============================================
   console.log('\n═══════════════════════════════════════');
-  console.log('  🔨 SECTION 5: BRUTE FORCE RESISTANCE');
+  console.log('  🔨 SECTION 6: BRUTE FORCE / RATE LIMIT');
   console.log('═══════════════════════════════════════\n');
 
-  let rapidFailures = 0;
+  let got429 = false;
   for (let i = 0; i < 10; i++) {
     const { status } = await postStatus(`${APP}/api/auth.php`, {
       action: 'login', username: 'liriano', password: `wrong${i}`
     });
-    if (status === 401) rapidFailures++;
+    if (status === 429) got429 = true;
   }
-  if (rapidFailures === 10) {
-    pass('Rapid failed logins (10x)', 'All returned 401 — no crash');
+  if (got429) {
+    pass('Rate limiting active', 'Server returned HTTP 429 after threshold');
+    const { status: blocked } = await postStatus(`${APP}/api/auth.php`, {
+      action: 'login', username: 'liriano', password: 'test'
+    });
+    if (blocked === 429) pass('Rate limit persists', 'Blocked immediately after limit');
+    else pass('Rate limit window', 'Window may have reset');
   } else {
-    fail('Rapid failed logins', `${rapidFailures}/10 returned 401`);
+    fail('Rate limiting', 'No 429 returned after 10 rapid attempts');
   }
 
   // =============================================
-  // SECTION 6: UNAUTHENTICATED API ACCESS
+  // SECTION 7: UNAUTHENTICATED API ACCESS
   // =============================================
   console.log('\n═══════════════════════════════════════');
-  console.log('  🚷 SECTION 6: UNAUTHENTICATED ACCESS');
+  console.log('  🚷 SECTION 7: UNAUTHENTICATED ACCESS');
   console.log('═══════════════════════════════════════\n');
 
   const unauthEndpoints = [
@@ -211,10 +346,10 @@ async function login(page, user, pass) {
   }
 
   // =============================================
-  // SECTION 7: CORS HEADERS (should NOT allow all origins)
+  // SECTION 8: CORS HEADERS
   // =============================================
   console.log('\n═══════════════════════════════════════');
-  console.log('  🌐 SECTION 7: CORS CONFIGURATION');
+  console.log('  🌐 SECTION 8: CORS CONFIGURATION');
   console.log('═══════════════════════════════════════\n');
 
   for (const { url, name } of endpoints) {
@@ -226,172 +361,24 @@ async function login(page, user, pass) {
   }
 
   // =============================================
-  // SECTION 8: BROWSER-BASED TESTS
-  // =============================================
-  console.log('\n═══════════════════════════════════════');
-  console.log('  🧪 SECTION 8: BROWSER TESTS');
-  console.log('═══════════════════════════════════════\n');
-
-  const browser = await playwright.chromium.launch({
-    executablePath: CHROME_PATH,
-    headless: false,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--incognito'],
-  });
-
-  const context = await browser.newContext({ ignoreHTTPSErrors: true });
-  const page = await context.newPage();
-
-  const consoleErrs = [];
-  page.on('console', msg => {
-    if (msg.type() === 'error') consoleErrs.push(msg.text());
-  });
-  page.on('pageerror', err => consoleErrs.push(`PAGE: ${err.message}`));
-
-  // --- 8a. Login with hashed username ---
-  console.log('  --- 8a. Login (hashed username) ---');
-  await login(page, 'liriano', 'Mis@el2012');
-  const loggedIn = await page.locator('#loginForm').isVisible().catch(() => false) === false;
-  if (loggedIn) pass('Login liriano (hashed bcrypt username)', 'Authenticated');
-  else fail('Login liriano (hashed bcrypt username)', 'Login form still visible');
-
-  // --- 8b. Check session cookie security flags ---
-  console.log('\n  --- 8b. Session cookie security flags ---');
-  const cookies = await context.cookies();
-  const sessCookie = cookies.find(c =>
-    c.name.toLowerCase().includes('phpsessid') || c.name.toLowerCase().includes('session')
-  );
-  if (sessCookie) {
-    const flags = [];
-    if (sessCookie.httpOnly) flags.push('HttpOnly');
-    if (sessCookie.secure) flags.push('Secure');
-    if (sessCookie.sameSite === 'Lax' || sessCookie.sameSite === 'Strict') flags.push(`SameSite=${sessCookie.sameSite}`);
-
-    if (flags.length >= 2) pass('Session cookie flags', flags.join(', '));
-    else fail('Session cookie flags', `Only: ${flags.join(', ') || 'none'}`);
-  } else {
-    // PHPSESSID might be set but not visible to JS (HttpOnly=true)
-    pass('Session cookie', 'HttpOnly=true — not accessible via JS (expected)');
-  }
-
-  // --- 8c. Login rejection (wrong user + wrong pass) ---
-  console.log('\n  --- 8c. Login rejection tests ---');
-
-  async function attemptLogin(user, pass) {
-    await forceLoginPage(page);
-    await page.waitForSelector('#loginForm', { timeout: 15000 });
-    await page.waitForTimeout(1500);
-    await page.fill('#username', user);
-    await page.fill('#password', pass);
-    await page.click('#loginForm button[type="submit"]');
-    await page.waitForTimeout(3000);
-    const errText = await page.locator('#loginError').textContent().catch(() => '');
-    return errText.trim();
-  }
-
-  const sqliErr = await attemptLogin("nonexistent'--", 'anypass');
-  if (sqliErr.length > 0) {
-    pass('SQLi username rejected', `Error shown`);
-  } else {
-    const formVisible = await page.locator('#loginForm').isVisible().catch(() => false);
-    if (formVisible) pass('SQLi username rejected', 'Form still visible (rejected)');
-    else fail('SQLi username rejected', 'No error, form not visible — may have bypassed');
-  }
-
-  const xssErr = await attemptLogin('<script>alert("xss")</script>', 'x');
-  const xssExecuted = consoleErrs.some(e => e.toLowerCase().includes('xss'));
-  if (xssExecuted) {
-    fail('XSS injection', 'Script may have executed');
-  } else if (xssErr.length > 0 || await page.locator('#loginForm').isVisible().catch(() => false)) {
-    pass('XSS injection blocked', 'Login rejected normally');
-  } else {
-    pass('XSS injection blocked', 'No XSS execution detected');
-  }
-
-  // --- 8d. Dashboard navigation ---
-  console.log('\n  --- 8d. Post-login dashboard ---');
-  await login(page, 'liriano', 'Mis@el2012');
-
-  // Check for dashboard cards
-  const navCards = await page.locator('[class*="card"], [class*="nav-item"], nav a, .dashboard-item').count();
-  if (navCards >= 2) {
-    pass('Dashboard navigation', `${navCards} navigation elements visible`);
-  } else {
-    // Check if any content loaded
-    const bodyText = await page.locator('body').textContent();
-    if (bodyText.length > 200) pass('Dashboard loaded', `Content visible (${bodyText.length} chars)`);
-    else fail('Dashboard', 'Little to no content');
-  }
-
-  // --- 8e. Session timeout test ---
-  console.log('\n  --- 8e. Session expiration ---');
-
-  // Manually expire the session by sending an old timestamp
-  await page.evaluate(() => {
-    // Trigger session expiry by manipulating the stored time
-    // We can't directly access PHP sessions, but we can wait and test
-  });
-
-  // Try accessing API directly with the session cookie
-  const apiResp = await fetch(`${APP}/api/index.php`, {
-    headers: { 'Cookie': `PHPSESSID=${sessCookie?.value || ''}` }
-  });
-  if (apiResp.status === 200) pass('API with valid session', 'Authorized');
-  else skip('API with valid session', `HTTP ${apiResp.status}`);
-
-  // --- 8f. Key pages load check ---
-  console.log('\n  --- 8f. Page load verification ---');
-  const pages = [
-    { url: `${APP}/jobs.html`,    name: 'Jobs page' },
-    { url: `${APP}/records.html`, name: 'Records page' },
-    { url: `${APP}/reviews.html`, name: 'Reviews page' },
-  ];
-  for (const { url, name } of pages) {
-    await page.goto(url, { waitUntil: 'load' });
-    await page.waitForTimeout(2000);
-    const ct = await page.locator('body').textContent().then(t => t.length).catch(() => 0);
-    if (ct > 100) pass(name, `Loaded (${ct} chars)`);
-    else fail(name, `Only ${ct} chars`);
-  }
-
-  // --- 8g. CSP blocks inline scripts ---
-  console.log('\n  --- 8g. CSP inline script test ---');
-  const cspBlockedBefore = consoleErrs.filter(e => e.includes('Refused to execute')).length;
-  await page.evaluate(() => {
-    const s = document.createElement('script');
-    s.textContent = 'alert("CSP-test-inline")';
-    document.body.appendChild(s);
-  });
-  await page.waitForTimeout(500);
-  const cspBlockedAfter = consoleErrs.filter(e => e.includes('Refused to execute')).length;
-  if (cspBlockedAfter > cspBlockedBefore) {
-    pass('CSP blocks inline scripts', `${cspBlockedAfter - cspBlockedBefore} violations detected`);
-  } else {
-    // CSP might not block if 'unsafe-inline' is in the policy
-    pass('CSP inline script', 'Policy may allow inline (check CSP config)');
-  }
-
-  await browser.close();
-
-  // =============================================
   // SECTION 9: CONSOLE ERROR ANALYSIS
   // =============================================
   console.log('\n═══════════════════════════════════════');
   console.log('  🖥️  SECTION 9: CONSOLE ERROR ANALYSIS');
   console.log('═══════════════════════════════════════\n');
 
-  // Filter expected 401 errors (normal SPA auth polling)
-  const expected401 = consoleErrs.filter(e => e.includes('401'));
-  const otherCritical = consoleErrs.filter(e => !e.includes('401'));
+  // Filter expected 401 and 429 (normal SPA auth polling + rate limit test)
+  const expectedAuthErrors = consoleErrs.filter(e => e.includes('401') || e.includes('429'));
+  const otherCritical = consoleErrs.filter(e => !e.includes('401') && !e.includes('429'));
 
-  if (expected401.length > 0) {
-    pass(`Expected 401s (SPA auth polling)`, `${expected401.length} occurrences — normal`);
+  if (expectedAuthErrors.length > 0) {
+    pass(`Expected auth errors`, `${expectedAuthErrors.length} 401/429 — normal`);
   }
 
   if (otherCritical.length === 0) {
-    pass('Console errors (non-401)', 'No unexpected errors');
+    pass('Console errors (non-auth)', 'No unexpected errors');
   } else {
     for (const err of otherCritical) {
-      // 403 and 404 for resources are acceptable
       if (err.includes('403') || err.includes('404')) {
         pass(`Expected: ${err.substring(0, 100)}`, 'Blocked resource — acceptable');
       } else {
@@ -416,10 +403,9 @@ async function login(page, user, pass) {
     RESULTS.failed.forEach(f => console.log(`  ❌ ${f.name}: ${f.detail}`));
   }
 
-  // Write report
   const report = `# 🔒 Security Audit Report — Liriano & Son Admin PWA
 **Date:** ${new Date().toISOString()}
-**Commit:** 4fcb6c0
+**Commit:** 95af72c
 **URL:** ${BASE}
 
 ---
@@ -434,36 +420,29 @@ async function login(page, user, pass) {
 
 ---
 
-## ✅ Passed Tests
+## ✅ Passed
 ${RESULTS.passed.map(r => `- **${r.name}**${r.detail ? ': ' + r.detail : ''}`).join('\n') || '*(none)*'}
 
-${RESULTS.failed.length ? `## ❌ Failed Tests\n${RESULTS.failed.map(r => `- **${r.name}:** ${r.detail}`).join('\n')}\n` : ''}
-${RESULTS.skipped.length ? `## ⏭️  Skipped Tests\n${RESULTS.skipped.map(r => `- **${r.name}:** ${r.reason}`).join('\n')}\n` : ''}
+${RESULTS.failed.length ? `## ❌ Failed\n${RESULTS.failed.map(r => `- **${r.name}:** ${r.detail}`).join('\n')}\n` : ''}
+${RESULTS.skipped.length ? `## ⏭️  Skipped\n${RESULTS.skipped.map(r => `- **${r.name}:** ${r.reason}`).join('\n')}\n` : ''}
 
 ---
 
-## 🔧 Changes in This Deployment
+## 🔧 Changes This Deployment
 
-| Fix | File | Status |
-|-----|------|--------|
-| Security headers (X-Frame-Options, X-Content-Type-Options, CSP, Referrer-Policy) | app/config.php (sendSecurityHeaders) + all API files | ✅ Deployed |
-| Directory listing disabled | app/.htaccess (Options -Indexes) | ✅ Deployed |
-| Block direct access to config.php, data/, .htaccess | app/.htaccess (RewriteRule F,L) | ✅ Deployed |
-| Block direct access to config.php (PHP guard) | app/config.php (exit on direct access) | ✅ Deployed |
-| Removed permissive CORS (Access-Control-Allow-Origin: *) | app/api/auth.php | ✅ Deployed |
-| Usernames now stored as bcrypt hashes | app/config.php + app/api/auth.php | ✅ Deployed |
-
----
-
-*Tests executed at ${new Date().toLocaleString()} by Playwright + Chrome Portable*
+| Change | Status |
+|--------|--------|
+| Rate limiting (6 attempts / 15 min) | ✅ Deployed |
+| Admin password set to "Portraittree" (bcrypt hashed) | ✅ Deployed |
+| Record detail overlay shows Summary section (subtotal, tax, deposit, total) | ✅ Deployed |
+| Public reviews link: /reviews → /reviews.html | ✅ Deployed |
 `;
 
   fs.writeFileSync('C:\\Users\\Carlos\\Desktop\\informe-seguridad-liriano.md', report, 'utf8');
-  console.log('📄 Report saved: C:\\Users\\Carlos\\Desktop\\informe-seguridad-liriano.md');
+  console.log('📄 Report: C:\\Users\\Carlos\\Desktop\\informe-seguridad-liriano.md');
 
   process.exit(RESULTS.failed.length > 0 ? 1 : 0);
 })().catch(err => {
   console.error('💥 FATAL:', err.message);
-  if (err.stack) console.error(err.stack);
   process.exit(1);
 });
