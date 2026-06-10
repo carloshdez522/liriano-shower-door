@@ -1,4 +1,4 @@
-const CACHE = 'liriano-app-v10';
+const CACHE = 'liriano-app-v11';
 const ASSETS = [
   '/app/',
   '/app/index.html',
@@ -34,6 +34,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request)
       .then(res => {

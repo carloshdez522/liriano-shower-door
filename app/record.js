@@ -315,9 +315,10 @@
   }
 
   function exportExcel() {
+    try {
     const groups = currentGroups;
     if (groups.length === 0) { showToast('No data to export', 'error'); return; }
-    if (typeof XLSX === 'undefined') { showToast('Excel library not loaded', 'error'); return; }
+    if (typeof XLSX === 'undefined') { console.error('XLSX not loaded'); showToast('Excel library not loaded', 'error'); return; }
 
     const wb = XLSX.utils.book_new();
 
@@ -394,6 +395,7 @@
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    } catch (e) { console.error('Export error:', e); showToast('Export error: ' + e.message, 'error'); }
   }
 
   async function loadRecords() {
