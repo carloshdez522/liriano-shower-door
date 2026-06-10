@@ -286,7 +286,7 @@ async function freshPage(context) {
       document.body.appendChild(s);
     });
     await pg.waitForTimeout(500);
-    const cspAfter = errs.filter(e => e.includes('Refused to execute')).length;
+    const cspAfter = allConsoleErrors.filter(e => e.includes('Refused to execute')).length;
     if (cspAfter > cspBefore) pass('CSP blocks inline scripts', `${cspAfter - cspBefore} violations`);
     else pass('CSP inline script', 'Policy may allow inline (check CSP config)');
 
