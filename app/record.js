@@ -381,6 +381,7 @@
     const blob = new Blob([wbout], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+    link.href = url;
 
     const filterLabel = activeFilter === 'all' ? '' : badgeLabel(activeFilter).toLowerCase();
     const fromVal = filterFrom.value;
@@ -394,7 +395,7 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch (e) { console.error('Export error:', e); showToast('Export error: ' + e.message, 'error'); }
   }
 
