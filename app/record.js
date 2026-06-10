@@ -3,13 +3,14 @@
 
   const recordList = $('recordList');
   const searchInput = $('searchInput');
-  const exportCsvBtn = $('exportCsvBtn');
+  const exportExcelBtn = $('exportExcelBtn');
   const statAllCount = $('statAllCount');
   const statCount = $('statCount');
   const statTotal = $('statTotal');
   const filterFrom = $('filterFrom');
   const filterTo = $('filterTo');
   let activeFilter = 'all';
+  let currentGroups = [];
 
   $('headerBrand').addEventListener('click', () => { location.href = 'index.html'; });
   const dh = $('dashHome'); if (dh) dh.addEventListener('click', () => { location.href = 'index.html'; });
@@ -98,7 +99,6 @@
     const snap = rec.snapshot;
     if (!snap) { showToast('No data to restore', 'error'); return; }
     try {
-      const prevStatus = (snap.status === 'estimado' || snap.status === 'invoice' || snap.status === 'done') ? snap.status : 'estimado';
       await window.restoreJob(snap, rec.jobId);
       showToast(t('records_recovered'));
       loadRecords();
@@ -291,39 +291,90 @@
     return localStorage.getItem('liriano_lang') || 'en';
   }
 
-  function exportCSV() {
-    getRecords().then(allRecords => {
-      const BOM = '\uFEFF';
-      let csv = BOM + 'Job,Client,ID,Status,Date,Time,Items,Total\n';
-      for (const r of allRecords) {
-        const snap = r.snapshot || r;
-        const total = calcTotal(snap);
-        const items = (snap.items || []).map(it => (it.item || '') + ' $' + (parseFloat(it.price) || 0).toFixed(2)).join('; ');
-        const ts = new Date(r.createdAt);
-        const dateStr = ts.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-        const timeStr = ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const row = [
-          r.jobName || snap.job || '',
-          r.clientName || snap.name || '',
-          formatId(r.jobId),
-          badgeLabel(r.status),
-          dateStr,
-          timeStr,
-          items,
-          total.toFixed(2),
-        ].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',');
-        csv += row + '\n';
-      }
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'liriano-history.csv';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+  function exportExcel() {
+    const groups = currentGroups;
+    if (groups.length === 0) { showToast('No data to export', 'error'); return; }
+    if (typeof XLSX === 'undefined') { showToast('Excel library not loaded', 'error'); return; }
+
+    const wb = XLSX.utils.book_new();
+
+    function statusDate(g, status) {
+      const e = g.entries.find(en => en.status === status);
+      return e ? formatDate(e.createdAt) : '';
+    }
+
+    function formatDate(ts) {
+      return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function findTotal(g, status) {
+      const e = g.entries.find(en => en.status === status);
+      if (!e) return '';
+      const snap = e.snapshot || e;
+      return calcTotal(snap);
+    }
+
+    const mainData = groups.map(g => {
+      const status = cardStatus(g);
+      return {
+        'Job ID': formatId(g.jobId),
+        'Job Name': g.jobName,
+        'Client Name': g.clientName,
+        'Current Status': badgeLabel(status),
+        'Status Date': statusDate(g, status),
+        'Total (if Completed)': status === 'done' ? findTotal(g, status) : '',
+      };
     });
+    const ws1 = XLSX.utils.json_to_sheet(mainData);
+    ws1['!cols'] = [{wch:15}, {wch:30}, {wch:25}, {wch:18}, {wch:20}, {wch:18}];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Principal');
+
+    const histData = groups.map(g => {
+      const firstEntry = g.entries[g.entries.length - 1];
+      return {
+        'Job ID': formatId(g.jobId),
+        'Created Date': formatDate(firstEntry.createdAt),
+        'Estimate Total': findTotal(g, 'estimado'),
+        'Invoice Total': findTotal(g, 'invoice'),
+        'Completed Total': findTotal(g, 'done'),
+      };
+    });
+    const ws2 = XLSX.utils.json_to_sheet(histData);
+    ws2['!cols'] = [{wch:15}, {wch:20}, {wch:18}, {wch:18}, {wch:18}];
+    XLSX.utils.book_append_sheet(wb, ws2, 'History');
+
+    const estimado = groups.filter(g => cardStatus(g) === 'estimado').length;
+    const invoice = groups.filter(g => cardStatus(g) === 'invoice').length;
+    const done = groups.filter(g => cardStatus(g) === 'done').length;
+    const deleted = groups.filter(g => cardStatus(g) === 'deleted').length;
+    const totalCollected = groups
+      .filter(g => cardStatus(g) === 'done')
+      .reduce((s, g) => s + calcTotal(g.latest.snapshot || g.latest), 0);
+    const ratio = estimado > 0 ? (done / estimado).toFixed(2) : 'N/A';
+
+    const statsData = [
+      { Statistics: 'Total Records', Value: groups.length },
+      { Statistics: 'Estimates', Value: estimado },
+      { Statistics: 'Invoices', Value: invoice },
+      { Statistics: 'Completed', Value: done },
+      { Statistics: 'Deleted', Value: deleted },
+      { Statistics: 'Total Collected', Value: '$' + totalCollected.toFixed(2) },
+      { Statistics: 'Completed / Estimates Ratio', Value: ratio },
+    ];
+    const ws3 = XLSX.utils.json_to_sheet(statsData);
+    ws3['!cols'] = [{wch:35}, {wch:18}];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Statistics');
+
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'liriano-records.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   async function loadRecords() {
@@ -351,6 +402,12 @@
       }
       groups.sort((a, b) => b.latest.createdAt - a.latest.createdAt);
 
+      $('countAll').textContent = groups.length;
+      $('countEstimado').textContent = groups.filter(g => cardStatus(g) === 'estimado').length;
+      $('countInvoice').textContent = groups.filter(g => cardStatus(g) === 'invoice').length;
+      $('countDone').textContent = groups.filter(g => cardStatus(g) === 'done').length;
+      $('countDeleted').textContent = groups.filter(g => cardStatus(g) === 'deleted').length;
+
       const query = (searchInput.value || '').toLowerCase().trim();
       if (query) {
         groups = groups.filter(g => {
@@ -376,6 +433,7 @@
         });
       }
 
+      currentGroups = groups;
       updateStats(groups);
       renderList(groups);
     } catch {
@@ -384,7 +442,7 @@
   }
 
   searchInput.addEventListener('input', loadRecords);
-  if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportCSV);
+  if (exportExcelBtn) exportExcelBtn.addEventListener('click', exportExcel);
   if (filterFrom) filterFrom.addEventListener('change', loadRecords);
   if (filterTo) filterTo.addEventListener('change', loadRecords);
 

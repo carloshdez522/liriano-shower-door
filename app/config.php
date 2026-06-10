@@ -4,13 +4,19 @@ define('ADMIN_USER', 'liriano');
 define('ADMIN_PASS_HASH', '$2y$10$/onSqMNakTgiAKCmqyaTgezcnnXM/7xHDcSjF.xobdDlJM5oIiAhi');
 define('SESSION_TIMEOUT', 900); /* 15 minutos */
 define('DATA_DIR', __DIR__ . '/data');
+define('IS_HTTPS', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443));
+
+$ADMIN_USERS = [
+  ['username' => 'liriano', 'hash' => ADMIN_PASS_HASH],
+  ['username' => 'admin',   'hash' => '$2y$12$o.l6KyeawZebZD3LgoOPxO/ug1YeiWD0/mhiY4bZVz48UHazZVQjS'],
+];
 
 function requireAuth() {
   if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
       'lifetime' => 0,
       'path' => '/',
-      'secure' => true,
+      'secure' => IS_HTTPS,
       'httponly' => true,
       'samesite' => 'Lax',
     ]);

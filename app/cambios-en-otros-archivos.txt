@@ -1,0 +1,28 @@
+cambios-en-otros-archivos.txt
+=============================
+Registro de modificaciones fuera de record.html / record.js
+
+[2026-06-09] Session 1
+- common.js: buildPDFDoc() ahora carga PlayfairDisplay-Bold.ttf via fetch() en vez de base64
+- common.js: showPDFPreview() cambió de modal a FABs (blur overlay + dos botones circulares)
+- common.js: createRecord() expuesta en window.createRecord
+- common.js: restoreJob() expuesta en window.restoreJob (restaura job en Manage Jobs)
+- common.js: getJobs() ahora hace seed si liriano_jobs está vacío (no más data/jobs.js)
+- common.js: i18n keys records_recover, records_recovered
+- common.js: restoreJob() usa deepClone + updateJob(), fallback a POST con _restore
+- style.css: .pdf-blur-overlay, .pdf-float-actions, .pdf-fab, .fabIn animation
+- style.css: .date-filter-bar, .date-filter-input, .filter-clear-btn
+- style.css: .job-action-btn con justify-content:center
+- jobs.html: removed <script src="playfair-font.js">
+- jobs.js: showPDFPreview callers pasan anchor element
+- config.php: $ADMIN_USERS array (liriano, admin), IS_HTTPS constant, requireAuth()
+- api/auth.php: multi-user loop sobre $ADMIN_USERS, sessionCookie() con IS_HTTPS
+- sw.js: v4, removed playfair-font.js, added assets/PlayfairDisplay-Bold.ttf
+- playfair-font.js: deleted
+- assets/PlayfairDisplay-Bold.ttf: added (font file)
+- record.js: restoreFromRecord() eliminada variable muerta prevStatus (no se usaba)
+- record.html: agregado SheetJS CDN (xlsx.full.min.js) para exportación Excel
+- record.html: botón Export CSV reemplazado por Export Excel (id exportExcelBtn)
+- record.js: agregada variable currentGroups que captura los grupos filtrados
+- record.js: exportCSV() reescrita como exportExcel() — genera 3 hojas (Principal, History, Statistics) respetando filtros activos
+- common.js: i18n key records_export_excel (EN/ES)

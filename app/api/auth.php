@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
 function sessionCookie() {
   session_set_cookie_params([
-    'lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax',
+    'lifetime' => 0, 'path' => '/', 'secure' => IS_HTTPS, 'httponly' => true, 'samesite' => 'Lax',
   ]);
 }
 
@@ -33,7 +33,11 @@ if ($method === 'POST') {
   $user = $input['username'] ?? '';
   $pass = $input['password'] ?? '';
 
-  if ($user === ADMIN_USER && password_verify($pass, ADMIN_PASS_HASH)) {
+  $authOk = false;
+  foreach ($ADMIN_USERS as $u) {
+    if ($user === $u['username'] && password_verify($pass, $u['hash'])) { $authOk = true; break; }
+  }
+  if ($authOk) {
     if (session_status() === PHP_SESSION_NONE) {
       sessionCookie();
       session_start();
