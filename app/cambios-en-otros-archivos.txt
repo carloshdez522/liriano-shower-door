@@ -26,3 +26,6 @@ Registro de modificaciones fuera de record.html / record.js
 - record.js: agregada variable currentGroups que captura los grupos filtrados
 - record.js: exportCSV() reescrita como exportExcel() — genera 3 hojas (Principal, History, Statistics) respetando filtros activos
 - common.js: i18n key records_export_excel (EN/ES)
+- record.js: exportExcel() mejorada — filename dinámico según filtros activos
+- record.js: exportExcel() — auto-filtros en hojas Principal e History para ordenar columnas
+- record.js: History ahora incluye Invoice Last Modified + Completed Date

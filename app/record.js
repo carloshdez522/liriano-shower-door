@@ -291,28 +291,35 @@
     return localStorage.getItem('liriano_lang') || 'en';
   }
 
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function findTotal(g, status) {
+    const e = g.entries.find(en => en.status === status);
+    if (!e) return '';
+    const snap = e.snapshot || e;
+    return calcTotal(snap);
+  }
+
+  function invoiceLastModified(g) {
+    const idx = g.entries.findIndex(e => e.status === 'invoice');
+    if (idx === -1) return '';
+    const edited = g.entries.slice(0, idx).find(e => e.status === 'edited');
+    return edited ? formatDate(edited.createdAt) : formatDate(g.entries[idx].createdAt);
+  }
+
+  function statusDate(g, status) {
+    const e = g.entries.find(en => en.status === status);
+    return e ? formatDate(e.createdAt) : '';
+  }
+
   function exportExcel() {
     const groups = currentGroups;
     if (groups.length === 0) { showToast('No data to export', 'error'); return; }
     if (typeof XLSX === 'undefined') { showToast('Excel library not loaded', 'error'); return; }
 
     const wb = XLSX.utils.book_new();
-
-    function statusDate(g, status) {
-      const e = g.entries.find(en => en.status === status);
-      return e ? formatDate(e.createdAt) : '';
-    }
-
-    function formatDate(ts) {
-      return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    }
-
-    function findTotal(g, status) {
-      const e = g.entries.find(en => en.status === status);
-      if (!e) return '';
-      const snap = e.snapshot || e;
-      return calcTotal(snap);
-    }
 
     const mainData = groups.map(g => {
       const status = cardStatus(g);
@@ -327,6 +334,7 @@
     });
     const ws1 = XLSX.utils.json_to_sheet(mainData);
     ws1['!cols'] = [{wch:15}, {wch:30}, {wch:25}, {wch:18}, {wch:20}, {wch:18}];
+    ws1['!autofilter'] = { ref: 'A1:F' + (mainData.length + 1) };
     XLSX.utils.book_append_sheet(wb, ws1, 'Principal');
 
     const histData = groups.map(g => {
@@ -335,12 +343,15 @@
         'Job ID': formatId(g.jobId),
         'Created Date': formatDate(firstEntry.createdAt),
         'Estimate Total': findTotal(g, 'estimado'),
+        'Invoice Last Modified': invoiceLastModified(g),
         'Invoice Total': findTotal(g, 'invoice'),
+        'Completed Date': statusDate(g, 'done'),
         'Completed Total': findTotal(g, 'done'),
       };
     });
     const ws2 = XLSX.utils.json_to_sheet(histData);
-    ws2['!cols'] = [{wch:15}, {wch:20}, {wch:18}, {wch:18}, {wch:18}];
+    ws2['!cols'] = [{wch:15}, {wch:20}, {wch:18}, {wch:22}, {wch:18}, {wch:20}, {wch:18}];
+    ws2['!autofilter'] = { ref: 'A1:G' + (histData.length + 1) };
     XLSX.utils.book_append_sheet(wb, ws2, 'History');
 
     const estimado = groups.filter(g => cardStatus(g) === 'estimado').length;
@@ -350,7 +361,7 @@
     const totalCollected = groups
       .filter(g => cardStatus(g) === 'done')
       .reduce((s, g) => s + calcTotal(g.latest.snapshot || g.latest), 0);
-    const ratio = estimado > 0 ? (done / estimado).toFixed(2) : 'N/A';
+    const ratio = groups.length > 0 ? Math.round(done / groups.length * 100) + '%' : 'N/A';
 
     const statsData = [
       { Statistics: 'Total Records', Value: groups.length },
@@ -359,7 +370,7 @@
       { Statistics: 'Completed', Value: done },
       { Statistics: 'Deleted', Value: deleted },
       { Statistics: 'Total Collected', Value: '$' + totalCollected.toFixed(2) },
-      { Statistics: 'Completed / Estimates Ratio', Value: ratio },
+      { Statistics: 'Completion Rate', Value: ratio },
     ];
     const ws3 = XLSX.utils.json_to_sheet(statsData);
     ws3['!cols'] = [{wch:35}, {wch:18}];
@@ -369,8 +380,16 @@
     const blob = new Blob([wbout], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
-    link.download = 'liriano-records.xlsx';
+
+    const filterLabel = activeFilter === 'all' ? '' : badgeLabel(activeFilter).toLowerCase();
+    const fromVal = filterFrom.value;
+    const toVal = filterTo.value;
+    let nameParts = ['liriano', 'records'];
+    if (filterLabel) nameParts.push(filterLabel);
+    if (fromVal) { nameParts.push('from', fromVal); }
+    if (toVal) { nameParts.push('to', toVal); }
+    link.download = nameParts.join(' ') + '.xlsx';
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
