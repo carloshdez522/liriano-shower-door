@@ -722,16 +722,6 @@
           if (!isEst) {
             msg += t('wa_review') + REVIEW_URL;
           }
-          try {
-            if (typeof navigator.share === 'function' && typeof File === 'function') {
-              const file = new File([blob], filename, { type: 'application/pdf' });
-              await navigator.share({ files: [file], text: msg });
-              dismiss();
-              return;
-            }
-          } catch (err) {
-            if (err.name === 'AbortError') return;
-          }
           window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
           dismiss();
         });
