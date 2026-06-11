@@ -53,7 +53,7 @@ function sanitizeJob($job) {
   }
   if (isset($job['items']) && is_array($job['items'])) {
     foreach ($job['items'] as &$item) {
-      foreach (['item','description','glassThickness'] as $f) {
+      foreach (['item','description','glassThickness','installationUnit','dimensionsUnit'] as $f) {
         if (isset($item[$f])) $item[$f] = sanitizeString($item[$f]);
       }
     }

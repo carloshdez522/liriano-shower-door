@@ -79,7 +79,7 @@
       }
       actionsHtml += '<button class="job-action-btn delete review-delete" data-id="' + r.id + '"><i class="fas fa-trash"></i></button>';
 
-      var photoHtml = r.photo ? '<div class="review-card-photo" style="margin:8px 0 0"><img src="' + r.photo + '" alt="" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px"></div>' : '';
+      var photoHtml = r.photo ? '<div class="review-card-photo" style="margin:8px 0 0"><img src="' + esc(r.photo) + '" alt="" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px"></div>' : '';
 
       return '<div class="job-card">'
         + '<div class="job-card-top">'
@@ -88,7 +88,7 @@
         + '</div>'
         + '<div class="review-card-stars" style="margin-bottom:6px">' + starsHtml + '</div>'
         + '<div class="job-card-info">'
-        + '<span><i class="fas fa-tag"></i> ' + (r.serviceType || '—') + '</span>'
+        + '<span><i class="fas fa-tag"></i> ' + esc(r.serviceType || '—') + '</span>'
         + '<span><i class="fas fa-calendar"></i> ' + dateStr + '</span>'
         + '</div>'
         + '<p style="font-size:0.85rem;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:8px">' + esc(r.text) + '</p>'
