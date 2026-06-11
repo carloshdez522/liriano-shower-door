@@ -312,21 +312,35 @@
 
   function findTotal(g, status) {
     const e = g.entries.find(en => en.status === status);
-    if (!e) return '';
+    if (!e) return null;
     const snap = e.snapshot || e;
     return calcTotal(snap);
   }
 
+  function findTotalFmt(g, status) {
+    const val = findTotal(g, status);
+    return val !== null ? val : '';
+  }
+
+  function excelDateVal(ts) {
+    return (new Date(ts).getTime() / 86400000) + 25569;
+  }
+
   function invoiceLastModified(g) {
     const idx = g.entries.findIndex(e => e.status === 'invoice');
-    if (idx === -1) return '';
+    if (idx === -1) return null;
     const edited = g.entries.slice(0, idx).find(e => e.status === 'edited');
-    return edited ? formatDate(edited.createdAt) : formatDate(g.entries[idx].createdAt);
+    return edited ? excelDateVal(edited.createdAt) : excelDateVal(g.entries[idx].createdAt);
   }
 
   function statusDate(g, status) {
     const e = g.entries.find(en => en.status === status);
     return e ? formatDate(e.createdAt) : '';
+  }
+
+  function statusDateVal(g, status) {
+    const e = g.entries.find(en => en.status === status);
+    return e ? excelDateVal(e.createdAt) : null;
   }
 
   function exportExcel() {
@@ -344,30 +358,48 @@
         'Job Name': g.jobName,
         'Client Name': g.clientName,
         'Current Status': badgeLabel(status),
-        'Status Date': statusDate(g, status),
-        'Total (if Completed)': status === 'done' ? findTotal(g, status) : '',
+        'Status Date': statusDateVal(g, status),
+        'Total': status === 'done' ? findTotal(g, status) : null,
       };
     });
     const ws1 = XLSX.utils.json_to_sheet(mainData);
+    const r1 = mainData.length + 1;
+    for (let i = 2; i <= r1; i++) {
+      const dateCell = ws1['E' + i];
+      if (dateCell && dateCell.t === 'n') { dateCell.z = 'mmm dd, yyyy'; }
+      const totalCell = ws1['F' + i];
+      if (totalCell && totalCell.t === 'n') { totalCell.z = '#,##0.00'; }
+    }
     ws1['!cols'] = [{wch:15}, {wch:30}, {wch:25}, {wch:18}, {wch:20}, {wch:18}];
-    ws1['!autofilter'] = { ref: 'A1:F' + (mainData.length + 1) };
+    ws1['!autofilter'] = { ref: 'A1:F' + r1 };
     XLSX.utils.book_append_sheet(wb, ws1, 'Principal');
 
     const histData = groups.map(g => {
       const firstEntry = g.entries[g.entries.length - 1];
       return {
         'Job ID': formatId(g.jobId),
-        'Created Date': formatDate(firstEntry.createdAt),
+        'Created Date': excelDateVal(firstEntry.createdAt),
         'Estimate Total': findTotal(g, 'estimado'),
         'Invoice Last Modified': invoiceLastModified(g),
         'Invoice Total': findTotal(g, 'invoice'),
-        'Completed Date': statusDate(g, 'done'),
+        'Completed Date': statusDateVal(g, 'done'),
         'Completed Total': findTotal(g, 'done'),
       };
     });
     const ws2 = XLSX.utils.json_to_sheet(histData);
+    const r2 = histData.length + 1;
+    for (let i = 2; i <= r2; i++) {
+      for (const col of ['B', 'D', 'F']) {
+        const cell = ws2[col + i];
+        if (cell && cell.t === 'n') { cell.z = 'mmm dd, yyyy'; }
+      }
+      for (const col of ['C', 'E', 'G']) {
+        const cell = ws2[col + i];
+        if (cell && cell.t === 'n') { cell.z = '#,##0.00'; }
+      }
+    }
     ws2['!cols'] = [{wch:15}, {wch:20}, {wch:18}, {wch:22}, {wch:18}, {wch:20}, {wch:18}];
-    ws2['!autofilter'] = { ref: 'A1:G' + (histData.length + 1) };
+    ws2['!autofilter'] = { ref: 'A1:G' + r2 };
     XLSX.utils.book_append_sheet(wb, ws2, 'History');
 
     const estimado = groups.filter(g => cardStatus(g) === 'estimado').length;
