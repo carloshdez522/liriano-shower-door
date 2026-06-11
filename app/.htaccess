@@ -10,7 +10,7 @@ Options -Indexes
   RewriteRule ^config\.php$ - [F,L]
   RewriteRule ^data/ - [F,L]
   RewriteRule ^login_attempts\.json$ - [F,L]
-  RewriteRule ^plantilla\.(js|pdf)$ - [F,L]
+  RewriteRule ^plantilla\.pdf$ - [F,L]
   RewriteRule ^cambios-en-otros-archivos\.txt$ - [F,L]
   RewriteRule ^assets/ - [F,L]
 
