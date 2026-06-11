@@ -84,8 +84,8 @@
       nav_contact: 'Contact',
 
       hero_badge: 'Premium Craftsmanship',
-      hero_title: 'Glass Solutions',
-      hero_p: 'Transform your home into a sanctuary of elegance. Custom glass installations for discerning homeowners across Miami, Miami-Dade and Broward.',
+      hero_title: 'Glass Solutions — Shower Doors, Mirrors &amp; More',
+      hero_p: 'Transform your home with custom glass solutions — from <strong>shower doors and glass railings</strong> to office partitions, mirrors, cabinets and repairs. Serving Miami, Miami-Dade and Broward since 2019. Request your free estimate today.',
       hero_btn: 'Request a Free Estimate',
       scroll: 'Scroll',
       about_label: 'About Us',
@@ -170,8 +170,8 @@
       nav_contact: 'Contacto',
 
       hero_badge: 'Artesan\u00eda Premium',
-      hero_title: 'Soluciones en Vidrio',
-      hero_p: 'Transforma tu hogar en un santuario de elegancia. Instalaci\u00f3n de cristaler\u00eda personalizada para propietarios exigentes en Miami, Miami-Dade y Broward.',
+      hero_title: 'Soluciones en Vidrio — Puertas, Espejos y M\u00e1s',
+      hero_p: 'Transforma tu hogar con soluciones personalizadas en vidrio — desde <strong>puertas de ducha y barandales</strong> hasta divisiones de oficina, espejos, gabinetes y reparaciones. Sirviendo a Miami, Miami-Dade y Broward desde 2019. Solicita tu estimado gratis hoy.',
       hero_btn: 'Solicita tu Estimado Gratis',
       scroll: 'Desplazar',
       about_label: 'Nosotros',

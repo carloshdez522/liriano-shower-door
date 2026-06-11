@@ -333,7 +333,7 @@ ul {
 
 .scroll-indicator {
   position: absolute;
-  bottom: 40px;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
