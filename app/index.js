@@ -107,7 +107,6 @@
           badge.textContent = '!';
           pendingCard.appendChild(badge);
         }
-        badge.textContent = pending > 9 ? '9+' : pending;
       } else {
         if (badge) badge.remove();
       }
