@@ -209,9 +209,9 @@
   }
 
   async function updateJob(id, data) {
+    const isPartialStatus = Object.keys(data).length === 1 && 'status' in data;
     data.id = id;
     const result = await apiFetch('PUT', null, data);
-    const isPartialStatus = Object.keys(data).length === 1 && 'status' in data;
     const recordStatus = isPartialStatus ? data.status : 'edited';
     await createRecord(result, recordStatus || 'edited');
     return result;
