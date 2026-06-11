@@ -44,50 +44,6 @@
     statTotal.textContent = '$' + total.toFixed(2);
   }
 
-  function seedYMD(y,m,d) { return new Date(y,m-1,d,12,0,0).getTime(); }
-
-  async function seedRealisticRecords() {
-    const jobs = await getJobs();
-    if (!jobs || jobs.length === 0) return;
-    const idMap = {};
-    for (const j of jobs) idMap[String(j.id)] = j;
-
-    function snap(job) { return JSON.parse(JSON.stringify(job)); }
-
-    function rec(jobId, status, daysOffset) {
-      const job = idMap[String(jobId)];
-      if (!job) return null;
-      const createdAt = seedYMD(2026, 3, daysOffset);
-      return {
-        jobId: job.id, status: status,
-        jobName: job.job || '', clientName: job.name || '',
-        snapshot: snap(job), createdAt: createdAt,
-      };
-    }
-
-    var records = [
-      rec(1001, 'estimado', 1), rec(1001, 'edited', 5),
-      rec(1002, 'estimado', 1), rec(1002, 'edited', 4), rec(1002, 'invoice', 8),
-      rec(1004, 'estimado', 1), rec(1004, 'edited', 3), rec(1004, 'invoice', 8), rec(1004, 'edited', 11),
-      rec(1006, 'estimado', 1), rec(1006, 'edited', 6), rec(1006, 'invoice', 13),
-      rec(1008, 'estimado', 1), rec(1008, 'invoice', 9), rec(1008, 'done', 17),
-      rec(1010, 'estimado', 1), rec(1010, 'invoice', 8), rec(1010, 'edited', 12), rec(1010, 'deleted', 17),
-    ].filter(Boolean);
-
-    for (const r of records) {
-      await apiFetch('POST', null, r, RECORDS_API);
-    }
-  }
-
-  window.resetRecords = async function () {
-    var all = await getRecords();
-    for (const r of all) {
-      await deleteRecord(r.id);
-    }
-    await seedRealisticRecords();
-    location.reload();
-  };
-
   function formatTime(ts) {
     const d = new Date(ts);
     const dateStr = d.toLocaleDateString(getLang() === 'es' ? 'es-US' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -449,11 +405,6 @@
   async function loadRecords() {
     try {
       let allRecords = await getRecords();
-
-      if (allRecords.length === 0) {
-        await seedRealisticRecords();
-        allRecords = await getRecords();
-      }
 
       allRecords.sort((a, b) => b.createdAt - a.createdAt);
 
