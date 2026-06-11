@@ -36,6 +36,7 @@
       pdf_estimate: 'ESTIMATE', pdf_invoice: 'INVOICE',
       pdf_est_from: 'Estimate from:', pdf_inv_from: 'Invoice from:', pdf_est_to: 'Estimate to:', pdf_inv_to: 'Invoice to:',
       pdf_est_no: 'Estimate No', pdf_inv_no: 'Invoice No',       pdf_col_glass: 'Glass Thickness', pdf_col_unit: 'Unit Price', pdf_col_desc: 'Description',
+      draft_found_title: 'Unsaved Work', draft_found_msg: 'You have unsaved work from your last session. Continue where you left off?', draft_restore: 'Restore',
       pdf_thanks: 'Thank you for choosing us!',
       dashboard_stats: 'Overview', total_value: 'Total Value', deposits: 'Deposits', conversion_rate: 'Conv. Rate',
       dashboard: 'Dashboard', pending_reviews: 'Pending Reviews',
@@ -87,6 +88,7 @@
       pdf_estimate: 'ESTIMADO', pdf_invoice: 'FACTURA',
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
       pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
+      draft_found_title: 'Trabajo sin guardar', draft_found_msg: 'Tienes trabajo sin guardar de tu sesión anterior. ¿Quieres continuar donde lo dejaste?', draft_restore: 'Restaurar',
       pdf_thanks: '¡Gracias por preferirnos!',
       dashboard: 'Panel', pending_reviews: 'Reseñas Pendientes',
       dashboard_stats: 'Resumen', total_value: 'Valor Total', deposits: 'Depósitos', conversion_rate: 'Tasa de Conversión',
@@ -320,20 +322,20 @@
   }
 
   /* ===== MODAL ===== */
-  function showModal(title, msg, confirmLabel, isDanger, callback) {
+  function showModal(title, msg, confirmLabel, isDanger, callback, cancelCallback) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay active';
     overlay.innerHTML = `
       <div class="modal-box">
         <h3>${esc(title)}</h3>
-        <p>${esc(msg)}</p>
+        <p>${msg}</p>
         <div class="modal-actions">
           <button class="modal-btn cancel" id="modalCancel">${t('confirm_cancel')}</button>
           <button class="modal-btn ${isDanger ? 'danger' : 'confirm'}" id="modalConfirm">${esc(confirmLabel)}</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    overlay.querySelector('#modalCancel').addEventListener('click', () => { overlay.remove(); });
+    overlay.querySelector('#modalCancel').addEventListener('click', () => { overlay.remove(); if (cancelCallback) cancelCallback(); });
     overlay.querySelector('#modalConfirm').addEventListener('click', () => { overlay.remove(); if (callback) callback(); });
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
@@ -757,8 +759,8 @@
         if (!res.ok) {
           clearInterval(heartbeatInterval);
           heartbeatInterval = null;
-          showToast('Session expired', 'error');
-          setTimeout(() => { window.location.href = '/app/'; }, 1000);
+          window.dispatchEvent(new CustomEvent('session-expiring'));
+          setTimeout(() => { window.location.href = '/app/'; }, 500);
         }
       } catch (_) {
         clearInterval(heartbeatInterval);

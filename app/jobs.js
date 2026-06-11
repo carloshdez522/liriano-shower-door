@@ -647,6 +647,79 @@
 
   window.addEventListener('popstate', checkRoute);
 
+  function isFormDirty() {
+    if (lastView !== 'form') return false;
+    if (f.job.value.trim() || f.name.value.trim() || f.address.value.trim() || f.phone.value.trim() || f.email.value.trim()) return true;
+    if (itemsData.length > 0) return true;
+    return false;
+  }
+
+  function saveDraft() {
+    if (!isFormDirty()) return;
+    const draft = {
+      editingJobId: editingJobId,
+      itemFormStatus: itemFormStatus,
+      job: f.job.value, date: f.date.value, name: f.name.value,
+      address: f.address.value, phone: f.phone.value, email: f.email.value,
+      taxRate: fTaxRate.value, salesTax: fSalesTax.value, deposit: fDeposit.value,
+      items: itemsData.map(it => ({ ...it })),
+      savedAt: Date.now(),
+    };
+    try { localStorage.setItem('liriano_draft', JSON.stringify(draft)); } catch (_) {}
+  }
+
+  function restoreDraft() {
+    var raw;
+    try { raw = localStorage.getItem('liriano_draft'); } catch (_) { return; }
+    if (!raw) return;
+    var draft;
+    try { draft = JSON.parse(raw); } catch (_) { return; }
+    var age = Date.now() - (draft.savedAt || 0);
+    if (age > 86400000) { localStorage.removeItem('liriano_draft'); return; }
+    showModal(
+      t('draft_found_title') || 'Unsaved Work',
+      (t('draft_found_msg') || 'You have unsaved work from your last session. Continue where you left off?') + ' <small style="display:block;margin-top:8px;opacity:0.6">' + esc(draft.job || draft.name || 'Draft') + '</small>',
+      (t('draft_restore') || 'Restore'),
+      true,
+      function () {
+        editingJobId = draft.editingJobId || null;
+        itemFormStatus = draft.itemFormStatus || 'estimado';
+        if (draft.editingJobId) {
+          formViewTitle.textContent = t('edit_job');
+          saveBtn.innerHTML = '<i class="fas fa-save"></i> ' + t('save');
+          var wrap = $('editFormBadgeWrap');
+          var badge = $('editFormBadge');
+          badge.textContent = draft.itemFormStatus === 'estimado' ? t('pdf_estimate') : t('pdf_invoice');
+          badge.className = 'edit-badge ' + (draft.itemFormStatus === 'estimado' ? 'estimado' : 'invoice');
+          wrap.style.display = '';
+        } else {
+          formViewTitle.textContent = t('new_job');
+          saveBtn.innerHTML = '<i class="fas fa-save"></i> ' + t('save');
+          $('editFormBadgeWrap').style.display = 'none';
+        }
+        f.job.value = draft.job || '';
+        f.date.value = draft.date || new Date().toISOString().split('T')[0];
+        f.name.value = draft.name || '';
+        f.address.value = draft.address || '';
+        f.phone.value = draft.phone || '';
+        f.email.value = draft.email || '';
+        fTaxRate.value = draft.taxRate ?? '';
+        fSalesTax.value = draft.salesTax ?? '';
+        fDeposit.value = draft.deposit ?? '';
+        itemsData = (draft.items || []).map(function (it) { return { ...it }; });
+        itemIdCounter = itemsData.reduce(function (max, it) { return Math.max(max, it.id || 0); }, 0) + 1;
+        showView('form');
+        renderCompactItems();
+        applyTranslations(formView);
+        localStorage.removeItem('liriano_draft');
+      },
+      function () { localStorage.removeItem('liriano_draft'); }
+    );
+  }
+
+  window.addEventListener('session-expiring', saveDraft);
+
   checkRoute();
+  restoreDraft();
 
 })();
