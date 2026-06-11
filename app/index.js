@@ -28,6 +28,7 @@
     appContainer.style.display = 'flex';
     startHeartbeat();
     loadStats();
+    updateReviewsBadge();
   }
 
   function hideApp() {
@@ -91,6 +92,27 @@
   $('dashboardStatsCard').addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('pendingReviews').addEventListener('click', () => { location.href = 'reviews.html'; });
   $('headerBrand').addEventListener('click', () => { location.href = 'index.html'; });
+
+  const pendingCard = $('pendingReviews');
+
+  async function updateReviewsBadge() {
+    try {
+      const reviews = await getReviews();
+      const pending = (reviews || []).filter(r => r.status === 'pending').length;
+      let badge = pendingCard.querySelector('.home-card-notif');
+      if (pending > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'home-card-notif';
+          badge.textContent = '!';
+          pendingCard.appendChild(badge);
+        }
+        badge.textContent = pending > 9 ? '9+' : pending;
+      } else {
+        if (badge) badge.remove();
+      }
+    } catch (_) {}
+  }
 
   /* ===== STATS ===== */
   async function loadStats() {

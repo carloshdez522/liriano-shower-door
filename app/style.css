@@ -390,6 +390,25 @@ button {
   transition: var(--transition);
   width: 100%;
   font-family: var(--font-body);
+  position: relative;
+}
+
+.home-card-notif {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+  z-index: 2;
 }
 
 .home-card:hover {

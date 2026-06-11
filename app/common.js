@@ -88,6 +88,8 @@
       pdf_est_from: 'De (Estimado):', pdf_inv_from: 'De (Factura):', pdf_est_to: 'Para (Estimado):', pdf_inv_to: 'Para (Factura):',
       pdf_est_no: 'Estimado No', pdf_inv_no: 'Factura No',       pdf_col_glass: 'Grosor', pdf_col_unit: 'Precio Unit.', pdf_col_desc: 'Descripción',
       pdf_thanks: '¡Gracias por preferirnos!',
+      dashboard: 'Panel', pending_reviews: 'Reseñas Pendientes',
+      dashboard_stats: 'Resumen', total_value: 'Valor Total', deposits: 'Depósitos', conversion_rate: 'Tasa de Conversión',
       reviews_card: 'Reseñas Pendientes', reviews_title: 'Reseñas',
       reviews_all: 'Total', reviews_pending: 'Pendientes', reviews_approved: 'Aprobadas', reviews_rejected: 'Rechazadas',
       reviews_approve: 'Aprobar', reviews_reject: 'Rechazar',
