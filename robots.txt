@@ -1,3 +1,20 @@
+# AI crawlers — explicitly allowed
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# All other crawlers
 User-agent: *
 Allow: /
 Disallow: /app/
