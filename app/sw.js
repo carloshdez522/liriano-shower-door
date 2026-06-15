@@ -1,4 +1,4 @@
-const CACHE = 'liriano-app-v12';
+const CACHE = 'liriano-app-v13';
 const ASSETS = [
   '/app/',
   '/app/index.html',
