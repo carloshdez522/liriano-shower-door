@@ -1,6 +1,6 @@
 .DS_Store
 Thumbs.db
-#app/data/*.json
+app/data/*.json
 node_modules/
 stress-test.mjs
 package.json
