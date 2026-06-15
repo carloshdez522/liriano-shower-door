@@ -649,8 +649,7 @@
       let anchorClone = null;
 
       if (anchorEl) {
-        var btnCount = 1;
-        if (canShare) btnCount++;
+        var btnCount = 2;
         if (phone) btnCount++;
         var fabHeight = btnCount * 52 + (btnCount - 1) * 12;
         const rect = anchorEl.getBoundingClientRect();
@@ -694,21 +693,27 @@
       });
       fabContainer.appendChild(dlFab);
 
-      if (canShare) {
-        const shareFab = document.createElement('button');
-        shareFab.className = 'pdf-fab share';
-        shareFab.setAttribute('aria-label', t('pdf_share'));
-        shareFab.innerHTML = '<i class="fas fa-share-alt"></i>';
-        shareFab.addEventListener('click', async e => {
-          e.stopPropagation();
+      const shareFab = document.createElement('button');
+      shareFab.className = 'pdf-fab share';
+      shareFab.setAttribute('aria-label', t('pdf_share'));
+      shareFab.innerHTML = '<i class="fas fa-share-alt"></i>';
+      shareFab.addEventListener('click', async e => {
+        e.stopPropagation();
+        if (canShare) {
           const file = new File([blob], filename, { type: 'application/pdf' });
           try {
             await navigator.share({ files: [file], title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`, text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)) });
             dismiss();
-          } catch (err) { if (err.name !== 'AbortError') showToast(t('error_api'), 'error'); }
-        });
-        fabContainer.appendChild(shareFab);
-      }
+            return;
+          } catch (err) { if (err.name === 'AbortError') return; showToast(t('error_api'), 'error'); }
+        }
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        a.click();
+        dismiss();
+      });
+      fabContainer.appendChild(shareFab);
 
       if (phone) {
         const REVIEW_URL = 'https://lirianosonglassprofessional.com/reviews';
