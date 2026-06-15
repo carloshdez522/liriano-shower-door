@@ -637,7 +637,7 @@
       const filename = `${prefix}-${formatId(job.id)} ${job.name || job.job || 'document'}.pdf`;
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const blobUrl = URL.createObjectURL(blob);
-      const canShare = typeof navigator.share === 'function' && typeof File === 'function';
+      const hasShare = typeof navigator.share === 'function';
       const phone = job.phone ? job.phone.replace(/[^0-9]/g, '') : '';
 
       const overlay = document.createElement('div');
@@ -699,13 +699,30 @@
       shareFab.innerHTML = '<i class="fas fa-share-alt"></i>';
       shareFab.addEventListener('click', async e => {
         e.stopPropagation();
-        if (canShare) {
-          const file = new File([blob], filename, { type: 'application/pdf' });
+        if (hasShare) {
+          const shareData = {
+            title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`,
+            text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)),
+          };
           try {
-            await navigator.share({ files: [file], title: `${job.job || job.name} - ${job.status === 'estimado' ? t('pdf_estimate') : t('pdf_invoice')}`, text: t('pdf_share_msg').replace('{job}', job.job || job.name || '').replace('{amount}', calcTotal(job).toFixed(2)) });
+            if (typeof File === 'function') {
+              await navigator.share({ ...shareData, files: [new File([blob], filename, { type: 'application/pdf' })] });
+            } else {
+              await navigator.share(shareData);
+            }
             dismiss();
             return;
-          } catch (err) { if (err.name === 'AbortError') return; showToast(t('error_api'), 'error'); }
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+            try {
+              await navigator.share(shareData);
+              dismiss();
+              return;
+            } catch (err2) {
+              if (err2.name !== 'AbortError') showToast(t('error_api'), 'error');
+              return;
+            }
+          }
         }
         const a = document.createElement('a');
         a.href = blobUrl;
